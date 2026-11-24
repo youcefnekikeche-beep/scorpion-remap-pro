@@ -111,7 +111,13 @@ def require_admin(request: Request) -> dict:
 
 # ================= الصفحات (Web Views) =================
 
+@app.get("/healthz")
+@app.head("/healthz")
+async def health_check():
+    return {"status": "ok"}
+
 @app.get("/", response_class=HTMLResponse)
+@app.head("/")
 async def index_page(request: Request):
     user = get_current_user(request)
     if not user:
@@ -121,6 +127,7 @@ async def index_page(request: Request):
     return RedirectResponse(url="/portal")
 
 @app.get("/login", response_class=HTMLResponse)
+@app.head("/login")
 async def login_page(request: Request):
     user = get_current_user(request)
     if user:
