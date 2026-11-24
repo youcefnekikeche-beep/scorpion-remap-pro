@@ -428,6 +428,10 @@
                 return;
             }
 
+            if (data.access_token) {
+                localStorage.setItem('ecu_token', data.access_token);
+            }
+
             showAlert("Connexion réussie ! Redirection...", true);
             setTimeout(() => {
                 window.location.href = data.redirect || '/portal';
@@ -472,6 +476,10 @@
             if (!res.ok) {
                 showAlert(data.detail || "Erreur d'inscription.");
                 return;
+            }
+
+            if (data.access_token) {
+                localStorage.setItem('ecu_token', data.access_token);
             }
 
             const welcomeMsg = data.bonus_granted ?

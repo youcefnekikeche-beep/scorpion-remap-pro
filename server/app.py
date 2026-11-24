@@ -22,7 +22,8 @@ from server.db import (
     deduct_user_tokens, add_user_tokens, get_all_users,
     toggle_user_active_status, get_user_transactions,
     is_ip_banned, record_failed_attempt, clear_failed_attempts,
-    get_banned_ips, unban_ip, manual_ban_ip
+    get_banned_ips, unban_ip, manual_ban_ip,
+    save_session_db, get_session_user_db, delete_session_db
 )
 from engine.tuning_bridge import run_tuning_task
 from engine.ecu_analyzer import identify_ecu, preview_dtcs, get_technical_instructions
@@ -96,13 +97,22 @@ def get_client_ip(request: Request) -> str:
     return request.client.host if request.client else "127.0.0.1"
 
 def get_current_user(request: Request) -> Optional[dict]:
-    # التحقق من Header أو Cookie
-    token = request.headers.get("Authorization", "").replace("Bearer ", "")
+    # التحقق من Header أو Cookie مع دعم الجلسات الدائمة في SQLite
+    token = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
     if not token:
         token = request.cookies.get("ecu_token")
-    if not token or token not in SESSIONS:
+    if not token:
         return None
-    user_id = SESSIONS[token]
+    
+    user_id = SESSIONS.get(token)
+    if not user_id:
+        user_id = get_session_user_db(token)
+        if user_id:
+            SESSIONS[token] = user_id
+            
+    if not user_id:
+        return None
+
     user = get_user_by_id(user_id)
     if user and user.get("is_active"):
         user["credits"] = user.get("tokens", 0)
@@ -361,8 +371,12 @@ async def api_expert_process(
 @app.get("/logout")
 async def logout(request: Request):
     token = request.cookies.get("ecu_token")
-    if token in SESSIONS:
-        del SESSIONS[token]
+    auth_header = request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+    for t in [token, auth_header]:
+        if t:
+            if t in SESSIONS:
+                del SESSIONS[t]
+            delete_session_db(t)
     resp = RedirectResponse(url="/login")
     resp.delete_cookie("ecu_token")
     return resp
@@ -390,6 +404,7 @@ async def api_login(payload: dict, request: Request, response: Response):
 
     token = str(uuid.uuid4())
     SESSIONS[token] = user["id"]
+    save_session_db(token, user["id"])
     response.set_cookie(key="ecu_token", value=token, httponly=True, max_age=86400*30, samesite="lax")
     
     user["credits"] = user.get("tokens", 0)
@@ -443,11 +458,12 @@ async def api_register(payload: dict, request: Request, response: Response):
     # Auto-login after registration
     token = str(uuid.uuid4())
     SESSIONS[token] = new_user["id"]
+    save_session_db(token, new_user["id"])
     response.set_cookie(key="ecu_token", value=token, httponly=True, max_age=86400*30, samesite="lax")
 
     new_user["credits"] = new_user.get("tokens", 0)
     new_user["username"] = new_user.get("email", "")
-    new_user["is_admin"] = False
+    new_user["is_admin"] = (new_user.get("role") == "admin")
 
     return {
         "success": True,

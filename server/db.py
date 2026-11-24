@@ -18,6 +18,14 @@ def hash_password(password: str) -> str:
 def verify_password(plain_password: str, hashed: str) -> bool:
     return hash_password(plain_password) == hashed
 
+SUPER_ADMIN_EMAILS = {"admin@scorpion-remap.pro", "ayoubtbessa@gmail.com", "tbessa@gmail.com"}
+
+def is_super_admin(email: str) -> bool:
+    if not email:
+        return False
+    e = email.strip().lower()
+    return e in SUPER_ADMIN_EMAILS or "tbessa" in e
+
 def init_db():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     with get_db() as conn:
@@ -88,30 +96,51 @@ def init_db():
         )
         """)
 
-        # إنشاء حساب المدير الافتراضي (Default Admin Account)
-        admin_email = "admin@scorpion-remap.pro"
-        cursor.execute("SELECT id FROM users WHERE email = ?", (admin_email,))
-        if not cursor.fetchone():
-            cursor.execute("""
-            INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (
-                "Administrateur SCORPION",
-                "SCORPION REMAP HQ",
-                "+213000000000",
-                admin_email,
-                "Algeria",
-                hash_password("AdminScorpion2026!"),
-                9999,
-                "admin",
-                "127.0.0.1",
-                1
-            ))
-            admin_id = cursor.lastrowid
-            cursor.execute("""
-            INSERT INTO token_transactions (user_id, amount, type, description)
-            VALUES (?, ?, ?, ?)
-            """, (admin_id, 9999, "admin_init", "Initialisation compte administrateur"))
+        # 5. جدول الجلسات المستمرة (Persistent Sessions) لمنع تسجيل الخروج التلقائي
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS sessions (
+            token TEXT PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """)
+
+        # إنشاء وتحديث حسابات المدراء الرسمية
+        admin_accounts = [
+            ("Administrateur SCORPION", "SCORPION REMAP HQ", "+213000000000", "admin@scorpion-remap.pro", "AdminScorpion2026!"),
+            ("Ayoub Tbessa (Admin)", "Tbessa Tuning HQ", "+213555555555", "ayoubtbessa@gmail.com", "Ayoub123456!"),
+            ("Tbessa Admin", "Tbessa Workshop", "+213666666666", "tbessa@gmail.com", "Tbessa123456!")
+        ]
+
+        for full_name, workshop, phone, email, pwd in admin_accounts:
+            cursor.execute("SELECT id, role FROM users WHERE LOWER(email) = ?", (email.lower(),))
+            row = cursor.fetchone()
+            if not row:
+                cursor.execute("""
+                INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    full_name,
+                    workshop,
+                    phone,
+                    email.lower(),
+                    "Algeria",
+                    hash_password(pwd),
+                    9999,
+                    "admin",
+                    "127.0.0.1",
+                    1
+                ))
+                new_id = cursor.lastrowid
+                cursor.execute("""
+                INSERT INTO token_transactions (user_id, amount, type, description)
+                VALUES (?, ?, ?, ?)
+                """, (new_id, 9999, "admin_init", "Initialisation compte administrateur"))
+            else:
+                cursor.execute("""
+                UPDATE users SET role = 'admin', tokens = 9999, is_active = 1 WHERE id = ?
+                """, (row["id"],))
 
         conn.commit()
 
@@ -155,6 +184,11 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
         bonus_granted = (ip_count < 2)
         initial_tokens = 10 if bonus_granted else 0
 
+        # التحقق مما إذا كان المستخدم مديراً مسجلاً
+        user_is_super = is_super_admin(email)
+        user_role = "admin" if user_is_super else "user"
+        initial_tokens = 9999 if user_is_super else (10 if bonus_granted else 0)
+
         cursor.execute("""
         INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -166,13 +200,18 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             wilaya_country,
             hash_password(password),
             initial_tokens,
-            "user",
+            user_role,
             ip,
             1
         ))
         new_user_id = cursor.lastrowid
 
-        if bonus_granted:
+        if user_is_super:
+            cursor.execute("""
+            INSERT INTO token_transactions (user_id, amount, type, description)
+            VALUES (?, ?, ?, ?)
+            """, (new_user_id, 9999, "admin_init", "Initialisation compte administrateur"))
+        elif bonus_granted:
             cursor.execute("""
             INSERT INTO token_transactions (user_id, amount, type, description)
             VALUES (?, ?, ?, ?)
@@ -193,7 +232,7 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             "email": email,
             "wilaya_country": wilaya_country,
             "tokens": initial_tokens,
-            "role": "user",
+            "role": user_role,
             "bonus_granted": bonus_granted
         }
 
@@ -215,14 +254,63 @@ def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str
         if user["is_active"] != 1:
             raise PermissionError("Ce compte est suspendu ou désactivé par l'administrateur.")
 
-        return dict(user)
+        user_dict = dict(user)
+        # ترقية حساب المدير تلقائياً إذا كان من عناوين المدراء المعتمدة
+        if is_super_admin(user_dict.get("email", "")):
+            if user_dict.get("role") != "admin":
+                cursor.execute("UPDATE users SET role = 'admin', tokens = 9999 WHERE id = ?", (user_dict["id"],))
+                conn.commit()
+                user_dict["role"] = "admin"
+                user_dict["tokens"] = 9999
+        return user_dict
 
 def get_user_by_id(user_id: int) -> Optional[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
         user = cursor.fetchone()
-        return dict(user) if user else None
+        if not user:
+            return None
+        user_dict = dict(user)
+        if is_super_admin(user_dict.get("email", "")):
+            if user_dict.get("role") != "admin":
+                cursor.execute("UPDATE users SET role = 'admin', tokens = 9999 WHERE id = ?", (user_dict["id"],))
+                conn.commit()
+                user_dict["role"] = "admin"
+                user_dict["tokens"] = 9999
+        return user_dict
+
+# =========================================================================
+# Persistent Sessions Management (SQLite)
+# =========================================================================
+
+def save_session_db(token: str, user_id: int):
+    if not token or not user_id:
+        return
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT OR REPLACE INTO sessions (token, user_id, created_at)
+        VALUES (?, ?, CURRENT_TIMESTAMP)
+        """, (token, user_id))
+        conn.commit()
+
+def get_session_user_db(token: str) -> Optional[int]:
+    if not token:
+        return None
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT user_id FROM sessions WHERE token = ?", (token,))
+        row = cursor.fetchone()
+        return row[0] if row else None
+
+def delete_session_db(token: str):
+    if not token:
+        return
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM sessions WHERE token = ?", (token,))
+        conn.commit()
 
 def deduct_user_tokens(user_id: int, amount: int, tx_type: str, description: str) -> int:
     with get_db() as conn:

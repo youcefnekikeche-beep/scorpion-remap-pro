@@ -359,14 +359,43 @@
             }
         }
 
+        let consecutiveAuthErrors = 0;
+
+        function getAuthHeaders(extra = {}) {
+            const token = localStorage.getItem('ecu_token');
+            const headers = { ...extra };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            return headers;
+        }
+
+        async function authFetch(url, options = {}) {
+            options.headers = getAuthHeaders(options.headers || {});
+            options.credentials = 'include';
+            try {
+                const res = await fetch(url, options);
+                if (res.status === 401 || res.status === 403) {
+                    consecutiveAuthErrors++;
+                    if (consecutiveAuthErrors >= 3) {
+                        console.warn("Session expired or forbidden. Redirecting to login...");
+                        window.location.href = '/login';
+                    }
+                    return res;
+                }
+                consecutiveAuthErrors = 0;
+                return res;
+            } catch(e) {
+                console.error("Network error during authFetch:", e);
+                throw e;
+            }
+        }
+
         async function fetchDashboardData(manual = false) {
             try {
-                const res = await fetch('/api/v1/admin/overview');
+                const res = await authFetch('/api/v1/admin/overview');
                 if (!res.ok) {
-                    if (res.status === 401 || res.status === 403) {
-                        window.location.href = '/login';
-                        return;
-                    }
+                    return;
                 }
                 const data = await res.json();
                 
@@ -493,7 +522,7 @@
 
         async function fetchBannedIps() {
             try {
-                const res = await fetch('/api/v1/admin/banned-ips');
+                const res = await authFetch('/api/v1/admin/banned-ips');
                 if (!res.ok) return;
                 const data = await res.json();
                 const tbody = document.getElementById('bannedIpsTableBody');
@@ -533,7 +562,7 @@
         async function unbanIp(ip) {
             if (!confirm(`هل أنت متأكد من فك الحظر عن عنوان الـ IP: ${ip}؟`)) return;
             try {
-                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                const res = await authFetch('/api/v1/admin/banned-ips/unban', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ip })
@@ -566,7 +595,7 @@
             }
 
             try {
-                const res = await fetch('/api/v1/admin/users', {
+                const res = await authFetch('/api/v1/admin/users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
@@ -596,7 +625,7 @@
             const amount = prompt(`كم عدد النقاط التي ترغب في إضافتها لحساب: ${name}؟`, '10');
             if(!amount || isNaN(amount)) return;
             try {
-                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                const res = await authFetch(`/api/v1/admin/users/${userId}/recharge`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({amount: parseInt(amount)})
@@ -612,7 +641,7 @@
         async function toggleUser(userId) {
             if(!confirm('هل أنت متأكد من تغيير حالة هذا الحساب؟')) return;
             try {
-                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                const res = await authFetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
                 if(res.ok) fetchDashboardData();
             } catch(e) {
                 alert("خطأ : " + e.message);

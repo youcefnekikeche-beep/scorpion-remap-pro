@@ -1137,10 +1137,28 @@
             if(tabId === 'tabAdmin') loadAdminData();
         }
 
+        function getAuthHeaders(extra = {}) {
+            const token = localStorage.getItem('ecu_token');
+            const headers = { ...extra };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            return headers;
+        }
+
         async function initPortal() {
             try {
-                const res = await fetch('/api/v1/user/me');
-                if(!res.ok) { window.location.href = '/login'; return; }
+                const res = await fetch('/api/v1/user/me', {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
+                });
+                if(!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    return;
+                }
                 const user = await res.json();
                 const displayName = user.full_name || user.username || "Client";
                 const workshop = user.workshop_name ? ` (${user.workshop_name})` : "";
@@ -1148,7 +1166,7 @@
                 const credits = user.tokens !== undefined ? user.tokens : (user.credits || 0);
                 document.getElementById('userCredits').innerText = `${credits}`;
             } catch(e) {
-                window.location.href = '/login';
+                console.error("Portal init warning:", e);
             }
         }
 
