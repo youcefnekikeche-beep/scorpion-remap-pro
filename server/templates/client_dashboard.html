@@ -496,7 +496,7 @@
                     </div>
                     <div class="sol-card" data-sol="DECAT / LAMBDA" onclick="toggleSol(this, 'DECAT / LAMBDA')">
                         <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <span class="title">DECAT / LAMBDA OFF</span>
+                            <span class="title">CAT OFF (Decat / Lambda)</span>
                             <span class="chk">+</span>
                         </div>
                         <div class="sol-status-badge"></div>
@@ -529,14 +529,14 @@
                     </div>
                     <div class="sol-card" data-sol="SWIRL / FLAPS" onclick="toggleSol(this, 'SWIRL / FLAPS')">
                         <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <span class="title">SWIRL / FLAPS OFF (Clapets)</span>
+                            <span class="title">VSA / SWIRL FLAPS OFF</span>
                             <span class="chk">+</span>
                         </div>
                         <div class="sol-status-badge"></div>
                     </div>
                     <div class="sol-card" data-sol="TVA" onclick="toggleSol(this, 'TVA')">
                         <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                            <span class="title">TVA / Throttle OFF</span>
+                            <span class="title">TVA OFF (Papillon / Throttle)</span>
                             <span class="chk">+</span>
                         </div>
                         <div class="sol-status-badge"></div>
@@ -1224,11 +1224,18 @@
                 const solKey = card.getAttribute('data-sol');
                 if(!solKey) return;
 
-                const isSupported = supportedSolutionsList.some(s => 
-                    s.toUpperCase() === solKey.toUpperCase() ||
-                    solKey.toUpperCase().includes(s.toUpperCase()) ||
-                    s.toUpperCase().includes(solKey.toUpperCase())
-                );
+                const isSupported = supportedSolutionsList.some(s => {
+                    const su = s.toUpperCase();
+                    const ku = solKey.toUpperCase();
+                    if (su === ku || ku.includes(su) || su.includes(ku)) return true;
+                    if ((su.includes('VSA') || su.includes('SWIRL')) && (ku.includes('VSA') || ku.includes('SWIRL'))) return true;
+                    if ((su.includes('CAT') || su.includes('LAMBDA') || su.includes('DECAT')) && (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT'))) return true;
+                    if (su.includes('TVA') && ku.includes('TVA')) return true;
+                    if (su.includes('IMMO') && ku.includes('IMMO')) return true;
+                    if (su.includes('EVAP') && ku.includes('EVAP')) return true;
+                    if ((su.includes('ADBLUE') || su.includes('SCR')) && (ku.includes('ADBLUE') || ku.includes('SCR'))) return true;
+                    return false;
+                });
 
                 const chk = card.querySelector('.chk');
                 let statusBadge = card.querySelector('.sol-status-badge');
