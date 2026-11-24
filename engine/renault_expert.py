@@ -77,6 +77,20 @@ def write_8bit_edc16cp33(temp: int) -> int:
     return (10 * temp - 853) % 256
 
 
+def read_v42(raw: int) -> int:
+    v42_rev = {0x00: 88, 0x14: 90, 0x28: 92, 0x3C: 95, 0x50: 98}
+    if raw in v42_rev:
+        return v42_rev[raw]
+    if 0 <= raw <= 120:
+        return int(round(88 + (raw / 8.0)))
+    return 98
+
+def write_v42(temp: int) -> int:
+    v42_map = {88: 0x00, 90: 0x14, 92: 0x28, 94: 0x3C, 95: 0x3C, 98: 0x50}
+    if temp in v42_map:
+        return v42_map[temp]
+    return int(round((temp - 88) * 8.0))
+
 FAN_ECU_DATABASE = {
     "DCM1.2": {
         "name": "Delphi DCM 1.2 (Renault 1.5 dCi)",
@@ -215,12 +229,12 @@ FAN_ECU_DATABASE = {
     },
     "V42": {
         "name": "Valeo V42 (Renault / Dacia 1.2 / 1.6 / GPL)",
-        "size": 2,
-        "type": "16bit_be",
-        "formula_read": read_16bit_x10_plus400,
-        "formula_write": write_16bit_x10_plus400,
-        "static_offsets": [163976, 163977],
-        "signatures": [(b"<\x05\x00", 0), (b"\x69\x6E", 0)]
+        "size": 1,
+        "type": "8bit",
+        "formula_read": read_v42,
+        "formula_write": write_v42,
+        "static_offsets": [0x28089, 0x2808A, 0x2808B],
+        "signatures": [(b"<\x05\x00", 0)]
     }
 }
 
@@ -372,30 +386,47 @@ def identify_renault_ecu(data: bytes, filename: str = "") -> dict:
 # 3. MODULATION DE TEMPÉRATURE POUR TOUS LES 16 CALCULATEURS (EVO FAN)
 # =========================================================================
 
-def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_override: str = "", filename: str = "") -> Tuple[bytearray, int, int, str]:
+def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_override: str = "", filename: str = "") -> Tuple[bytearray, int, int, str, str]:
     """
     Scanne et patche la température du ventilateur pour N'IMPORTE LEQUEL des 16 calculateurs.
-    Retourne: (data_modifiée, temp_originale_détectée, octets_modifiés, description)
+    Retourne: (data_modifiée, temp_originale_détectée, octets_modifiés, description, protocole_détecté)
     """
     size = len(data)
     out = bytearray(data)
 
-    # 1. Sélection du protocole
+    # 1. Sélection du protocole (avec détection automatique si non forcé)
     selected_proto = None
-    if protocol_override and protocol_override in FAN_ECU_DATABASE:
-        selected_proto = protocol_override
-    else:
+    if protocol_override and protocol_override.strip() and protocol_override.strip().upper() not in ("", "AUTO", "SELECT"):
+        if protocol_override in FAN_ECU_DATABASE:
+            selected_proto = protocol_override
+
+    if not selected_proto:
         ident = identify_renault_ecu(data, filename)
-        fam = ident["family"]
+        fam = ident.get("family", "")
         if fam in FAN_ECU_DATABASE:
             selected_proto = fam
         elif fam == "EMS31XX":
             selected_proto = "EMS3120"
         elif "dcm" in filename.lower() and "1.2" in filename.lower():
             selected_proto = "DCM1.2"
+        elif "v42" in filename.lower():
+            selected_proto = "V42"
+        elif "ems" in filename.lower():
+            selected_proto = "EMS3120"
+        elif "3132" in filename.lower():
+            selected_proto = "EMS3132"
 
     if not selected_proto:
-        selected_proto = "V42" # fallback par défaut
+        for proto_name, proto_cfg in FAN_ECU_DATABASE.items():
+            for pat, val_off in proto_cfg.get("signatures", []):
+                if pat in out:
+                    selected_proto = proto_name
+                    break
+            if selected_proto:
+                break
+
+    if not selected_proto:
+        selected_proto = "V42"
 
     cfg = FAN_ECU_DATABASE[selected_proto]
     fmt_type = cfg["type"]
@@ -403,9 +434,9 @@ def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_overr
     write_fn = cfg["formula_write"]
     val_size = cfg["size"]
 
-    # 2. Recherche des offsets cibles
+    # 2. Recherche des offsets cibles et lecture de la température réelle d'origine
     offsets_to_patch = []
-    current_temp = 98 # valeur par défaut si non lisible
+    current_temp = 98
 
     # A) Recherche par offsets statiques
     for off in cfg.get("static_offsets", []):
@@ -450,20 +481,15 @@ def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_overr
                     pass
             pos = idx + len(pat)
 
-    # C) Offsets V42 spécifiques depuis solutions_perso.json si V42
-    if selected_proto == "V42" or (163977 + 3 <= len(out) and b"<\x05\x00" in out[163840:164096]):
+    # C) Offsets V42 spécifiques
+    if selected_proto == "V42":
         for off in [0x28089, 0x2808A, 0x2808B]:
             if off not in offsets_to_patch and off < len(out):
                 offsets_to_patch.append(off)
-
-    # D) Recherche par motif de seuil GMV d'origine 105°C (b'\x69\x6E')
-    stock_gmv_pattern = bytearray([0x69, 0x6E])
-    idx_gmv = out.find(stock_gmv_pattern)
-    if idx_gmv != -1:
-        if idx_gmv not in offsets_to_patch:
-            offsets_to_patch.append(idx_gmv)
-            offsets_to_patch.append(idx_gmv + 1)
-        current_temp = 105
+        if 0x28089 < len(out):
+            t_v42 = read_v42(out[0x28089])
+            if 70 <= t_v42 <= 115:
+                current_temp = t_v42
 
     if not offsets_to_patch:
         raise ValueError(f"Erreur de sécurité : Impossible de localiser la cartographie du ventilateur pour le protocole {selected_proto}. Fichier déjà modifié ou non reconnu.")
@@ -500,16 +526,11 @@ def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_overr
                 out[off] = b_val
                 mod_count += 1
 
-    if idx_gmv != -1:
-        out[idx_gmv] = target_temp
-        out[idx_gmv + 1] = target_temp + 5
-        mod_count += 2
-
     if len(out) != size:
         raise ValueError("Erreur interne de sécurité : La taille du fichier a été altérée.")
 
     desc = f"Protocole [{selected_proto}] : Seuil GMV abaissé de {current_temp}°C (Stock) ➔ {target_temp}°C ({mod_count} octets calibrés)"
-    return out, current_temp, mod_count, desc
+    return out, current_temp, mod_count, desc, selected_proto
 
 
 # =========================================================================
@@ -723,7 +744,7 @@ def preview_expert_operation(data: bytes, tool_key: str, param: str = "", filena
         patched_bytes, count, desc = patch_renault_lambda_off(data, filename)
     elif tool_key == "renault_fan_temp":
         t_val = int(param) if param and param.isdigit() else 92
-        patched_bytes, current_temp, count, desc = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
+        patched_bytes, current_temp, count, desc, sel_proto = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
     elif tool_key == "renault_cold_start":
         patched_bytes, count, desc = fix_renault_cold_start(data, filename)
     else:
@@ -741,6 +762,9 @@ def preview_expert_operation(data: bytes, tool_key: str, param: str = "", filena
     }
     if current_temp is not None:
         res["current_temp"] = current_temp
+    if tool_key == "renault_fan_temp":
+        res["protocol_detected"] = sel_proto
+        res["protocol_name"] = FAN_ECU_DATABASE.get(sel_proto, {}).get("name", sel_proto)
     return res
 
 
@@ -751,7 +775,7 @@ def execute_expert_operation(data: bytes, tool_key: str, param: str = "", filena
         out, count, desc = patch_renault_lambda_off(data, filename)
     elif tool_key == "renault_fan_temp":
         t_val = int(param) if param and param.isdigit() else 92
-        out, curr_t, count, desc = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
+        out, curr_t, count, desc, sel_proto = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
     elif tool_key == "renault_cold_start":
         out, count, desc = fix_renault_cold_start(data, filename)
     else:

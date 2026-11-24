@@ -679,7 +679,8 @@
                         <div>
                             <label style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">HARDWARE PROTOCOL (ECU)</label>
                             <select id="evoEcuSelect" class="evo-select" onchange="onEvoProtocolChange()">
-                                <option value="DCM1.2" selected>DCM1.2</option>
+                                <option value="" selected>🔍 Auto-Détection Automatique (Recommandé)</option>
+                                <option value="DCM1.2">Delphi DCM1.2 (1.5 dCi)</option>
                                 <option value="EDC16CP33">EDC16CP33</option>
                                 <option value="EDC17C42">EDC17C42</option>
                                 <option value="EMS3110">EMS3110</option>
@@ -1501,6 +1502,7 @@
             box.scrollTop = box.scrollHeight;
         }
 
+        let evoTempDebounceTimer = null;
         function syncEvoTemp(val) {
             val = parseInt(val, 10);
             if (isNaN(val)) val = 90;
@@ -1509,12 +1511,19 @@
             document.getElementById('evoSlider').value = val;
             document.getElementById('evoNumberBox').value = val;
             document.getElementById('evoTargetVal').textContent = `${val} °C`;
-            addEvoLog('info', `Target temperature consigne updated to ${val}°C`);
+            addEvoLog('info', `Consigne de température cible ajustée à ${val}°C`);
+
+            if (evoCurrentFile) {
+                clearTimeout(evoTempDebounceTimer);
+                evoTempDebounceTimer = setTimeout(() => {
+                    processEvoFileAnalysis(evoCurrentFile);
+                }, 250);
+            }
         }
 
         function onEvoProtocolChange() {
-            const proto = document.getElementById('evoEcuSelect').value;
-            addEvoLog('info', `ECU Hardware Protocol selected: ${proto}`);
+            const proto = document.getElementById('evoEcuSelect').value || 'Auto-Détection';
+            addEvoLog('info', `Protocole sélectionné : [${proto}]`);
             if (evoCurrentFile) {
                 processEvoFileAnalysis(evoCurrentFile);
             }
@@ -1527,10 +1536,10 @@
 
             document.getElementById('evoFileName').textContent = file.name;
             document.getElementById('evoFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB (${file.size} octets)`;
-            document.getElementById('evoFileStatus').textContent = "Analyse en cours...";
+            document.getElementById('evoFileStatus').textContent = "Analyse et identification en cours...";
             document.getElementById('evoFileInfo').style.display = 'block';
 
-            addEvoLog('info', `File loaded: ${file.name} (${file.size} bytes)`);
+            addEvoLog('info', `Fichier chargé : ${file.name} (${file.size} octets)`);
             await processEvoFileAnalysis(file);
         }
 
@@ -1538,7 +1547,7 @@
             const proto = document.getElementById('evoEcuSelect').value;
             const targetTemp = document.getElementById('evoSlider').value;
 
-            addEvoLog('info', `Scanning binary structures for protocol [${proto}]...`);
+            addEvoLog('info', `Analyse des cartographies ventilateur (GMV) [${proto || 'Auto-Détection'}]...`);
 
             const formData = new FormData();
             formData.append('file', file);
@@ -1558,14 +1567,22 @@
                     return;
                 }
 
+                if (data.protocol_detected) {
+                    const sel = document.getElementById('evoEcuSelect');
+                    if (sel && sel.value !== data.protocol_detected) {
+                        sel.value = data.protocol_detected;
+                    }
+                }
+
                 evoPreviewToken = data.preview_token;
-                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "98 °C";
+                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "-- °C";
                 document.getElementById('evoCurrentVal').textContent = curTemp;
-                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.ecu_type || proto})`;
+                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.protocol_name || data.ecu_type || proto})`;
                 document.getElementById('evoFileStatus').style.color = "#34d399";
 
-                addEvoLog('ok', `Pattern identified! Current Stock Trigger Temp: ${curTemp}`);
-                addEvoLog('ok', `Calibration ready: ${data.bytes_modified} byte(s) mapped | Checksum: ${data.checksum_status}`);
+                addEvoLog('ok', `Calculateur identifié : [${data.protocol_name || data.protocol_detected || data.ecu_type}]`);
+                addEvoLog('ok', `Température d'origine réelle détectée (Stock GMV) : ${curTemp}`);
+                addEvoLog('ok', `Calibration prête : ${data.bytes_modified} octet(s) calibrés vers consigne ${targetTemp}°C`);
             } catch (err) {
                 addEvoLog('err', "Erreur de communication : " + err.message);
             }
