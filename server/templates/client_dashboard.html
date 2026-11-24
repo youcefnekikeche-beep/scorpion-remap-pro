@@ -444,7 +444,7 @@
                 <div class="drop-icon">📤</div>
                 <div class="drop-title">Glissez-déposez votre fichier binaire ECU (.bin, .ori)</div>
                 <div class="drop-subtitle">Ou cliquez pour parcourir vos fichiers (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)</div>
-                <input type="file" id="fileInput" accept=".bin,.ori,.hex" style="display:none;">
+                <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
             </div>
 
             <!-- Analysis & Tuning Panel -->
@@ -702,7 +702,7 @@
                             <button type="button" class="evo-attach-btn" onclick="document.getElementById('evoFileInput').click()">
                                 📁 Attach / Load Flash File (.bin)
                             </button>
-                            <input type="file" id="evoFileInput" accept=".bin,.ori,.hex" style="display:none;" onchange="handleEvoFileUpload(event)">
+                            <input type="file" id="evoFileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;" onchange="handleEvoFileUpload(event)">
                         </div>
 
                         <div id="evoFileInfo" style="display:none; background:#040711; border:1px solid #1e293b; border-radius:10px; padding:14px; font-size:12px;">
@@ -1176,8 +1176,13 @@
 
             try {
                 const res = await fetch('/api/v1/tuning/analyze', { method: 'POST', body: formData });
+                if (res.status === 401) {
+                    alert('Session expirée. Veuillez vous reconnecter.');
+                    window.location.href = '/login';
+                    return;
+                }
                 const data = await res.json();
-                if(data.success) {
+                if(res.ok && data.success) {
                     currentFileToken = data.file_token;
                     currentChecksumInfo = data.checksum_info;
                     dropZone.innerHTML = `<div class="drop-icon">✅</div><div class="drop-title">Fichier sélectionné : ${file.name}</div><div class="drop-subtitle">Cliquez pour changer de fichier</div>`;
@@ -1195,9 +1200,13 @@
 
                     // 3. عرض إرشادات ما بعد البرمجة وحالة التشيكسوم
                     renderTechnicalInstructions(data.instructions, data.checksum_info);
+                } else {
+                    dropZone.innerHTML = `<div class="drop-icon">❌</div><div class="drop-title">Erreur d'analyse</div><div class="drop-subtitle">${data.detail || 'Fichier non reconnu ou corrompu'}</div>`;
+                    alert(data.detail || 'Erreur lors de la lecture du fichier');
                 }
             } catch(e) {
-                alert('Erreur lors de la lecture du fichier');
+                dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title">Erreur réseau</div><div class="drop-subtitle">Cliquez pour réessayer</div>`;
+                alert('Erreur de communication : ' + e.message);
             }
         }
 
@@ -1456,7 +1465,20 @@
                     document.getElementById('downloadLink').href = `/api/v1/tuning/download/${data.task_id}`;
                     document.getElementById('successBox').style.display = 'block';
                     window.location.href = `/api/v1/tuning/download/${data.task_id}`;
-                    // =========================================================================
+                    setTimeout(() => { btn.disabled = false; btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)'; }, 2500);
+                } else {
+                    alert(data.detail || 'Erreur lors du traitement');
+                    btn.disabled = false;
+                    btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+                }
+            } catch(e) {
+                alert('Erreur serveur : ' + e.message);
+                btn.disabled = false;
+                btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+            }
+        }
+
+        // =========================================================================
         // EVO Fan Modifier Logic (Matching Screenshot & 16 Protocols)
         // =========================================================================
         let evoCurrentFile = null;
