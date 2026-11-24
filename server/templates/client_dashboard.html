@@ -1779,7 +1779,242 @@
             }
         }
 
+        // =========================================================================
+        // Outils Expert (Renault Tools & Specialized Patcher)
+        // =========================================================================
+        let currentExpertPreviewToken = null;
+
+        function triggerExpertTool(toolKey, title) {
+            currentExpertTool = toolKey;
+            const inp = document.getElementById('expertFileInput');
+            if(!inp) {
+                alert("Erreur: Champ de fichier introuvable");
+                return;
+            }
+            inp.value = '';
+            inp.onchange = async () => {
+                if(!inp.files.length) return;
+                const file = inp.files[0];
+                const param = (toolKey === 'renault_fan_temp') ? (document.getElementById('fanTempParam')?.value || '92') : '';
+                const protocol = (toolKey === 'renault_fan_temp') ? (document.getElementById('fanEcuProtocol')?.value || '') : '';
+
+                // Indicateur de chargement
+                const buttons = document.querySelectorAll('.expert-btn');
+                buttons.forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('tool', toolKey);
+                formData.append('param', param);
+                formData.append('protocol', protocol);
+
+                try {
+                    const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+
+                    if(!res.ok || !data.success) {
+                        alert(data.detail || 'Erreur lors de la validation de sécurité du fichier.');
+                        inp.value = '';
+                        return;
+                    }
+
+                    // Remplissage du Modal de confirmation
+                    currentExpertPreviewToken = data.preview_token;
+                    document.getElementById('modalEcuType').innerText = data.ecu_type || 'Calculateur Renault';
+                    document.getElementById('modalSwVersion').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+                    document.getElementById('modalBytesMod').innerText = `${data.bytes_modified} octets calibrés`;
+                    document.getElementById('modalChecksum').innerText = data.checksum_status || 'Automatique & Supporté ✅';
+                    document.getElementById('modalDesc').innerText = data.description || '';
+
+                    // Affichage des températures Fan si disponible
+                    const tempRow = document.getElementById('modalTempRow');
+                    if(data.current_temp !== undefined && data.current_temp !== null) {
+                        tempRow.style.display = 'block';
+                        document.getElementById('modalCurrentTemp').innerText = `${data.current_temp}°C`;
+                        document.getElementById('modalTargetTemp').innerText = `${param || 92}°C`;
+                    } else {
+                        tempRow.style.display = 'none';
+                    }
+
+                    const modal = document.getElementById('expertConfirmModal');
+                    if(modal) modal.style.display = 'flex';
+                } catch(e) {
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+                    alert('Erreur de connexion au serveur : ' + e.message);
+                    inp.value = '';
+                }
+            };
+            inp.click();
+        }
+
+        function closeExpertModal() {
+            const modal = document.getElementById('expertConfirmModal');
+            if(modal) modal.style.display = 'none';
+            currentExpertPreviewToken = null;
+            const inp = document.getElementById('expertFileInput');
+            if(inp) inp.value = '';
+            const btn = document.getElementById('modalConfirmBtn');
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+            }
+        }
+
+        async function confirmAndDownloadExpert() {
+            if(!currentExpertPreviewToken) return;
+            const btn = document.getElementById('modalConfirmBtn');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = '⚙️ Application du patch & Sauvegarde...';
+            }
+
+            const formData = new FormData();
+            formData.append('preview_token', currentExpertPreviewToken);
+
+            try {
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    window.location.href = data.download_url;
+                    closeExpertModal();
+                    alert(`✅ Opération réussie !\n\n${data.description}\nLe fichier a été téléchargé avec succès.`);
+                    initPortal();
+        loadCatalogue(); // Pré-charger le catalogue immédiatement // Actualiser le solde
+                } else {
+                    alert(data.detail || 'Erreur lors du traitement du fichier.');
+                    if(btn) {
+                        btn.disabled = false;
+                        btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+                    }
+                }
+            } catch(e) {
+                alert('Erreur serveur : ' + e.message);
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+                }
+            }
+        }
+
+        // =========================================================================
+        // Catalogue Calculateurs & Search & Filtering
+        // =========================================================================
+        async function loadCatalogue() {
+            try {
+                const res = await fetch('/api/v1/supported-ecus');
+                if(!res.ok) return;
+                catalogueData = await res.json();
+                const numEl = document.getElementById('catTotalNum');
+                if(numEl) numEl.innerText = catalogueData.length;
+                renderCatalogue(catalogueData);
+            } catch (e) {
+                console.error("Error loading catalogue:", e);
+            }
+        }
+
+        function renderCatalogue(list) {
+            const grid = document.getElementById('catGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            if(!list || list.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-muted); padding:30px; text-align:center; grid-column:1/-1;">Aucun calculateur trouvé pour ce critère.</div>';
+                return;
+            }
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'cat-card';
+
+                const fuelClass = item.fuel === 'Essence' ? 'fuel-essence' : 'fuel-diesel';
+                let badges = '';
+                (item.solutions || []).forEach(s => {
+                    badges += `<span style="background:rgba(255,255,255,0.05); border:1px solid #334155; color:#cbd5e1; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px; display:inline-block;">✔ ${s}</span>`;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div style="font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:4px;">
+                            ${item.brand}
+                            <span class="fuel-badge ${fuelClass}">⛽ ${item.fuel || 'DIESEL'}</span>
+                        </div>
+                        <div style="font-size:16px; font-weight:800; color:#fff; margin-bottom:4px;">${item.ecu}</div>
+                        <div style="font-size:12px; color:#38bdf8; margin-bottom:12px;">${item.engine}</div>
+                    </div>
+                    <div>${badges}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setBrandFilter(b, btn) {
+            currentBrandFilter = b;
+            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            filterCatalogue();
+        }
+
+        function setFuelFilter(f, btn) {
+            currentFuelFilter = f;
+            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            filterCatalogue();
+        }
+
+        function filterCatalogue() {
+            const searchInput = document.getElementById('catSearch');
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let res = catalogueData;
+            if(currentBrandFilter !== 'Tous') {
+                res = res.filter(i => (i.brand || '').toLowerCase().includes(currentBrandFilter.toLowerCase()) || (i.ecu || '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
+            }
+            if(currentFuelFilter !== 'Tous') {
+                res = res.filter(i => (i.fuel || 'Diesel').toLowerCase() === currentFuelFilter.toLowerCase());
+            }
+            if(q) {
+                res = res.filter(i => 
+                    (i.brand || '').toLowerCase().includes(q) || 
+                    (i.ecu || '').toLowerCase().includes(q) || 
+                    (i.engine || '').toLowerCase().includes(q) || 
+                    (i.solutions || []).some(s => s.toLowerCase().includes(q))
+                );
+            }
+            renderCatalogue(res);
+        }
+
+        // =========================================================================
+        // Historique Utilisateur
+        // =========================================================================
+        async function loadUserHistory() {
+            try {
+                const res = await fetch('/api/v1/user/history');
+                if(!res.ok) return;
+                const data = await res.json();
+                const tb = document.getElementById('historyBody');
+                if(!tb) return;
+                tb.innerHTML = '';
+                if(!data.files || !data.files.length) {
+                    tb.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Aucun fichier traité dans votre historique.</td></tr>';
+                    return;
+                }
+                data.files.forEach(f => {
+                    tb.innerHTML += `
+                        <tr>
+                            <td><strong>${f.original_name}</strong></td>
+                            <td>${f.brand} / ${f.ecu_type}</td>
+                            <td><span style="background:rgba(56,189,248,0.15); color:#38bdf8; padding:3px 8px; border-radius:4px; font-size:11px;">${f.solutions}</span></td>
+                            <td>${f.created_at}</td>
+                            <td><a href="/api/v1/tuning/download/${f.id}" style="color:#10b981; font-weight:700; text-decoration:none;">Télécharger 📥</a></td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                console.error("Error loading user history:", e);
+            }
+        }
+
+
         initPortal();
+        loadCatalogue(); // Pré-charger le catalogue immédiatement
 
         // Actualisation automatique du panneau d'administration toutes les 10 secondes
         setInterval(() => {
