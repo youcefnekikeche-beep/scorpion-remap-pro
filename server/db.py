@@ -1,8 +1,8 @@
 import sqlite3
 import os
 import hashlib
-from datetime import datetime
-from typing import Optional, List, Dict, Any
+from datetime import datetime, timedelta
+from typing import Optional, List, Dict, Any, Tuple
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "storage", "scorpion_users.db")
 
@@ -72,6 +72,19 @@ def init_db():
             modified_path TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """)
+
+        # 4. جدول حظر العناوين المشبوهة والهجمات (Anti-Brute-Force & Fail2Ban)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS banned_ips (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip_address TEXT UNIQUE NOT NULL,
+            attempts INTEGER DEFAULT 1,
+            reason TEXT NOT NULL,
+            banned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            banned_until TIMESTAMP NOT NULL,
+            is_active INTEGER DEFAULT 1
         )
         """)
 
@@ -275,3 +288,112 @@ def get_user_transactions(user_id: int) -> List[Dict[str, Any]]:
         SELECT * FROM token_transactions WHERE user_id = ? ORDER BY id DESC LIMIT 50
         """, (user_id,))
         return [dict(r) for r in cursor.fetchall()]
+
+# =========================================================================
+# الحماية ومكافحة الهجمات وحظر الـ IP (Fail2Ban & Security)
+# =========================================================================
+
+# تعقب المحاولات في الذاكرة لتسريع الأداء قبل الحفظ في القاعدة
+_IP_ATTEMPTS: Dict[str, Dict[str, Any]] = {}
+
+def is_ip_banned(ip: str) -> Tuple[bool, Optional[str]]:
+    """فحص ما إذا كان عنوان الـ IP محظوراً حالياً"""
+    if not ip or ip in ("127.0.0.1", "localhost"):
+        return False, None
+
+    now = datetime.utcnow()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT banned_until, reason FROM banned_ips 
+        WHERE ip_address = ? AND is_active = 1
+        """, (ip,))
+        row = cursor.fetchone()
+        if row:
+            try:
+                until = datetime.fromisoformat(row["banned_until"])
+                if now < until:
+                    remaining_mins = int((until - now).total_seconds() / 60) + 1
+                    return True, f"Adresse IP temporairement bloquée pour sécurité ({row['reason']}). Réessayez dans {remaining_mins} minute(s)."
+                else:
+                    # انتهت فترة الحظر
+                    cursor.execute("UPDATE banned_ips SET is_active = 0 WHERE ip_address = ?", (ip,))
+                    conn.commit()
+            except Exception:
+                pass
+    return False, None
+
+def record_failed_attempt(ip: str, max_attempts: int = 5, ban_minutes: int = 30) -> Tuple[int, bool]:
+    """تسجيل محاولة دخول فاشلة، وحظر الـ IP تلقائياً عند تجاوز الحد الأقصى"""
+    if not ip or ip in ("127.0.0.1", "localhost"):
+        return 1, False
+
+    now = datetime.utcnow()
+    if ip not in _IP_ATTEMPTS:
+        _IP_ATTEMPTS[ip] = {"count": 1, "first_attempt": now}
+    else:
+        # مسح العداد إذا مر أكثر من 15 دقيقة على أول محاولة فاشلة
+        if (now - _IP_ATTEMPTS[ip]["first_attempt"]).total_seconds() > 900:
+            _IP_ATTEMPTS[ip] = {"count": 1, "first_attempt": now}
+        else:
+            _IP_ATTEMPTS[ip]["count"] += 1
+
+    attempts = _IP_ATTEMPTS[ip]["count"]
+    if attempts >= max_attempts:
+        banned_until = (now + timedelta(minutes=ban_minutes)).isoformat()
+        with get_db() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+            INSERT INTO banned_ips (ip_address, attempts, reason, banned_until, is_active)
+            VALUES (?, ?, 'Multiples tentatives de connexion échouées (Protection Anti-Brute-Force)', ?, 1)
+            ON CONFLICT(ip_address) DO UPDATE SET 
+                attempts = attempts + 1,
+                banned_until = excluded.banned_until,
+                is_active = 1
+            """, (ip, attempts, banned_until))
+            conn.commit()
+        # تصفير الذاكرة
+        del _IP_ATTEMPTS[ip]
+        return attempts, True
+
+    return attempts, False
+
+def clear_failed_attempts(ip: str):
+    """مسح محاولات الـ IP عند تسجيل الدخول الناجح"""
+    if ip in _IP_ATTEMPTS:
+        del _IP_ATTEMPTS[ip]
+
+def get_banned_ips() -> List[Dict[str, Any]]:
+    """استرجاع قائمة كافة عناوين الـ IP المحظورة"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT * FROM banned_ips ORDER BY id DESC LIMIT 50
+        """)
+        return [dict(r) for r in cursor.fetchall()]
+
+def unban_ip(ip: str) -> bool:
+    """فك الحظر عن عنوان IP"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE banned_ips SET is_active = 0 WHERE ip_address = ?", (ip,))
+        conn.commit()
+        clear_failed_attempts(ip)
+        return True
+
+def manual_ban_ip(ip: str, reason: str = "Bloqué manuellement par Administrateur", ban_hours: int = 24) -> bool:
+    """حظر عنوان IP يدوياً من طرف المدير"""
+    now = datetime.utcnow()
+    banned_until = (now + timedelta(hours=ban_hours)).isoformat()
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO banned_ips (ip_address, attempts, reason, banned_until, is_active)
+        VALUES (?, 1, ?, ?, 1)
+        ON CONFLICT(ip_address) DO UPDATE SET 
+            reason = excluded.reason,
+            banned_until = excluded.banned_until,
+            is_active = 1
+        """, (ip, reason, banned_until))
+        conn.commit()
+        return True

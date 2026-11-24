@@ -1066,6 +1066,38 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Anti-Brute-Force & Banned IPs Table -->
+            <div style="background:var(--bg-card); border:1px solid rgba(239, 68, 68, 0.3); border-radius:14px; padding:20px; margin-top:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px; font-weight:800; color:#f87171; display:flex; align-items:center; gap:8px;">
+                            <span>🛡️</span> Protection Anti-Brute-Force & IPs Bloquées
+                        </h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                            يتم حظر أي جهاز يحاول تخمين كلمة المرور أكثر من 5 مرات تلقائياً لحماية حسابات المنصة وسيرفر الـ Admin.
+                        </p>
+                    </div>
+                    <button class="chip" onclick="loadBannedIps()">🔄 Actualiser les IPs</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Adresse IP</th>
+                                <th>Tentatives</th>
+                                <th>Raison du Blocage</th>
+                                <th>Bloqué Jusqu'à</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminBannedIpsBody">
+                            <tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
         {% endif %}
 
@@ -1628,8 +1660,63 @@
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // Load Banned IPs
+                await loadBannedIps();
             } catch (e) {
                 console.error("Admin load error:", e);
+            }
+        }
+
+        async function loadBannedIps() {
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('adminBannedIpsBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data.banned_ips || data.banned_ips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#34d399;">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>';
+                    return;
+                }
+
+                data.banned_ips.forEach(b => {
+                    const tr = document.createElement('tr');
+                    const isActive = b.is_active === 1;
+                    tr.innerHTML = `
+                        <td><code style="color:#ef4444; font-weight:700;">${b.ip_address}</code></td>
+                        <td><strong>${b.attempts}</strong></td>
+                        <td style="font-size:12px; color:#cbd5e1;">${b.reason}</td>
+                        <td style="font-size:11px; color:#94a3b8;">${b.banned_until}</td>
+                        <td><span style="background:${isActive ? 'rgba(239,68,68,0.2)' : 'rgba(100,116,139,0.2)'}; color:${isActive ? '#f87171' : '#94a3b8'}; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700;">${isActive ? '⛔ Bloqué' : 'Expiré'}</span></td>
+                        <td>
+                            <button class="chip" style="background:#10b981; color:#fff; border:none;" onclick="adminUnbanIp('${b.ip_address}')">Débloquer (Unban)</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error loading banned IPs:", e);
+            }
+        }
+
+        async function adminUnbanIp(ip) {
+            if (!confirm(`Voulez-vous débloquer l'adresse IP ${ip} ?`)) return;
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadBannedIps();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
             }
         }
 
@@ -1976,8 +2063,63 @@
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // Load Banned IPs
+                await loadBannedIps();
             } catch (e) {
                 console.error("Admin load error:", e);
+            }
+        }
+
+        async function loadBannedIps() {
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('adminBannedIpsBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data.banned_ips || data.banned_ips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#34d399;">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>';
+                    return;
+                }
+
+                data.banned_ips.forEach(b => {
+                    const tr = document.createElement('tr');
+                    const isActive = b.is_active === 1;
+                    tr.innerHTML = `
+                        <td><code style="color:#ef4444; font-weight:700;">${b.ip_address}</code></td>
+                        <td><strong>${b.attempts}</strong></td>
+                        <td style="font-size:12px; color:#cbd5e1;">${b.reason}</td>
+                        <td style="font-size:11px; color:#94a3b8;">${b.banned_until}</td>
+                        <td><span style="background:${isActive ? 'rgba(239,68,68,0.2)' : 'rgba(100,116,139,0.2)'}; color:${isActive ? '#f87171' : '#94a3b8'}; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700;">${isActive ? '⛔ Bloqué' : 'Expiré'}</span></td>
+                        <td>
+                            <button class="chip" style="background:#10b981; color:#fff; border:none;" onclick="adminUnbanIp('${b.ip_address}')">Débloquer (Unban)</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error loading banned IPs:", e);
+            }
+        }
+
+        async function adminUnbanIp(ip) {
+            if (!confirm(`Voulez-vous débloquer l'adresse IP ${ip} ?`)) return;
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadBannedIps();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
             }
         }
 
@@ -2321,8 +2463,63 @@
                     `;
                     tbody.appendChild(tr);
                 });
+
+                // Load Banned IPs
+                await loadBannedIps();
             } catch (e) {
                 console.error("Admin load error:", e);
+            }
+        }
+
+        async function loadBannedIps() {
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('adminBannedIpsBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data.banned_ips || data.banned_ips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#34d399;">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>';
+                    return;
+                }
+
+                data.banned_ips.forEach(b => {
+                    const tr = document.createElement('tr');
+                    const isActive = b.is_active === 1;
+                    tr.innerHTML = `
+                        <td><code style="color:#ef4444; font-weight:700;">${b.ip_address}</code></td>
+                        <td><strong>${b.attempts}</strong></td>
+                        <td style="font-size:12px; color:#cbd5e1;">${b.reason}</td>
+                        <td style="font-size:11px; color:#94a3b8;">${b.banned_until}</td>
+                        <td><span style="background:${isActive ? 'rgba(239,68,68,0.2)' : 'rgba(100,116,139,0.2)'}; color:${isActive ? '#f87171' : '#94a3b8'}; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700;">${isActive ? '⛔ Bloqué' : 'Expiré'}</span></td>
+                        <td>
+                            <button class="chip" style="background:#10b981; color:#fff; border:none;" onclick="adminUnbanIp('${b.ip_address}')">Débloquer (Unban)</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error loading banned IPs:", e);
+            }
+        }
+
+        async function adminUnbanIp(ip) {
+            if (!confirm(`Voulez-vous débloquer l'adresse IP ${ip} ?`)) return;
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadBannedIps();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
             }
         }
 
