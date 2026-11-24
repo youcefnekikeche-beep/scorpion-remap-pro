@@ -131,6 +131,434 @@ SOLUTION_DTC_MAP = {
     ]
 }
 
+# =========================================================================
+# Strict Supported ECU Registry (Only Authentically Supported Units)
+# =========================================================================
+SUPPORTED_REGISTRY = {
+    "VAG (Volkswagen / Audi / Seat / Skoda)": [
+        {
+            "id": "VAG_EDC17",
+            "name": "Bosch EDC17 (2.0 TDI / 1.6 TDI CR)",
+            "brand": "VAG (VW / Audi / Seat / Skoda)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "VAG_EDC16",
+            "name": "Bosch EDC16 (1.9 TDI / 2.0 TDI / 2.5 TDI)",
+            "brand": "VAG (VW / Audi / Seat / Skoda)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch EDC16 Checksum'}
+        },
+        {
+            "id": "VAG_MED17",
+            "name": "Bosch MED17 (1.4 TSI / 1.8 TFSI / 2.0 TFSI)",
+            "brand": "VAG (VW / Audi / Seat / Skoda)",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "VAG_MD1",
+            "name": "Bosch MD1CP002 / MD1CP004 / MD1CS004 (TDI)",
+            "brand": "VAG (VW / Audi / Seat / Skoda)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch MD1 Checksum'}
+        }
+    ],
+    "BMW": [
+        {
+            "id": "BMW_EDC16",
+            "name": "Bosch EDC16C35 (2.0d / 3.0d M47 / M57)",
+            "brand": "BMW",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
+        },
+        {
+            "id": "BMW_EDC17",
+            "name": "Bosch EDC17C50 / EDC17CP45 (N47 / N57)",
+            "brand": "BMW",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "BMW_MSV_MSD",
+            "name": "Continental MSV70 / MSV80 / MSV90 / MSD80 / MSD81 / MSD85",
+            "brand": "BMW",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        }
+    ],
+    "Mercedes-Benz": [
+        {
+            "id": "MB_EDC16",
+            "name": "Bosch EDC16CP31 (CDI V6 OM642 / OM646)",
+            "brand": "Mercedes-Benz",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
+        },
+        {
+            "id": "MB_EDC17",
+            "name": "Bosch EDC17CP46 / EDC17CP57 / EDC17C66 (BlueTEC)",
+            "brand": "Mercedes-Benz",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "MB_MED17_7",
+            "name": "Bosch MED17.7.X (M270 / M274 / M276 / M278)",
+            "brand": "Mercedes-Benz",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        }
+    ],
+    "Renault / Dacia": [
+        {
+            "id": "RENAULT_EMS",
+            "name": "Continental EMS3110 / EMS3120 / EMS3125 / Siemens EMS3132",
+            "brand": "Renault / Dacia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Siemens / Continental CRC'}
+        },
+        {
+            "id": "RENAULT_VALEO",
+            "name": "Valeo V40 / Valeo V42 (1.2 16V / 1.6 16V)",
+            "brand": "Renault / Dacia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Valeo Checksum'}
+        },
+        {
+            "id": "RENAULT_DCM",
+            "name": "Delphi DCM1.2 / DCM3.4 (1.5 dCi)",
+            "brand": "Renault / Dacia",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
+        },
+        {
+            "id": "RENAULT_BOSCH_DIESEL",
+            "name": "Bosch EDC16C3 / EDC17C84 / MD1CS006 (1.5 dCi / 1.6 dCi)",
+            "brand": "Renault / Dacia",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore / MD1 Checksum'}
+        }
+    ],
+    "PSA (Peugeot / Citroën)": [
+        {
+            "id": "PSA_EDC16",
+            "name": "Bosch EDC16C34 (1.6 HDi / 2.0 HDi)",
+            "brand": "PSA (Peugeot / Citroën)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
+        },
+        {
+            "id": "PSA_EDC17",
+            "name": "Bosch EDC17C10 / EDC17C60 (BlueHDi)",
+            "brand": "PSA (Peugeot / Citroën)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "PSA_MED17",
+            "name": "Bosch MED17.4 / MED17.4.2 (1.6 THP)",
+            "brand": "PSA (Peugeot / Citroën)",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        }
+    ],
+    "Hyundai / Kia": [
+        {
+            "id": "HYUNDAI_DCM37",
+            "name": "Delphi DCM3.7 (1.1 CRDi / 1.4 CRDi / 2.0 CRDi)",
+            "brand": "Hyundai / Kia",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'IMMO', 'SWIRL / FLAPS', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
+        },
+        {
+            "id": "HYUNDAI_BOSCH_DIESEL",
+            "name": "Bosch EDC17C08 / EDC17C57 / EDC17CP62 / EDC16C39 / MD1CS012",
+            "brand": "Hyundai / Kia",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'IMMO', 'SWIRL / FLAPS', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
+        },
+        {
+            "id": "HYUNDAI_SIM2K",
+            "name": "Continental SIM2K-140 / 141 / 142 / 240 / 241 / 250 / 260",
+            "brand": "Hyundai / Kia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        },
+        {
+            "id": "HYUNDAI_BOSCH_PETROL",
+            "name": "Bosch ME17.9.11 / 12 / 13 / 21 / MED17.9.8",
+            "brand": "Hyundai / Kia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore CRC'}
+        },
+        {
+            "id": "HYUNDAI_MT",
+            "name": "Delphi MT38 / MT86",
+            "brand": "Hyundai / Kia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
+        },
+        {
+            "id": "HYUNDAI_KEFICO",
+            "name": "Kefico CPEGD2 / CPGSH2 / CPxxx3",
+            "brand": "Hyundai / Kia",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Kefico TriCore'}
+        }
+    ],
+    "Ford": [
+        {
+            "id": "FORD_SID208",
+            "name": "Continental SID208 (2.2 TDCi Transit / Ranger)",
+            "brand": "Ford",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        },
+        {
+            "id": "FORD_EEC",
+            "name": "Visteon EEC-V / EEC-VI (MPC555 / 216K / 256K)",
+            "brand": "Ford",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Visteon Checksum'}
+        },
+        {
+            "id": "FORD_EMS24XX",
+            "name": "Continental EMS24xx (4MB EcoBoost)",
+            "brand": "Ford",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        },
+        {
+            "id": "FORD_MEDG17_MG1",
+            "name": "Bosch MEDG17 / MG1CS015/16/17/18/19 (EcoBoost)",
+            "brand": "Ford",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch TriCore / Aurora CRC'}
+        }
+    ],
+    "Toyota / Lexus": [
+        {
+            "id": "TOYOTA_DENSO_DIESEL",
+            "name": "Denso Gen1 / Gen2 / Gen3 / Gen4 (1GD / 2GD / 1KD / 2KD D-4D)",
+            "brand": "Toyota / Lexus",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
+        },
+        {
+            "id": "TOYOTA_DENSO_PETROL",
+            "name": "Denso Gen1 / Gen2 / Gen3 / Gen4 (VVT-i / Dual VVT-i)",
+            "brand": "Toyota / Lexus",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
+        }
+    ],
+    "Nissan / Infiniti": [
+        {
+            "id": "NISSAN_SID",
+            "name": "Continental SID309 / SID310 (1.5 dCi / 1.6 dCi / 2.3 dCi)",
+            "brand": "Nissan / Infiniti",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        },
+        {
+            "id": "NISSAN_HITACHI",
+            "name": "Hitachi SH705x / Gen2 SH72531 / SH72533",
+            "brand": "Nissan / Infiniti",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi Checksum'}
+        }
+    ],
+    "Chevrolet": [
+        {
+            "id": "CHEVY_MT80",
+            "name": "Delphi MT80 / MT80.1 (Aveo / Cruze / Sonic)",
+            "brand": "Chevrolet",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['P0315 FIX', 'DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
+        }
+    ],
+    "Honda": [
+        {
+            "id": "HONDA_KEIHIN",
+            "name": "Keihin (SH7058 / SH72543 / SH72546 / TC1782 / TC275)",
+            "brand": "Honda",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Keihin Checksum'}
+        },
+        {
+            "id": "HONDA_HITACHI",
+            "name": "Hitachi & Matsushita (SH7058 / SH7059 / SH72543)",
+            "brand": "Honda",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi Checksum'}
+        }
+    ],
+    "Mazda": [
+        {
+            "id": "MAZDA_MITSUBISHI_DENSO",
+            "name": "Mitsubishi MH8106F / MH8405F / Denso Z6 (SkyActiv / MZR)",
+            "brand": "Mazda",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Mitsubishi / Denso Checksum'}
+        }
+    ],
+    "Mitsubishi": [
+        {
+            "id": "MITSUBISHI_MELCO",
+            "name": "Melco CAN MH8104/8106 & K-Line MH7203/8206",
+            "brand": "Mitsubishi",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'IMMO', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Melco Checksum'}
+        },
+        {
+            "id": "MITSUBISHI_DENSO_TDI",
+            "name": "Denso TDI SH7058 / SH7059 (Di-D Pajero / L200)",
+            "brand": "Mitsubishi",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
+        }
+    ],
+    "Fiat / Alfa Romeo / Jeep (FCA)": [
+        {
+            "id": "FCA_EDC16_EDC17",
+            "name": "Bosch EDC16C39 / EDC17C69 (JTDm / MultiJet / CRD)",
+            "brand": "Fiat / Alfa Romeo / Jeep (FCA)",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 / TriCore CRC'}
+        },
+        {
+            "id": "FCA_NGC_SIM90",
+            "name": "Motorola NGC3 / Continental NGC4 / SIM90 / SIM90E",
+            "brand": "Fiat / Alfa Romeo / Jeep (FCA)",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
+        }
+    ],
+    "SsangYong": [
+        {
+            "id": "SSANGYONG_DCM",
+            "name": "Delphi DCM3.7 / DCM6.2 (e-XDi 200 / 220)",
+            "brand": "SsangYong",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'TVA', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
+        }
+    ],
+    "Subaru": [
+        {
+            "id": "SUBARU_HITACHI_DENSO",
+            "name": "Hitachi SH7058/7059/72543 & Denso SH72531 (Boxer)",
+            "brand": "Subaru",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi / Denso Checksum'}
+        }
+    ],
+    "Isuzu": [
+        {
+            "id": "ISUZU_TRANSTRON",
+            "name": "Transtron SH7058 / SH7059 (D-Max 2.5 / 3.0 TD)",
+            "brand": "Isuzu",
+            "fuel": "DIESEL",
+            "supported_solutions": ['DPF / FAP', 'EGR', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Transtron Checksum'}
+        }
+    ],
+    "Chinese Brands (Chery / Geely / Great Wall / BYD)": [
+        {
+            "id": "CHINA_ME7_MG1",
+            "name": "Bosch ME7.9.7(1) / ME7.8.8 / M7.8 / MG1UA008",
+            "brand": "Chinese Brands (Chery / Geely / Great Wall / BYD)",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch Checksum'}
+        }
+    ],
+    "Volvo": [
+        {
+            "id": "VOLVO_ESU",
+            "name": "Visteon ESU-121 / ESU-411 / ESU-418",
+            "brand": "Volvo",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Visteon Checksum'}
+        }
+    ],
+    "UAZ": [
+        {
+            "id": "UAZ_ME17",
+            "name": "Bosch ME17.9.7 / ME17.9.71 (Patriot / Hunter)",
+            "brand": "UAZ",
+            "fuel": "ESSENCE",
+            "supported_solutions": ['IMMO', 'SPEED LIMIT', 'STAGE 1'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore Checksum'}
+        }
+    ],
+    "Universal SCR AdBlue": [
+        {
+            "id": "BOSCH_DCU17",
+            "name": "Bosch DCU17 (Dosing Control Unit AdBlue)",
+            "brand": "Universal SCR AdBlue",
+            "fuel": "DIESEL",
+            "supported_solutions": ['ADBLUE'],
+            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore Checksum'}
+        }
+    ]
+}
+
+def get_registry_ecu(brand: str, ecu_id: str):
+    """استرجاع معلومات الكمبيوتر من السجل المدعوم حصرياً"""
+    if brand in SUPPORTED_REGISTRY:
+        for ecu in SUPPORTED_REGISTRY[brand]:
+            if ecu["id"] == ecu_id:
+                return ecu
+    for b, ecus in SUPPORTED_REGISTRY.items():
+        for ecu in ecus:
+            if ecu["id"] == ecu_id:
+                return ecu
+    return None
+
 def identify_ecu(binary_data: bytes, filename: str) -> dict:
     """
     Analyzes ECU binary data and extracts authentic HW/SW signatures,
@@ -325,62 +753,45 @@ def identify_ecu(binary_data: bytes, filename: str) -> dict:
     detected = None
     for pattern, ecu_name, brand, fuel, sols in ecu_patterns:
         if re.search(pattern, binary_data, re.IGNORECASE) or re.search(pattern, filename.encode('ascii', 'ignore'), re.IGNORECASE):
+            fuel_upper = fuel.upper()
+            
+            # الفصل الصارم بين البنزين والمازوت ومنع الخلط (Strict Fuel Type Isolation)
+            filtered_sols = []
+            for s in sols:
+                su = s.upper()
+                if fuel_upper == "DIESEL" and any(x in su for x in ['DECAT', 'LAMBDA', 'EVAP']):
+                    continue
+                if fuel_upper == "ESSENCE" and any(x in su for x in ['DPF', 'FAP', 'ADBLUE', 'SCR', 'HOT START']):
+                    continue
+                filtered_sols.append(s)
+
             detected = {
                 'ecu_type': ecu_name,
                 'brand': brand,
-                'fuel': fuel,
-                'supported_solutions': sols
+                'fuel': fuel_upper,
+                'supported_solutions': filtered_sols
             }
             break
 
-    # Fallback based on file size and micro architecture if string search is stripped
+    # ممنوع التخمين إطلاقاً: إذا لم يتعرف السيرفر على الملف تلقائياً
     if not detected:
-        if file_size >= 8388608: # 8MB (MD1 / MG1)
-            detected = {
-                'ecu_type': 'Bosch MD1 / MG1 (8MB SPC5777)',
-                'brand': 'Bosch Automotive',
-                'fuel': 'Diesel',
-                'supported_solutions': edc17_sols
-            }
-        elif file_size >= 4194304: # 4MB (EDC17 / MEDG17 / SID208 / EMS24xx)
-            detected = {
-                'ecu_type': 'Bosch EDC17 / Continental SID208 (4MB TriCore)',
-                'brand': 'Bosch / Continental',
-                'fuel': 'Diesel',
-                'supported_solutions': edc17_sols
-            }
-        elif file_size == 2097152: # 2MB (EDC17 / MED17 / SID309 / Keihin)
-            detected = {
-                'ecu_type': 'Bosch EDC17 / MED17 (2MB TriCore)',
-                'brand': 'Bosch Automotive',
-                'fuel': 'Diesel',
-                'supported_solutions': edc17_sols
-            }
-        elif file_size == 1572864: # 1.5MB (MT80 / Hitachi SH7059)
-            detected = {
-                'ecu_type': 'Delphi MT80 / Hitachi (1.5MB Flash)',
-                'brand': 'Delphi / Hitachi',
-                'fuel': 'Essence',
-                'supported_solutions': chevy_mt80_sols
-            }
-        elif file_size == 1048576: # 1MB (EDC16 / ME7 / Keihin SH7058 / Transtron)
-            detected = {
-                'ecu_type': 'Bosch EDC16 / Transtron / Keihin (1MB Flash)',
-                'brand': 'Bosch Automotive',
-                'fuel': 'Essence' if b'ME7' in binary_data[:1000] else 'Diesel',
-                'supported_solutions': china_petrol_sols if b'ME7' in binary_data[:1000] else edc16_sols
-            }
-        else:
-            detected = {
-                'ecu_type': 'Standard ECU Microcontroller',
-                'brand': 'Universal ECU',
-                'fuel': 'Diesel',
-                'supported_solutions': ['DPF / FAP', 'EGR', 'HOT START', 'DTC OFF']
-            }
+        return {
+            'recognized': False,
+            'message': 'Calculateur non reconnu automatiquement. Veuillez sélectionner votre véhicule et calculateur dans notre base de données :',
+            'file_size': file_size,
+            'sw_version': sw_version,
+            'hw_version': hw_version,
+            'brand': None,
+            'model': None,
+            'ecu_type': None,
+            'fuel': None,
+            'supported_solutions': [],
+            'checksum_info': None
+        }
 
     # Extract VAG part number if present
     vag_part = re.findall(rb'0[34]L\s?906\s?[0-9]{3}\s?[A-Z]{1,3}', binary_data)
-    model_str = f"Calculateur Moteur {detected['fuel']}"
+    model_str = f"Calculateur Moteur ({detected['fuel']})"
     if vag_part:
         model_str = f"VAG 2.0 TDI ({vag_part[0].decode('ascii').replace(' ', '')})"
 
@@ -393,6 +804,7 @@ def identify_ecu(binary_data: bytes, filename: str) -> dict:
     }
 
     return {
+        'recognized': True,
         'brand': detected['brand'],
         'model': model_str,
         'ecu_type': detected['ecu_type'],

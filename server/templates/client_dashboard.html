@@ -106,11 +106,25 @@
 
         /* ECU Specs Grid */
         .specs-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
             background: #060a12; padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px;
         }
-        .spec-item span { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .spec-item span { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
         .spec-item strong { font-size: 14px; color: #38bdf8; font-weight: 700; }
+
+        /* Fuel Type Badges */
+        .badge-fuel {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            border-radius: 6px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.3px;
+        }
+        .badge-diesel {
+            background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+        }
+        .badge-petrol {
+            background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4);
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.15);
+        }
 
         /* Solutions Checkboxes Grid */
         .sol-category-title { font-size: 13px; font-weight: 800; color: #cbd5e1; margin-bottom: 10px; }
@@ -119,16 +133,9 @@
             background: #060a12; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
             display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none;
         }
-        .sol-card:hover { border-color: #38bdf8; }
+        .sol-card:hover { border-color: #38bdf8; transform: translateY(-1px); }
         .sol-card.selected { background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; }
-        .sol-card.disabled {
-            opacity: 0.3 !important;
-            pointer-events: none !important;
-            cursor: not-allowed !important;
-            filter: grayscale(0.85);
-            border-color: #1e293b !important;
-            background: #04070e !important;
-        }
+        .sol-card.disabled { display: none !important; }
         .sol-card .title { font-weight: 700; font-size: 13px; color: #f1f5f9; }
         .sol-card .chk {
             width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,0.05);
@@ -447,6 +454,41 @@
                 <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
             </div>
 
+            <!-- Unrecognized File Strict Manual Selector (قاعدة بيانات الكمبيوترات المبرمجة فعلياً فقط) -->
+            <div id="unrecognizedBox" style="display:none; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                    <span style="font-size: 26px;">⚠️</span>
+                    <div>
+                        <h3 style="font-size: 16.5px; color: #fca5a5; margin: 0; font-weight: 800;">Calculateur non reconnu automatiquement</h3>
+                        <p style="font-size: 13px; color: #cbd5e1; margin-top: 4px; margin-bottom: 0;">
+                            Veuillez sélectionner votre véhicule et calculateur dans notre base de données :
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">1. Marque / Constructeur :</label>
+                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                            <option value="">-- Choisir la marque / constructeur --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">2. Calculateur / ECU :</label>
+                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                            <option value="">-- Choisir le calculateur --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <span style="font-size: 12px; color: var(--text-muted);">Votre calculateur ne figure pas dans la liste officielle ?</span>
+                    <button type="button" onclick="requestManualProcessing()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                        📩 Calculateur non supporté - Demander un traitement manuel
+                    </button>
+                </div>
+            </div>
+
             <!-- Analysis & Tuning Panel -->
             <div id="resultsPanel" style="display:none; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px;">
                 <h3 style="font-size:17px; margin-bottom:14px; color:#fff;">Calculateur Identifié avec Succès ✅</h3>
@@ -467,6 +509,10 @@
                     <div class="spec-item">
                         <span>Version Logiciel (SW / HW)</span>
                         <strong id="swVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Type de Motorisation</span>
+                        <strong id="fuelVal"><span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span></strong>
                     </div>
                 </div>
 
@@ -1185,16 +1231,135 @@
             if(fileInput.files.length) handleFile(fileInput.files[0]);
         });
 
+        let supportedRegistryCache = null;
+        async function loadSupportedRegistry() {
+            if (!supportedRegistryCache) {
+                try {
+                    const res = await fetch('/api/v1/tuning/registry');
+                    if (res.ok) {
+                        const data = await res.json();
+                        supportedRegistryCache = data.registry || {};
+                    }
+                } catch(e) {
+                    console.error("Registry error:", e);
+                }
+            }
+            return supportedRegistryCache;
+        }
+
+        async function populateManualBrandSelect() {
+            const registry = await loadSupportedRegistry();
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            brandSel.innerHTML = '<option value="">-- Choisir la marque / constructeur --</option>';
+            ecuSel.innerHTML = '<option value="">-- Choisir le calculateur --</option>';
+            ecuSel.disabled = true;
+
+            if (!registry) return;
+            Object.keys(registry).forEach(brand => {
+                const opt = document.createElement('option');
+                opt.value = brand;
+                opt.textContent = brand;
+                brandSel.appendChild(opt);
+            });
+        }
+
+        async function onManualBrandChange() {
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            const brand = brandSel.value;
+            ecuSel.innerHTML = '<option value="">-- Choisir le calculateur --</option>';
+
+            if (!brand || !supportedRegistryCache || !supportedRegistryCache[brand]) {
+                ecuSel.disabled = true;
+                return;
+            }
+
+            supportedRegistryCache[brand].forEach(ecu => {
+                const opt = document.createElement('option');
+                opt.value = ecu.id;
+                opt.textContent = `${ecu.name} (${ecu.fuel})`;
+                ecuSel.appendChild(opt);
+            });
+            ecuSel.disabled = false;
+        }
+
+        async function onManualEcuChange() {
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            const brand = brandSel.value;
+            const ecuId = ecuSel.value;
+            if (!ecuId) return;
+
+            try {
+                const res = await fetch('/api/v1/tuning/manual-select', {
+                    method: 'POST',
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        file_token: currentFileToken,
+                        brand: brand,
+                        ecu_id: ecuId
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    document.getElementById('unrecognizedBox').style.display = 'none';
+                    displayIdentifiedEcu(data, currentFile ? currentFile.name : 'ECU_File.bin');
+                } else {
+                    alert(data.detail || 'Erreur lors de la sélection du calculateur');
+                }
+            } catch(e) {
+                alert('Erreur : ' + e.message);
+            }
+        }
+
+        function requestManualProcessing() {
+            alert("📩 Votre demande de traitement manuel pour ce fichier a été transmise avec succès à notre équipe d'ingénieurs SCORPION REMAP PRO.\n\nVous serez recontacté sous 15 minutes sur votre téléphone / WhatsApp ou Email.");
+        }
+
+        function displayIdentifiedEcu(data, fileName) {
+            currentChecksumInfo = data.checksum_info;
+            dropZone.innerHTML = `<div class="drop-icon">✅</div><div class="drop-title">Fichier sélectionné : ${fileName}</div><div class="drop-subtitle">Cliquez pour changer de fichier</div>`;
+            document.getElementById('brandVal').innerText = data.brand || 'VAG / Auto';
+            document.getElementById('modelVal').innerText = data.model || 'Calculateur Moteur';
+            document.getElementById('ecuVal').innerText = data.ecu_type || 'Bosch ECU';
+            document.getElementById('swVal').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+            
+            const fuelEl = document.getElementById('fuelVal');
+            const isDiesel = (data.fuel || '').toUpperCase() === 'DIESEL';
+            if (fuelEl) {
+                fuelEl.innerHTML = isDiesel ?
+                    '<span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span>' :
+                    '<span class="badge-fuel badge-petrol">Moteur Essence ⚡</span>';
+            }
+
+            document.getElementById('resultsPanel').style.display = 'block';
+
+            // تطبيق التصفية الديناميكية والفصل الصارم بين البنزين والمازوت وإخفاء غير المدعوم
+            applyDynamicSolutionFiltering(data.supported_solutions, data.default_solutions, data.fuel);
+
+            renderDtcPreviewTable(data.dtc_preview, data.dtc_count);
+            renderTechnicalInstructions(data.instructions, data.checksum_info);
+        }
+
         async function handleFile(file) {
             currentFile = file;
             dropZone.innerHTML = `<div class="drop-icon">⏳</div><div class="drop-title">Analyse du fichier ECU : ${file.name}...</div>`;
             document.getElementById('successBox').style.display = 'none';
+            document.getElementById('unrecognizedBox').style.display = 'none';
+            document.getElementById('resultsPanel').style.display = 'none';
 
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                const res = await fetch('/api/v1/tuning/analyze', { method: 'POST', body: formData });
+                const res = await fetch('/api/v1/tuning/analyze', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData 
+                });
                 if (res.status === 401) {
                     alert('Session expirée. Veuillez vous reconnecter.');
                     window.location.href = '/login';
@@ -1203,22 +1368,20 @@
                 const data = await res.json();
                 if(res.ok && data.success) {
                     currentFileToken = data.file_token;
-                    currentChecksumInfo = data.checksum_info;
-                    dropZone.innerHTML = `<div class="drop-icon">✅</div><div class="drop-title">Fichier sélectionné : ${file.name}</div><div class="drop-subtitle">Cliquez pour changer de fichier</div>`;
-                    document.getElementById('brandVal').innerText = data.brand || 'VAG / Auto';
-                    document.getElementById('modelVal').innerText = data.model || '2.0 TDI';
-                    document.getElementById('ecuVal').innerText = data.ecu_type || 'Bosch EDC17';
-                    document.getElementById('swVal').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
-                    document.getElementById('resultsPanel').style.display = 'block';
+                    
+                    // إذا لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%: الاختيار اليدوي الصارم
+                    if (data.recognized === false) {
+                        document.getElementById('resultsPanel').style.display = 'none';
+                        const unbox = document.getElementById('unrecognizedBox');
+                        unbox.style.display = 'block';
+                        dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title">Fichier téléversé : ${file.name}</div><div class="drop-subtitle">${data.message}</div>`;
+                        await populateManualBrandSelect();
+                        return;
+                    }
 
-                    // 1. تفعيل الحلول الموجودة فعلياً وتعطيل الباقي
-                    applyDynamicSolutionFiltering(data.supported_solutions, data.default_solutions);
-
-                    // 2. كشف دقيق لما سينحذف في جدول الـ DTC
-                    renderDtcPreviewTable(data.dtc_preview, data.dtc_count);
-
-                    // 3. عرض إرشادات ما بعد البرمجة وحالة التشيكسوم
-                    renderTechnicalInstructions(data.instructions, data.checksum_info);
+                    // تم التعرف على الكمبيوتر تلقائياً
+                    document.getElementById('unrecognizedBox').style.display = 'none';
+                    displayIdentifiedEcu(data, file.name);
                 } else {
                     dropZone.innerHTML = `<div class="drop-icon">❌</div><div class="drop-title">Erreur d'analyse</div><div class="drop-subtitle">${data.detail || 'Fichier non reconnu ou corrompu'}</div>`;
                     alert(data.detail || 'Erreur lors de la lecture du fichier');
@@ -1229,22 +1392,35 @@
             }
         }
 
-        // Dynamic Solution Filtering (No Mock Data)
-        function applyDynamicSolutionFiltering(supportedSolutions, defaultSolutions) {
+        // Dynamic Solution Filtering (Strict Fuel Isolation & Render ONLY Available Solutions)
+        function applyDynamicSolutionFiltering(supportedSolutions, defaultSolutions, fuelType) {
             supportedSolutionsList = supportedSolutions || [];
             selectedSolutions.clear();
-
-            if(defaultSolutions && defaultSolutions.length) {
-                defaultSolutions.forEach(s => selectedSolutions.add(s));
-            }
+            const currentFuel = (fuelType || 'DIESEL').toUpperCase();
 
             document.querySelectorAll('.sol-card').forEach(card => {
                 const solKey = card.getAttribute('data-sol');
                 if(!solKey) return;
+                const ku = solKey.toUpperCase();
 
+                // 1. الفصل الصارم بين البنزين والمازوت ومنع الخلط (Strict Fuel Type Isolation)
+                if (currentFuel === 'DIESEL') {
+                    // كمبيوترات المازوت: يمنع منعاً باتاً إظهار أو تفعيل حلول البنزين
+                    if (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT') || ku.includes('EVAP')) {
+                        card.style.display = 'none';
+                        return;
+                    }
+                } else if (currentFuel === 'ESSENCE') {
+                    // كمبيوترات البنزين: يمنع منعاً باتاً إظهار أو تفعيل حلول المازوت
+                    if (ku.includes('DPF') || ku.includes('FAP') || ku.includes('ADBLUE') || ku.includes('SCR') || ku.includes('HOT START')) {
+                        card.style.display = 'none';
+                        return;
+                    }
+                }
+
+                // 2. التحقق من دعم السيرفر الفعلي للحل
                 const isSupported = supportedSolutionsList.some(s => {
                     const su = s.toUpperCase();
-                    const ku = solKey.toUpperCase();
                     if (su === ku || ku.includes(su) || su.includes(ku)) return true;
                     if ((su.includes('VSA') || su.includes('SWIRL')) && (ku.includes('VSA') || ku.includes('SWIRL'))) return true;
                     if ((su.includes('CAT') || su.includes('LAMBDA') || su.includes('DECAT')) && (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT'))) return true;
@@ -1256,44 +1432,37 @@
                 });
 
                 const chk = card.querySelector('.chk');
-                let statusBadge = card.querySelector('.sol-status-badge');
-                if(!statusBadge) {
-                    statusBadge = document.createElement('div');
-                    statusBadge.className = 'sol-status-badge';
-                    card.appendChild(statusBadge);
-                }
 
-                if(isSupported) {
+                // 3. إظهار الحلول المتوفرة فقط وإخفاء الباقي تماماً (بدون أزرار رمادية)
+                if (isSupported) {
+                    card.style.display = 'flex';
                     card.classList.remove('disabled');
+                    card.classList.remove('selected');
                     card.style.opacity = '1';
                     card.style.pointerEvents = 'auto';
                     card.style.cursor = 'pointer';
                     card.style.filter = 'none';
-                    statusBadge.innerHTML = '<span style="font-size:10px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); border-radius:4px; padding:1px 6px; font-weight:700;">✓ Solution Disponible</span>';
-
-                    if(selectedSolutions.has(solKey)) {
-                        card.classList.add('selected');
-                        if(chk) chk.innerText = '✔';
-                    } else {
-                        card.classList.remove('selected');
-                        if(chk) chk.innerText = '+';
-                    }
+                    if (chk) chk.innerText = '+';
                 } else {
-                    card.classList.add('disabled');
+                    card.style.display = 'none'; // إخفاء كامل بدون أزرار رمادية
                     card.classList.remove('selected');
-                    selectedSolutions.delete(solKey);
-                    if(chk) chk.innerText = '✕';
-                    card.style.opacity = '0.3';
-                    card.style.pointerEvents = 'none';
-                    card.style.cursor = 'not-allowed';
-                    card.style.filter = 'grayscale(0.85)';
-                    statusBadge.innerHTML = '<span style="font-size:10px; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; padding:1px 6px; font-weight:700;">⛔ Non disponible</span>';
+                    if (chk) chk.innerText = '✕';
+                }
+            });
+
+            // إخفاء العناوين الفرعية للأقسام التي لا تحتوي على أي بطاقة ظاهرة
+            document.querySelectorAll('.sol-category-title').forEach(titleEl => {
+                const nextGrid = titleEl.nextElementSibling;
+                if (nextGrid && nextGrid.classList.contains('sol-grid')) {
+                    const visibleCards = Array.from(nextGrid.querySelectorAll('.sol-card')).filter(c => c.style.display !== 'none');
+                    titleEl.style.display = (visibleCards.length > 0) ? 'block' : 'none';
+                    nextGrid.style.display = (visibleCards.length > 0) ? 'grid' : 'none';
                 }
             });
         }
 
         function toggleSol(card, name) {
-            if(card.classList.contains('disabled')) return;
+            if(card.style.display === 'none' || card.classList.contains('disabled')) return;
 
             const chk = card.querySelector('.chk');
             if(selectedSolutions.has(name)) {
@@ -1482,9 +1651,19 @@
             if(currentFile) formData.append('file', currentFile);
             formData.append('solutions', JSON.stringify(Array.from(selectedSolutions)));
             formData.append('dtcs', JSON.stringify(Array.from(selectedDtcs)));
+            
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            if (brandSel && brandSel.value) formData.append('manual_brand', brandSel.value);
+            if (ecuSel && ecuSel.value) formData.append('manual_ecu_id', ecuSel.value);
 
             try {
-                const res = await fetch('/api/v1/tuning/process', { method: 'POST', body: formData });
+                const res = await fetch('/api/v1/tuning/process', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData 
+                });
                 const data = await res.json();
                 if(res.ok && data.success) {
                     btn.innerText = '✅ Modification Terminée avec Succès!';

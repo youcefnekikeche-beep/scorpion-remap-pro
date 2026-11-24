@@ -26,7 +26,10 @@ from server.db import (
     save_session_db, get_session_user_db, delete_session_db
 )
 from engine.tuning_bridge import run_tuning_task
-from engine.ecu_analyzer import identify_ecu, preview_dtcs, get_technical_instructions
+from engine.ecu_analyzer import (
+    identify_ecu, preview_dtcs, get_technical_instructions,
+    SUPPORTED_REGISTRY, get_registry_ecu
+)
 from engine.renault_expert import preview_expert_operation, execute_expert_operation
 
 app = FastAPI(title="SCORPION REMAP PRO", version="3.2.0")
@@ -499,6 +502,47 @@ async def api_search_dtc(q: str = ""):
                 break
     return matches
 
+@app.get("/api/v1/tuning/registry")
+async def api_tuning_registry():
+    """استرجاع قاعدة بيانات الكمبيوترات والماركات المبرمجة فعلياً فقط"""
+    return {
+        "success": True,
+        "registry": SUPPORTED_REGISTRY
+    }
+
+@app.post("/api/v1/tuning/manual-select")
+async def api_tuning_manual_select(payload: dict, user: dict = Depends(require_user)):
+    """تطبيق الاختيار اليدوي الصارم عند عدم التعرف التلقائي على الملف"""
+    ecu_id = payload.get("ecu_id", "").strip()
+    brand = payload.get("brand", "").strip()
+    file_token = payload.get("file_token", "").strip()
+    
+    ecu_info = get_registry_ecu(brand, ecu_id)
+    if not ecu_info:
+        raise HTTPException(status_code=400, detail="Calculateur introuvable dans la base de données SCORPION")
+        
+    return {
+        "success": True,
+        "recognized": True,
+        "manual_selection": True,
+        "file_token": file_token,
+        "brand": ecu_info["brand"],
+        "model": f"Calculateur Moteur ({ecu_info['fuel']})",
+        "ecu_type": ecu_info["name"],
+        "sw_version": "SW_Manuel_Sélectionné",
+        "hw_version": "HW_Manuel_Sélectionné",
+        "fuel": ecu_info["fuel"],
+        "supported_solutions": ecu_info["supported_solutions"],
+        "checksum_info": ecu_info.get("checksum_info", {
+            "status": "Correction via Flasher (KESS/Autotuner/Flex) ⚠️",
+            "is_auto": False,
+            "algorithm": "Standard Checksum"
+        }),
+        "instructions": [],
+        "dtc_preview": [],
+        "dtc_count": 0
+    }
+
 @app.post("/api/v1/tuning/analyze")
 async def api_tuning_analyze(file: UploadFile = File(...), user: dict = Depends(require_user)):
     file_token = uuid.uuid4().hex
@@ -511,9 +555,22 @@ async def api_tuning_analyze(file: UploadFile = File(...), user: dict = Depends(
     with open(saved_path, "rb") as f:
         binary_data = f.read()
         
-    # فحص بصمة الملف والكومبيوتر والحلول المدعومة فعلياً فقط (No Mock Data)
+    # فحص بصمة الملف والكومبيوتر والحلول المدعومة فعلياً فقط (No Mock Data & No Guessing)
     ident = identify_ecu(binary_data, file.filename)
     
+    # في حال لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%
+    if not ident.get("recognized", True):
+        return {
+            "success": True,
+            "recognized": False,
+            "message": ident.get("message", "Calculateur non reconnu automatiquement. Veuillez sélectionner votre véhicule et calculateur dans notre base de données :"),
+            "file_token": file_token,
+            "filename": file.filename,
+            "file_size": ident.get("file_size", len(binary_data)),
+            "sw_version": ident.get("sw_version"),
+            "hw_version": ident.get("hw_version")
+        }
+
     # عدم تفعيل أي حل تلقائياً عند رفع الملف (No Auto-Selection on Upload)
     # تبدأ جميع الأزرار غير محددة ويكون عدد أكواد الـ DTC صفراً حتى يحدد المستخدم الحل بنفسه
     defaults = []
@@ -522,6 +579,7 @@ async def api_tuning_analyze(file: UploadFile = File(...), user: dict = Depends(
     
     return {
         "success": True,
+        "recognized": True,
         "file_token": file_token,
         "filename": file.filename,
         "brand": ident["brand"],
@@ -572,6 +630,8 @@ async def api_tuning_process(
     file_token: Optional[str] = Form(None),
     solutions: str = Form("[]"),
     dtcs: str = Form("[]"),
+    manual_brand: Optional[str] = Form(None),
+    manual_ecu_id: Optional[str] = Form(None),
     user: dict = Depends(require_user)
 ):
     # التأكد من الرصيد أولاً (لن يخصم إلا عند ضغط زر التطبيق الفعلي)
@@ -649,6 +709,17 @@ async def api_tuning_process(
     # خصم النقطة وتسجيل العملية في token_transactions وقاعدة البيانات
     new_balance = deduct_user_tokens(user["id"], 1, "file_process", f"Tuning {original_filename} ({', '.join(all_applied)})")
 
+    final_brand = engine_result.get("brand", "Vehicle")
+    final_ecu_type = engine_result.get("ecu_type", "Standard ECU")
+    final_model = engine_result.get("model", "Engine")
+
+    if manual_ecu_id:
+        reg_ecu = get_registry_ecu(manual_brand or "", manual_ecu_id)
+        if reg_ecu:
+            final_brand = reg_ecu["brand"]
+            final_ecu_type = reg_ecu["name"]
+            final_model = f"Calculateur Moteur ({reg_ecu['fuel']})"
+
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -658,9 +729,9 @@ async def api_tuning_process(
                 user["id"],
                 original_filename,
                 file_hash,
-                engine_result.get("brand", "Vehicle"),
-                engine_result.get("model", "Engine"),
-                engine_result.get("ecu_type", "Standard ECU"),
+                final_brand,
+                final_model,
+                final_ecu_type,
                 engine_result.get("sw_version", "SW_MOD"),
                 json.dumps(all_applied),
                 1,
@@ -676,9 +747,9 @@ async def api_tuning_process(
         "task_id": task_db_id,
         "filename": modified_filename,
         "download_url": f"/api/v1/tuning/download/{task_db_id}",
-        "brand": engine_result.get("brand"),
-        "model": engine_result.get("model"),
-        "ecu_type": engine_result.get("ecu_type"),
+        "brand": final_brand,
+        "model": final_model,
+        "ecu_type": final_ecu_type,
         "solutions": selected_solutions
     }
 
