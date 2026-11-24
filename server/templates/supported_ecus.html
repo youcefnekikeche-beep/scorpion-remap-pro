@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORPION REMAP PRO | قائمة الكمبيوترات والحلول المدعومة</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
+        body { background: #080d1a; color: #f8fafc; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: #111a2e; border: 1px solid #1e293b; border-radius: 16px;
+            padding: 16px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .header h1 { font-size: 20px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+        .nav-links { display: flex; gap: 12px; align-items: center; }
+        .nav-link {
+            color: #cbd5e1; text-decoration: none; font-size: 14px; font-weight: 700; padding: 6px 14px;
+            border-radius: 8px; transition: 0.2s;
+        }
+        .nav-link:hover { color: #38bdf8; background: rgba(56, 189, 248, 0.1); }
+        .btn-portal {
+            background: #0284c7; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 8px;
+            font-size: 13px; font-weight: 700; transition: 0.2s;
+        }
+        .btn-portal:hover { background: #0369a1; }
+
+        /* شريط الإحصائيات */
+        .stats-banner {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;
+        }
+        .stat-item {
+            background: #111a2e; border: 1px solid #1e293b; border-radius: 14px; padding: 18px;
+            text-align: center;
+        }
+        .stat-item strong { display: block; font-size: 28px; color: #38bdf8; margin-bottom: 4px; }
+        .stat-item span { font-size: 13px; color: #94a3b8; }
+
+        /* منطقة البحث والفلترة */
+        .filter-section {
+            background: #111a2e; border: 1px solid #1e293b; border-radius: 16px; padding: 20px;
+            margin-bottom: 24px;
+        }
+        .search-box {
+            width: 100%; padding: 14px 18px; background: #080d1a; border: 1px solid #334155;
+            border-radius: 12px; color: #fff; font-size: 15px; outline: none; margin-bottom: 16px;
+            transition: 0.2s;
+        }
+        .search-box:focus { border-color: #38bdf8; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+
+        .filter-buttons {
+            display: flex; flex-wrap: wrap; gap: 8px;
+        }
+        .filter-btn {
+            background: #080d1a; border: 1px solid #334155; color: #cbd5e1; padding: 8px 16px;
+            border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: #0284c7; border-color: #0284c7; color: #fff;
+        }
+
+        /* شبكة الكروت للكمبيوترات */
+        .ecu-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px;
+        }
+        .ecu-card {
+            background: #111a2e; border: 1px solid #1e293b; border-radius: 16px; padding: 20px;
+            transition: transform 0.2s, border-color 0.2s; display: flex; flex-direction: column;
+            justify-content: space-between;
+        }
+        .ecu-card:hover {
+            transform: translateY(-3px); border-color: #38bdf8;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+        }
+        .card-brand {
+            font-size: 12px; font-weight: 800; color: #94a3b8; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 6px;
+        }
+        .card-title {
+            font-size: 17px; font-weight: 800; color: #38bdf8; margin-bottom: 8px;
+        }
+        .card-engine {
+            font-size: 13px; color: #cbd5e1; background: #080d1a; padding: 6px 10px;
+            border-radius: 6px; margin-bottom: 14px; border: 1px solid #1e293b;
+        }
+        .solutions-list {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto;
+        }
+        .sol-badge {
+            background: rgba(34, 197, 94, 0.15); border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700;
+        }
+        .sol-badge.adblue { background: rgba(56, 189, 248, 0.15); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8; }
+        .sol-badge.immo { background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5; }
+        .sol-badge.perf { background: rgba(234, 179, 8, 0.15); border-color: rgba(234, 179, 8, 0.3); color: #facc15; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><span>🦂</span> SCORPION REMAP PRO | قائمة الكمبيوترات والحلول المدعومة</h1>
+            <div class="nav-links">
+                <a href="/login" class="nav-link">تسجيل الدخول</a>
+                <a href="/portal" class="btn-portal">بوابة الزبائن ⚡</a>
+            </div>
+        </header>
+
+        <!-- ملخص الإحصائيات -->
+        <section class="stats-banner">
+            <div class="stat-item">
+                <strong id="totalEcusCount">30+</strong>
+                <span>عائلة كمبيوتر رئيسية (ECU Families)</span>
+            </div>
+            <div class="stat-item">
+                <strong>1,500+</strong>
+                <span>موديل سيارة ومحرك متوافق</span>
+            </div>
+            <div class="stat-item">
+                <strong>12+</strong>
+                <span>حل تعديل برمجي متوفر</span>
+            </div>
+            <div class="stat-item">
+                <strong>11,600+</strong>
+                <span>كود عطل DTC مدعوم للحذف</span>
+            </div>
+        </section>
+
+        <!-- أدوات البحث والفلترة -->
+        <section class="filter-section">
+            <input type="text" id="searchInput" class="search-box" 
+                   placeholder="🔍 ابحث عن نوع الكمبيوتر (مثال: EDC17C64 أو SID208 أو DCM6.2) أو اسم السيارة..." 
+                   oninput="filterEcus()">
+
+            <div class="filter-buttons">
+                <button class="filter-btn active" onclick="setFilter('all', this)">الكل (All)</button>
+                <button class="filter-btn" onclick="setFilter('bosch', this)">Bosch (EDC16, EDC17, MD1, MG1)</button>
+                <button class="filter-btn" onclick="setFilter('continental', this)">Continental (SID / Simos)</button>
+                <button class="filter-btn" onclick="setFilter('delphi', this)">Delphi (DCM / CRD)</button>
+                <button class="filter-btn" onclick="setFilter('marelli', this)">Marelli (MJD)</button>
+                <button class="filter-btn" onclick="setFilter('denso', this)">Denso</button>
+                <button class="filter-btn" onclick="setFilter('valeo', this)">Valeo (Essence)</button>
+            </div>
+        </section>
+
+        <!-- شبكة عرض الكمبيوترات المدعومة -->
+        <div id="ecuGrid" class="ecu-grid">
+            <div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8;">جاري تحميل القائمة...</div>
+        </div>
+    </div>
+
+    <script>
+        let allEcus = [];
+        let currentFilter = 'all';
+
+        async function loadEcus() {
+            try {
+                const res = await fetch('/api/v1/supported-ecus');
+                allEcus = await res.json();
+                document.getElementById('totalEcusCount').innerText = allEcus.length + '+';
+                renderEcus(allEcus);
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        function renderEcus(list) {
+            const grid = document.getElementById('ecuGrid');
+            grid.innerHTML = '';
+            
+            if(list.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:40px; color:#94a3b8; font-size:16px;">لم يتم العثور على أي كمبيوتر يطابق بحثك</div>';
+                return;
+            }
+
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'ecu-card';
+
+                let badgesHtml = '';
+                item.solutions.forEach(sol => {
+                    let cls = 'sol-badge';
+                    if(sol.includes('ADBLUE') || sol.includes('SCR') || sol.includes('UREA')) cls += ' adblue';
+                    else if(sol.includes('IMMO')) cls += ' immo';
+                    else if(sol.includes('VMAX') || sol.includes('START') || sol.includes('BURBLES')) cls += ' perf';
+                    badgesHtml += `<span class="${cls}">✔ ${sol}</span>`;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div class="card-brand">🚗 ${item.brand}</div>
+                        <div class="card-title">${item.ecu}</div>
+                        <div class="card-engine"><strong>المحركات:</strong> ${item.engine}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px; color:#94a3b8; margin-bottom:6px; font-weight:700;">الحلول المتوفرة لهذا الكمبيوتر:</div>
+                        <div class="solutions-list">${badgesHtml}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setFilter(category, btn) {
+            currentFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterEcus();
+        }
+
+        function filterEcus() {
+            const q = document.getElementById('searchInput').value.trim().toLowerCase();
+            let filtered = allEcus;
+
+            // فلترة الفئة
+            if(currentFilter !== 'all') {
+                filtered = filtered.filter(item => item.ecu.toLowerCase().includes(currentFilter) || item.brand.toLowerCase().includes(currentFilter));
+            }
+
+            // فلترة نص البحث
+            if(q) {
+                filtered = filtered.filter(item => 
+                    item.ecu.toLowerCase().includes(q) ||
+                    item.brand.toLowerCase().includes(q) ||
+                    item.engine.toLowerCase().includes(q) ||
+                    item.solutions.some(s => s.toLowerCase().includes(q))
+                );
+            }
+
+            renderEcus(filtered);
+        }
+
+        loadEcus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,661 @@
+[
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17C46",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI CR (Golf 6, Passat, Tiguan, Octavia, Leon)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "HOT START FIX",
+      "SWIRL FLAPS OFF",
+      "TVA OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17C64",
+    "fuel": "Diesel",
+    "engine": "1.6 & 2.0 TDI EA288 (Golf 7, Audi A3, Leon 5F, Octavia 5E)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "HOT START FIX",
+      "TVA OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17C54",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI BiTDI (Crafter, Amarok)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "HOT START FIX",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17CP14 / EDC17CP20",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI CR (Transporter T5/T6, Tiguan, Audi A4 B8)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SWIRL FLAPS OFF",
+      "TVA OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17CP04 / EDC17CP44",
+    "fuel": "Diesel",
+    "engine": "3.0 TDI V6 (Audi A6, A8, Q7, VW Touareg)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "SWIRL FLAPS OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17C74",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI EA288 (Audi A4 B9, Passat B8, Superb)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC16U1 / EDC16U31 / EDC16U34",
+    "fuel": "Diesel",
+    "engine": "1.9 TDI & 2.0 TDI PD (Golf 5, Passat B6, Caddy, Leon, Ibiza)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "HOT START FIX",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch MD1CS004 / MD1CP004",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI EA288evo & 3.0 TDI (Golf 8, Audi A4/A6 2019+)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch MED17.5 / MED17.5.5 / MED17.1",
+    "fuel": "Essence",
+    "engine": "1.4 TSI / 1.8 TSI / 2.0 TFSI (Golf GTI, Scirocco, Audi A3)",
+    "solutions": [
+      "DECAT / LAMBDA OFF",
+      "START-STOP OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Continental PCR 2.1",
+    "fuel": "Diesel",
+    "engine": "1.6 TDI (Golf 6, Polo 6R, Caddy, Ibiza, Fabia - CAYC, CAYD)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "HOT START FIX",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Bosch EDC17C84",
+    "fuel": "Diesel",
+    "engine": "1.5 dCi / 1.6 dCi (Megane 4, Kadjar, Talisman, Duster 2, Qashqai)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Bosch EDC17C42",
+    "fuel": "Diesel",
+    "engine": "2.0 dCi (Trafic 3, Master 3, Laguna 3)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Bosch EDC16C36 / EDC16CP33",
+    "fuel": "Diesel",
+    "engine": "2.0 dCi & 2.5 dCi (Master 2, Trafic 2, Megane 2)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Valeo V42",
+    "fuel": "Essence",
+    "engine": "1.6 16V / 1.2 16V (Symbol 2/3, Clio 4, Duster, Logan)",
+    "solutions": [
+      "FAN MOD (95°C / 92°C / 90°C)",
+      "COLD START FIX",
+      "DECAT / LAMBDA OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Siemens EMS3132",
+    "fuel": "Essence",
+    "engine": "1.4 / 1.6 8V & 16V (Symbol, Clio Classic, Logan, Sandero)",
+    "solutions": [
+      "COLD START FIX",
+      "IMMO OFF",
+      "DECAT / LAMBDA OFF",
+      "FAN MOD (95°C / 92°C / 90°C)",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "RENAULT / DACIA",
+    "ecu": "Continental EMS3125 / EMS3110",
+    "fuel": "Essence",
+    "engine": "1.2 TCe / 1.6 16V (Megane 3, Clio 4, Captur, Duster)",
+    "solutions": [
+      "COLD START FIX",
+      "DECAT / LAMBDA OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Bosch EDC17C60",
+    "fuel": "Diesel",
+    "engine": "1.6 BlueHDi (208, 308, 2008, 3008, Partner, Berlingo)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "TVA OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Bosch EDC17C10",
+    "fuel": "Diesel",
+    "engine": "1.4 HDi / 1.6 HDi (207, 308, Partner, C3, C4)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "TVA OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Bosch EDC16C34",
+    "fuel": "Diesel",
+    "engine": "1.4 HDi / 1.6 HDi (206, 207, 307, 407, Berlingo)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Delphi DCM6.2A",
+    "fuel": "Diesel",
+    "engine": "2.0 BlueHDi (308, 508, 3008, 5008, Traveller, Expert)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "BMW",
+    "ecu": "Bosch EDC17C50 / EDC17C56",
+    "fuel": "Diesel",
+    "engine": "1.6d / 2.0d N47 & B47 (Serie 1 F20, Serie 3 F30, Serie 5 F10, X1, X3)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SWIRL FLAPS OFF",
+      "START-STOP OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "BMW",
+    "ecu": "Bosch EDC17CP45 / EDC17CP09",
+    "fuel": "Diesel",
+    "engine": "3.0d N57 (Serie 3 E90/F30, Serie 5 F10, X5 E70/F15, X6)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SWIRL FLAPS OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "BMW",
+    "ecu": "Bosch EDC16C35 / EDC16CP35",
+    "fuel": "Diesel",
+    "engine": "2.0d & 3.0d M47 / M57 (Serie 3 E90, Serie 5 E60, X3 E83, X5 E53/E70)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "SWIRL FLAPS OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "BMW",
+    "ecu": "Bosch MD1CS001 / MD1CS003",
+    "fuel": "Diesel",
+    "engine": "2.0d B47 & 3.0d B57 (Serie 3 G20, Serie 5 G30, X3 G01, X5 G05)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "START-STOP OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "MERCEDES",
+    "ecu": "Bosch EDC17CP46 / EDC17CP57",
+    "fuel": "Diesel",
+    "engine": "V6 3.0 CDI OM642 & 2.2 CDI OM651 (Classe C, E, ML, GL, Sprinter)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SWIRL FLAPS OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "MERCEDES",
+    "ecu": "Bosch EDC17C66",
+    "fuel": "Diesel",
+    "engine": "2.2 CDI BlueTEC OM651 (Classe C W205, Classe E W212, Sprinter 906)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "MERCEDES",
+    "ecu": "Bosch EDC16C31 / EDC16CP31",
+    "fuel": "Diesel",
+    "engine": "200 CDI, 220 CDI, 280 CDI, 320 CDI (W203, W204, W211, ML W164, Sprinter)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "SWIRL FLAPS OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Bosch EDC17C57",
+    "fuel": "Diesel",
+    "engine": "1.6 CRDi & 2.0 CRDi (Tucson TL, Sportage QL, i30, Ceed)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "SWIRL FLAPS OFF",
+      "DTC TABLE REMOVAL",
+      "SPEED LIMIT (VMAX) OFF"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Bosch EDC17C08",
+    "fuel": "Diesel",
+    "engine": "1.4 CRDi & 1.6 CRDi (Accent, Rio, i20, Cerato)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Bosch EDC17CP14",
+    "fuel": "Diesel",
+    "engine": "2.0 CRDi & 2.2 CRDi (Santa Fe, Sorento, Carnival)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Delphi DCM3.7AP",
+    "fuel": "Diesel",
+    "engine": "1.1 CRDi & 1.4 CRDi (Rio, i20, Picanto)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Bosch MD1CS012",
+    "fuel": "Diesel",
+    "engine": "1.6 CRDi Smartstream (Tucson 2019+, Sportage, Ceed)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "HYUNDAI / KIA",
+    "ecu": "Denso SH72546",
+    "fuel": "Diesel",
+    "engine": "1.4 CRDi & 1.6 CRDi (Soul, Venga, i30)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "TOYOTA",
+    "ecu": "Denso D-4D Gen 1 & Gen 2",
+    "fuel": "Diesel",
+    "engine": "2.5 D-4D & 3.0 D-4D (Hilux, Land Cruiser Prado 120/150, Hiace, Fortuner)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "FORD",
+    "ecu": "Continental SID208 / SID209",
+    "fuel": "Diesel",
+    "engine": "2.2 TDCi & 3.2 TDCi (Transit Custom, Ranger, Everest)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "FORD",
+    "ecu": "Bosch EDC17CP05 / EDC17CP42",
+    "fuel": "Diesel",
+    "engine": "2.2 TDCi (Transit, Ranger, Tourneo)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "FIAT / ALFA ROMEO",
+    "ecu": "Bosch EDC17C69 / EDC17C49",
+    "fuel": "Diesel",
+    "engine": "1.3 / 1.6 / 2.0 / 2.2 MultiJet (Giulia, Stelvio, Ducato, Tipo, 500X)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "FIAT / ALFA ROMEO",
+    "ecu": "Bosch EDC16C39",
+    "fuel": "Diesel",
+    "engine": "1.9 JTDm & 2.4 JTDm (147, 159, Bravo, Punto, Croma)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "SWIRL FLAPS OFF",
+      "HOT START FIX",
+      "IMMO OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "SSANGYONG",
+    "ecu": "Delphi DCM6.2",
+    "fuel": "Diesel",
+    "engine": "2.2 e-XDi (Rexton, Korando, Musso, Tivoli)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "DTC TABLE REMOVAL"
+    ]
+  },
+  {
+    "brand": "MERCEDES",
+    "ecu": "Delphi CRD2 / CRD3",
+    "fuel": "Diesel",
+    "engine": "2.1 & 2.2 CDI OM651 (Classe C, E, GLK, Sprinter, Vito)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "SWIRL FLAPS OFF",
+      "TVA OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "MERCEDES",
+    "ecu": "Bosch EDC17CP57",
+    "fuel": "Diesel",
+    "engine": "3.0 BlueTEC V6 OM642 (Classe E, ML, GL, S, GLE)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "SWIRL FLAPS OFF",
+      "TVA OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Delphi DCM6.2A / DCM6.2C",
+    "fuel": "Diesel",
+    "engine": "2.0 BlueHDi 150/180 CH (308, 3008, 508, 5008, DS5)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "TVA OFF",
+      "DECAT / LAMBDA OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "FIAT / ALFA ROMEO",
+    "ecu": "Bosch EDC17C69",
+    "fuel": "Diesel",
+    "engine": "1.6 & 2.0 MultiJet (Jeep Renegade, Compass, Fiat 500X, Tipo)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "START-STOP OFF",
+      "SWIRL FLAPS OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17CP24",
+    "fuel": "Diesel",
+    "engine": "3.0 TDI V6 (Audi A4, A5, A6, Q7, VW Touareg)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "TVA OFF",
+      "SWIRL FLAPS OFF",
+      "DECAT / LAMBDA OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch EDC17CP54 / EDC17CP74",
+    "fuel": "Diesel",
+    "engine": "3.0 & 4.2 TDI V6/V8 (Audi A6, A7, A8, Touareg)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "START-STOP OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch MED17.1.6 / MED17.1.1",
+    "fuel": "Essence",
+    "engine": "1.4 TSI & 2.0 TFSI (Golf 6/7, Audi S3, TT, Leon Cupra)",
+    "solutions": [
+      "DECAT / LAMBDA OFF",
+      "EVAP OFF",
+      "START-STOP OFF",
+      "TORQUE MONITORING OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Continental Simos 18",
+    "fuel": "Essence",
+    "engine": "2.0 TSI EA888 Gen 3 (Golf 7 GTI/R, Audi S3 8V, Leon Cupra 300)",
+    "solutions": [
+      "DECAT / LAMBDA OFF",
+      "EVAP OFF",
+      "TORQUE MONITORING OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Siemens PPD 1.x",
+    "fuel": "Diesel",
+    "engine": "2.0 TDI PD 170 CH (Passat B6, Golf 5 GTD, Audi A3, Octavia RS)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "HOT START FIX",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "PSA / PEUGEOT",
+    "ecu": "Siemens SID803 / SID803A",
+    "fuel": "Diesel",
+    "engine": "2.0 HDi / TDCi (Peugeot 407, 307, Ford Focus, Volvo V50)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "FIAT / ALFA ROMEO",
+    "ecu": "Magneti Marelli 8F2 / 8F3 / 9GF",
+    "fuel": "Diesel",
+    "engine": "1.3 MultiJet & 0.9 TwinAir (Fiat 500, Punto, Panda, Mito)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "START-STOP OFF",
+      "MAF OFF",
+      "STAGE 1"
+    ]
+  },
+  {
+    "brand": "VAG / VW",
+    "ecu": "Bosch MD1CP002 / MG1CS201",
+    "fuel": "Diesel",
+    "engine": "3.0 TDI EA897evo2 & 2.0/3.0 TFSI (Audi A6 C8, A8 D5, Touareg CR)",
+    "solutions": [
+      "DPF / FAP OFF",
+      "EGR OFF",
+      "ADBLUE / SCR OFF",
+      "TORQUE MONITORING OFF",
+      "SPEED LIMIT (VMAX) OFF",
+      "STAGE 1"
+    ]
+  }
+]

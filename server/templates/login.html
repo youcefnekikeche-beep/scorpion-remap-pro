@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification | SCORPION REMAP PRO V3.2.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cairo:wght@600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #040813;
+            --card-bg: rgba(11, 19, 36, 0.92);
+            --primary: #0284c7;
+            --primary-glow: #38bdf8;
+            --accent-purple: #8b5cf6;
+            --border-color: rgba(56, 189, 248, 0.2);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', 'Cairo', sans-serif; }
+        body {
+            background: radial-gradient(circle at 50% -20%, #0c2146 0%, #040813 65%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .auth-container {
+            width: 100%;
+            max-width: 520px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 35px rgba(2, 132, 199, 0.15);
+            border-radius: 24px;
+            padding: 36px 32px;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #0284c7, #8b5cf6, #38bdf8);
+        }
+        .header-logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #0284c7, #8b5cf6);
+            border-radius: 18px;
+            font-size: 28px;
+            box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4);
+            margin-bottom: 12px;
+        }
+        .platform-title {
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #fff;
+        }
+        .platform-title span {
+            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .platform-tag {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* Lang switch */
+        .lang-switch {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .lang-btn {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .lang-btn.active, .lang-btn:hover {
+            background: rgba(2, 132, 199, 0.25);
+            border-color: var(--primary-glow);
+            color: #fff;
+        }
+
+        /* Tabs */
+        .auth-tabs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: rgba(6, 11, 23, 0.8);
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid rgba(56, 189, 248, 0.15);
+            margin-bottom: 22px;
+        }
+        .auth-tab {
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s;
+            color: var(--text-muted);
+            border: none;
+            background: transparent;
+        }
+        .auth-tab.active {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+        }
+
+        /* Welcome Bonus Banner */
+        .bonus-banner {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.15));
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #34d399;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+        }
+        input {
+            width: 100%;
+            padding: 11px 14px;
+            background: #060b17;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.25s;
+        }
+        input:focus {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+            background: #091224;
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+            transition: all 0.25s;
+            margin-top: 8px;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(37, 99, 235, 0.55);
+            background: linear-gradient(135deg, #0369a1, #1d4ed8);
+        }
+        .alert-box {
+            padding: 11px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 16px;
+            display: none;
+            line-height: 1.4;
+        }
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: #fca5a5;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid var(--success);
+            color: #6ee7b7;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="header-logo">
+        <div class="logo-badge">🦂</div>
+        <div class="platform-title">SCORPION <span>REMAP PRO</span></div>
+        <div class="platform-tag">Plateforme Cloud Ingénierie ECU V3.2.0</div>
+    </div>
+
+    <div class="lang-switch">
+        <button class="lang-btn active" onclick="setLang('fr')">Français</button>
+        <button class="lang-btn" onclick="setLang('ar')">العربية</button>
+        <button class="lang-btn" onclick="setLang('en')">English</button>
+    </div>
+
+    <!-- Alert Box -->
+    <div id="alertBox" class="alert-box alert-danger"></div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs">
+        <button id="tabBtnLogin" class="auth-tab active" onclick="switchAuthTab('login')">Se connecter</button>
+        <button id="tabBtnRegister" class="auth-tab" onclick="switchAuthTab('register')">Créer un compte</button>
+    </div>
+
+    <!-- Form 1: Connexion -->
+    <form id="loginForm" onsubmit="handleLogin(event)">
+        <div class="form-group">
+            <label id="lblLoginIdent">Adresse Email ou Téléphone / WhatsApp :</label>
+            <input type="text" id="loginIdent" placeholder="nom@garage.com ou +213..." required>
+        </div>
+        <div class="form-group">
+            <label id="lblLoginPass">Mot de passe :</label>
+            <input type="password" id="loginPass" placeholder="••••••••" required>
+        </div>
+        <button type="submit" id="btnSubmitLogin" class="btn-submit">Se connecter à l'Atelier ➔</button>
+    </form>
+
+    <!-- Form 2: Inscription -->
+    <form id="registerForm" onsubmit="handleRegister(event)" style="display:none;">
+        <div class="bonus-banner">
+            <span style="font-size:20px;">🎁</span>
+            <div id="txtBonusDesc">
+                <strong>10 Crédits (Tokens) offerts</strong> à l'inscription pour tester l'ensemble des solutions de la plateforme !
+            </div>
+        </div>
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label id="lblRegFullName">Nom complet :</label>
+                <input type="text" id="regFullName" placeholder="ex: Karim Benali" required>
+            </div>
+            <div class="form-group">
+                <label id="lblRegWorkshop">Nom de l'atelier / Garage :</label>
+                <input type="text" id="regWorkshop" placeholder="ex: Auto Remap Performance" required>
+            </div>
+            <div class="form-group">
+                <label id="lblRegPhone">Téléphone / WhatsApp :</label>
+                <input type="text" id="regPhone" placeholder="ex: +213 555 123 456" required>
+            </div>
+            <div class="form-group">
+                <label id="lblRegWilaya">Wilaya / Ville / Pays :</label>
+                <input type="text" id="regWilaya" placeholder="ex: Alger, Algérie" required>
+            </div>
+            <div class="form-group full-width">
+                <label id="lblRegEmail">Adresse Email professionnelle :</label>
+                <input type="email" id="regEmail" placeholder="contact@votre-atelier.com" required>
+            </div>
+            <div class="form-group">
+                <label id="lblRegPass">Mot de passe :</label>
+                <input type="password" id="regPass" placeholder="Minimum 6 caractères" minlength="6" required>
+            </div>
+            <div class="form-group">
+                <label id="lblRegPassConfirm">Confirmer le mot de passe :</label>
+                <input type="password" id="regPassConfirm" placeholder="Répéter le mot de passe" minlength="6" required>
+            </div>
+        </div>
+
+        <button type="submit" id="btnSubmitRegister" class="btn-submit">Créer mon compte & Réclamer 10 Crédits ➔</button>
+    </form>
+</div>
+
+<script>
+    let currentLang = 'fr';
+    const translations = {
+        fr: {
+            loginTab: "Se connecter",
+            regTab: "Créer un compte",
+            lblIdent: "Adresse Email ou Téléphone / WhatsApp :",
+            lblPass: "Mot de passe :",
+            btnLog: "Se connecter à l'Atelier ➔",
+            bonus: "<strong>10 Crédits (Tokens) offerts</strong> à l'inscription pour tester l'ensemble des solutions de la plateforme !",
+            btnReg: "Créer mon compte & Réclamer 10 Crédits ➔",
+            lblFullName: "Nom complet :",
+            lblWorkshop: "Nom de l'atelier / Garage :",
+            lblPhone: "Téléphone / WhatsApp :",
+            lblWilaya: "Wilaya / Ville / Pays :",
+            lblEmail: "Adresse Email professionnelle :",
+            lblPassConf: "Confirmer le mot de passe :"
+        },
+        ar: {
+            loginTab: "تسجيل الدخول",
+            regTab: "إنشاء حساب جديد",
+            lblIdent: "البريد الإلكتروني أو رقم الهاتف / WhatsApp :",
+            lblPass: "كلمة المرور :",
+            btnLog: "دخول إلى ورشة العمل ➔",
+            bonus: "<strong>هدية 10 توكنز مجاناً</strong> عند التسجيل لتجربة كافة حلول البوابة فوراً وبدون أي قيود !",
+            btnReg: "إنشاء الحساب واستلام 10 توكنز مجاناً ➔",
+            lblFullName: "الاسم واللقب الكامل :",
+            lblWorkshop: "اسم الورشة / المحل :",
+            lblPhone: "رقم الهاتف / WhatsApp :",
+            lblWilaya: "الولاية / المدينة / البلد :",
+            lblEmail: "البريد الإلكتروني المهني :",
+            lblPassConf: "تأكيد كلمة المرور :"
+        },
+        en: {
+            loginTab: "Sign In",
+            regTab: "Create Account",
+            lblIdent: "Email Address or Phone / WhatsApp:",
+            lblPass: "Password:",
+            btnLog: "Sign In to Workshop ➔",
+            bonus: "<strong>10 Free Welcome Credits (Tokens)</strong> on signup to test all ECU tuning solutions!",
+            btnReg: "Create Account & Claim 10 Credits ➔",
+            lblFullName: "Full Name:",
+            lblWorkshop: "Workshop / Garage Name:",
+            lblPhone: "Phone / WhatsApp:",
+            lblWilaya: "State / City / Country:",
+            lblEmail: "Professional Email:",
+            lblPassConf: "Confirm Password:"
+        }
+    };
+
+    function setLang(lang) {
+        currentLang = lang;
+        document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        const t = translations[lang];
+
+        document.getElementById('tabBtnLogin').textContent = t.loginTab;
+        document.getElementById('tabBtnRegister').textContent = t.regTab;
+        document.getElementById('lblLoginIdent').textContent = t.lblIdent;
+        document.getElementById('lblLoginPass').textContent = t.lblPass;
+        document.getElementById('btnSubmitLogin').textContent = t.btnLog;
+        document.getElementById('txtBonusDesc').innerHTML = t.bonus;
+        document.getElementById('btnSubmitRegister').textContent = t.btnReg;
+        document.getElementById('lblRegFullName').textContent = t.lblFullName;
+        document.getElementById('lblRegWorkshop').textContent = t.lblWorkshop;
+        document.getElementById('lblRegPhone').textContent = t.lblPhone;
+        document.getElementById('lblRegWilaya').textContent = t.lblWilaya;
+        document.getElementById('lblRegEmail').textContent = t.lblEmail;
+        document.getElementById('lblRegPassConfirm').textContent = t.lblPassConf;
+
+        if (lang === 'ar') {
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.querySelectorAll('.form-group').forEach(el => el.style.textAlign = 'right');
+        } else {
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.querySelectorAll('.form-group').forEach(el => el.style.textAlign = 'left');
+        }
+    }
+
+    function switchAuthTab(type) {
+        hideAlert();
+        if (type === 'login') {
+            document.getElementById('tabBtnLogin').classList.add('active');
+            document.getElementById('tabBtnRegister').classList.remove('active');
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+        } else {
+            document.getElementById('tabBtnRegister').classList.add('active');
+            document.getElementById('tabBtnLogin').classList.remove('active');
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+    }
+
+    function showAlert(msg, isSuccess = false) {
+        const box = document.getElementById('alertBox');
+        box.textContent = msg;
+        box.className = 'alert-box ' + (isSuccess ? 'alert-success' : 'alert-danger');
+        box.style.display = 'block';
+    }
+
+    function hideAlert() {
+        document.getElementById('alertBox').style.display = 'none';
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        hideAlert();
+        const username = document.getElementById('loginIdent').value.trim();
+        const password = document.getElementById('loginPass').value;
+
+        try {
+            const res = await fetch('/api/v1/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showAlert(data.detail || "Erreur de connexion.");
+                return;
+            }
+
+            showAlert("Connexion réussie ! Redirection...", true);
+            setTimeout(() => {
+                window.location.href = data.redirect || '/portal';
+            }, 600);
+        } catch (err) {
+            showAlert("Impossible de contacter le serveur : " + err.message);
+        }
+    }
+
+    async function handleRegister(e) {
+        e.preventDefault();
+        hideAlert();
+
+        const full_name = document.getElementById('regFullName').value.trim();
+        const workshop_name = document.getElementById('regWorkshop').value.trim();
+        const phone = document.getElementById('regPhone').value.trim();
+        const wilaya_country = document.getElementById('regWilaya').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPass').value;
+        const confirm_password = document.getElementById('regPassConfirm').value;
+
+        if (password !== confirm_password) {
+            showAlert(currentLang === 'ar' ? "كلمات المرور غير متطابقة." : "Les mots de passe ne correspondent pas.");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/v1/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    full_name,
+                    workshop_name,
+                    phone,
+                    wilaya_country,
+                    email,
+                    password,
+                    confirm_password
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                showAlert(data.detail || "Erreur d'inscription.");
+                return;
+            }
+
+            const welcomeMsg = data.bonus_granted ?
+                `🎉 Bienvenue ${data.user.full_name} ! 10 Crédits ont été ajoutés à votre compte.` :
+                `Compte créé. (Bonus de bienvenue déjà accordé sur cet appareil).`;
+
+            showAlert(welcomeMsg, true);
+            setTimeout(() => {
+                window.location.href = '/portal';
+            }, 1200);
+        } catch (err) {
+            showAlert("Erreur réseau : " + err.message);
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,676 @@
+[Change Log]
+Gold unlimited Version V1.13/v1.0.26
+
+version 1.0.26
+
+- BMW Bosch EDC17xx Corrected all Solutions
+- Peugeot DCM6.2x DPF Solution Corrected
+- Peugeot DCM6.2x ADBLUE Solution Corrected
+- VW Siemens PRC2.1 Genearal solutions Corrected 
+
+version 1.0.25
+
+- JEEP Bosch EDC17C69 Readiness Solutions Added
+- JEEP Bosch EDC17C69 Start & Stop Solutions Added
+- JEEP Bosch EDC17C69 AdBlue Solutions Added
+- FIAT/ALFA/LANCIA Bosch EDC17C69 Readiness Solutions Added
+- FIAT/ALFA/LANCIA Bosch EDC17C69 AdBlue Solutions Added
+- FIAT/ALFA/LANCIA Bosch EDC17C69 Start & Stop Solutions Added
+- Peugeot DCM6.2x DTC Solution Added
+- Peugeot DCM6.2x DPF Solution Added
+- Peugeot DCM6.2x EGR Solution Added
+- Peugeot DCM6.2x Lambda Solution Added
+- Peugeot DCM6.2x TVA Solution Added
+- VW Bosch MED17.1.1 Readiness Solution Added
+- VW Bosch MED17.1.2 Readiness Solution Added
+- VW Bosch MED17.1.6 Readiness Solution Added
+
+- VW EDC17U1 Corrected DPF Solution
+- Peugeot EDC17C10 Corrected DPF Solution
+- FIAT/ALFA/LANCIA Marelli 8F2/8F3 DPF Solutions ( Ducato ) Corrected
+- FIAT/ALFA/LANCIA Marelli 8F2/8F3 DPF Solutions Corrected
+- FIAT/ALFA/LANCIA Marelli 8F2/8F3 Start & Stop Solutions Corrected
+- VW Siemens PRC2.1 Added more file versions
+- VW Bosch EDC16U1 Added more file versions
+- VW DCM6.2 Corrected DPF Solution ( Fan spinning for long )
+- VW DCM6.2 Corrected AdBlue Solution ( Counter on dash )
+- VW Bosch EDC17C64 Added more file versions
+- VW Bosch EDC17CP44 Added more file versions
+- VW Bosch PPD1.x Corrected DTC Solution for some version
+- MB Bosch EDC16cp31 Added more file versions
+- MB Bosch EDC17CP57 Added more file versions
+- MB Bosch EDC17C66 Corrected AdBlue Solution
+- BMW Bosch EDC16C35 Corrected EGR Solution
+
+version 1.0.24
+
+- New Function DTC Export List added
+- New Function Lambda Custom List added
+
+- OPEL Delco E98 DTC Solution Added
+
+- FCA Marelli IAW9GFH DTC Solution Added
+- FCA Marelli IAW9GFH Lambda Solution Added
+
+- BMW Bosch EDC17C50 AdBlue Solution Added
+- BMW Bosch EDC17C56 AdBlue Solution Added
+- BMW Bosch EDC17CP45 AdBlue Solution Added
+
+- VW Bosch EDC16CP34 MAF Solution Added
+- VW Bosch EDC16U31 MAF Solution Added
+- VW Bosch EDC16U34 MAF Solution Added
+- VW Bosch EDC16U1 MAF Solution Added
+
+- VW Bosch EDC17CP24 DPF Solution Added
+- VW Bosch EDC17CP24 EGR Solution Added
+- VW Bosch EDC17CP24 TVA Solution Added
+- VW Bosch EDC17CP24 FLAPS Solution Added
+- VW Bosch EDC17CP24 Readiness Solution Added
+- VW Bosch EDC17CP24 Lambda Solution Added
+
+- VW Bosch EDC17CP54 Start & Stop Solution Added
+- VW Bosch EDC17CP54 EGR Solution Added
+- VW Bosch EDC17CP54 AdBlue Solution Added
+
+- MB Delphi CRD2.x DTC Solution Added
+- MB Delphi CRD2.x DPF Solution Added
+- MB Delphi CRD2.x EGR Solution Added
+- MB Delphi CRD2.x FLAPS Solution Added
+- MB Delphi CRD2.x TVA Solution Added
+
+- MB Bosch EDC17C66 AdBlue Solution Added
+
+- VW Bosch EDC17CP14 Added more file versions
+- VW Bosch EDC17CP44 Added more file versions
+- VW Delphi DCM6.2 DTC Solution Corrected
+- VW Bosch EDC16CP34 Added more file versions
+- PSA Bosch EDC17C60 Added more file versions
+- MB Bosch EDC17C66 Added more file versions
+- MB Bosch EDC16CP31 Added more file versions
+- MB Bosch EDC17CP10 Added more file versions
+- BMW Bosch EDC16C31 Added more file versions
+- BMW Bosch EDC17CP02 Added more file versions
+
+version 1.0.23
+
+
+- MB Bosch EDC17CP57 DTC Solution Added
+- MB Bosch EDC17CP57 DPF Solution Added
+- MB Bosch EDC17CP57 EGR Solution Added
+- MB Bosch EDC17CP57 FLAPS Solution Added
+- MB Bosch EDC17CP57 TVA Solution Added
+- MB Bosch EDC17CP57 AdBlue Solution Added
+- MB Bosch EDC17CP57 Readiness Solution Added
+- MB Bosch EDC17CP57 Lambda Solution Added
+
+- NEW Added MAF off Solutions
+
+- Fiat Magneti Marelli 6JF/6F3 MAF Solution Added
+- Fiat Magneti Marelli 8F2/8F3 MAF Solution Added
+- Alfa Magneti Marelli 6JF/6F3 MAF Solution Added
+- Alfa Magneti Marelli 8F2/8F3 MAF Solution Added
+- Lancia Magneti Marelli 6JF/6F3 MAF Solution Added
+- Lancia Magneti Marelli 8F2/8F3 MAF Solution Added
+
+
+- Rewrite Full FIAT solutions
+
+- FIAT Bosch EDC16C39 EURO4 DPF Solution Added
+- FIAT Bosch EDC16C39 EURO4 MAF Solution Added
+- ALFA Bosch EDC16C39 EURO4 DPF Solution Added
+- ALFA Bosch EDC16C39 EURO4 MAF Solution Added
+- LANCIA Bosch EDC16C39 EURO4 DPF Solution Added
+- LANCIA Bosch EDC16C39 EURO4 MAF Solution Added
+
+- FIAT Bosch EDC16C39 EURO5 DPF Solution Added
+- FIAT Bosch EDC16C39 EURO5 MAF Solution Added
+- ALFA Bosch EDC16C39 EURO5 DPF Solution Added
+- ALFA Bosch EDC16C39 EURO5 MAF Solution Added
+- LANCIA Bosch EDC16C39 EURO5 DPF Solution Added
+- LANCIA Bosch EDC16C39 EURO5 MAF Solution Added
+
+
+- MB Bosch EDC17C66 Added more file versions
+- VW Bosch EDC17CP14 Added more file versions
+- VW Bosch EDC17CP20 Added more file versions
+- PSA Bosch EDC17C10 Added more file versions
+
+
+version 1.0.22
+
+- NEW Added ASAP2/A2l EXPORT for EDC ( Menu Files ) A2l tested with Winols and Asap2Demo software 
+
+- Iveco Bosch EDC17CP52 DTC Solution Added
+- Iveco Bosch EDC17CP52 DPF Solution Added
+- Iveco Bosch EDC17CP52 EGR Solution Added
+- Iveco Bosch EDC17CP52 TVA Solution Added
+- Iveco Bosch EDC17CP52 Readiness Solution Added
+
+- VW Siemens PRC2.1 Added more file versions
+- VW Bosch EDC17CP74 Added more AdBlue versions
+- BMW Bosch EDC16C31 Added more file versions
+- FCA Bosch EDC16C39 Added more file versions
+- FCA Bosch MJ9DF Added more file versions
+- Peugeot EDC17C60 Added more file versions
+- Peugeot EDC16CP39 Added more file versions
+- MB Bosch EDC16CP36 DPF Solution Added
+- MB Bosch EDC16CP36 EGR Solution Added
+
+
+version 1.0.21
+
+- VW Siemens PRC2.1 EGR Corrected 
+- VW Siemens PRC2.1 DPF Corrected 
+- VW Bosch ME9.1 Added more file versions
+- VW Bosch DCM6.2 Added more AdBlue versions
+- VW Bosch DCM6.2 Added more DPF versions
+- VW Bosch DCM6.2 Corrected DTC Algo
+
+- BMW Bosch MEVD17.2 Readiness Solution Added
+- BMW Bosch MEVD17.2.4 Readiness Solution Added
+- BMW Bosch MEVD17.2.5 Readiness Solution Added
+- BMW Bosch MEVD17.2.9 Readiness Solution Added
+
+- Peugeot EDC17C60 Added More File Versions
+
+version 1.0.20
+
+- MB Bosch EDC17C66 DTC Solution Added
+- MB Bosch EDC17C66 DPF Solution Added
+- MB Bosch EDC17C66 EGR Solution Added
+- MB Bosch EDC17C66 LAMBDA Solution Added
+- MB Bosch EDC17C66 Readiness Solution Added
+- MB Bosch EDC17C66 TVA Solution Added
+- MB Bosch EDC17C66 FLAPS Solution Added
+
+- VW Siemens/Continetal Simos18 DTC Solution Added
+- VW Siemens/Continetal Simos18 Lambda Solution Added
+- VW Siemens/Continetal Simos18 TVA Solution Added
+- VW Siemens/Continetal Simos18 FLAPS Solution Added
+
+- VW Bosch EDC17C74 EGR Solution Added ( Connector Off )
+- VW Bosch EDC17C64 EGR Solution Added ( Connector Off )
+
+- VW Bosch EDC17CP74 DTC Solution Added
+- VW Bosch EDC17CP74 DPF Solution Added
+- VW Bosch EDC17CP74 EGR Solution Added
+- VW Bosch EDC17CP74 LAMBDA Solution Added
+- VW Bosch EDC17CP74 TVA Solution Added
+- VW Bosch EDC17CP74 FLAPS Solution Added
+- VW Bosch EDC17CP74 Readiness Solution Added
+- VW Bosch EDC17CP74 Start & Stop Solution Added
+
+- VW Bosch EDC17U01 DTC Solution Added
+- VW Bosch EDC17U01 DPF Solution Added
+- VW Bosch EDC17U01 EGR Solution Added
+- VW Bosch EDC17U01 LAMBDA Solution Added
+- VW Bosch EDC17U01 TVA Solution Added
+- VW Bosch EDC17U01 FLAPS Solution Added
+
+- BMW MSDXX Added more file versions
+- EDC17C66 & EDC17C10 PEUGEOT Wrong DTC Corrected
+
+version 1.0.19
+
+- Lambda/o2-sensor Module Added(Cover all brands)
+- Corrected wrong DTC area on Peugeot,FCA
+- Added more file solution
+
+version 1.0.18
+
+- VW Bosch ME9.1 DTC Solution Added
+- Peugeot/VW/Iveco Added support for EDC17 double DTC area
+
+version 1.0.17
+
+- Peugeot EDC17C60 DTC Solution Added
+- Peugeot EDC17C60 DPF Solution Added
+- Peugeot EDC17C60 EGR Solution Added
+- Peugeot EDC17C60 TVA Solution Added
+- Peugeot EDC17C60 Readiness Added
+- Peugeot EDC17C60 AdBlue Solution Added
+- Peugeot EDC17C10 DTC Solution Added
+- Peugeot EDC17C10 DPF Solution Added
+- Peugeot EDC17C10 EGR Solution Added
+- Peugeot EDC17C10 TVA Solution Added
+- Peugeot EDC17C10 Readiness Added
+
+- Corrected wrong Random DTC in DPF solutions
+
+- FCA EDC17CP52 Added More File Versions
+- FCA EDC17CP52 EGR Solution Added
+
+version 1.0.16
+
+- Peugeot Group Tree, added NEW SOLUTIONS
+
+- Peugeot EDC16C0 DTC Solution Added
+- Peugeot EDC16C0 EGR Solution Added
+- Peugeot EDC16C0 TVA Solution Added
+- Peugeot EDC16C34 DTC Solution Added
+- Peugeot EDC16C34 EGR Solution Added
+- Peugeot EDC16C34 DPF Solution Added
+- Peugeot EDC16C34 TVA Solution Added
+- Peugeot EDC16C39 DTC Solution Added
+- Peugeot EDC16C39 EGR Solution Added
+- Peugeot EDC16C39 TVA Solution Added
+- Peugeot EDC16CP39 DTC Solution Added
+- Peugeot EDC16CP39 EGR Solution Added
+- Peugeot EDC16CP39 TVA Solution Added
+
+- Readiness Module Added
+
+- MB EDC17CP46 Readiness added
+- MB EDC17CP01 Readiness added
+- MB EDC17CP10 Readiness added
+
+- MB EDC17CP01 AdBlue Solution Added ( TODO implemento others)
+- MB EDC17CP46 AdBlue Solution Added
+
+- BMW MSDXX Added More File Version
+- BMW EDC16CXX EGR solution corrected
+
+- VW EDC17C46 Added More File Version
+- VW EDC17C46 AdBlue Corrected  (KM on DashBoard) 
+- VW EDC17C64 Added More File Version  
+- VW EDC17C64 Added More AdBlue Version  
+- VW EDC17CP44 AdBlue Solution Added
+- VW EDC17C74 Start & Stop Solution Added
+- VW EDC17CP44 Added More File Versions
+- VW MED17.5.2 DTC Solution Added
+- VW MED17.1.1 DTC Solution Added
+- VW MED17.1.6 DTC Solution Added
+- VW MED17.1.2 DTC Solution Added
+- VW DCM6.2 Added More File Versions
+
+- Generic DTC deletes TVA, EGR, DPF, AdBlue corrected
+
+- Fiat Marelli 9DF Added More File Versions
+
+version 1.0.15
+
+- FCA Marelli IAW7GF DTC Solution Added
+- FCA Marelli MJ9DF DPF Solution Added
+- FCA Marelli MJ9DF EGR Solution Added
+- FCA Marelli MJ6JF/6F3 more variants of DPF added
+- FCA EDC17C69 DPF Solution Added
+- FCA EDC17C69 EGR Solution Added
+- FCA EDC17CP52 DPF Solution Added
+
+- JEEP EDC17C69 DPF Solution Added
+- JEEP EDC17C69 EGR Solution Added
+
+- CHRYSLER EDC17C69 DPF Solution Added
+- CHRYSLER EDC17C69 EGR Solution Added
+
+- DODGE EDC17C69 DPF Solution Added
+- DODGE EDC17C69 EGR Solution Added
+
+- MB EDC17CP10 DTC Solution Added
+- MB EDC17CP10 DPF Solution Added
+
+- MB EDC17CP01 DTC solution corrected
+- MB EDC15CP6 DTC and EGR solution corrected
+
+version 1.0.14
+
+- MB EDC17C43 DPF Solution Added
+- MB EDC17C43 EGR Solution Added
+- Corrected EDC16xx VW Files Recognition 
+- Added solution tree sort button
+
+version 1.0.13
+
+- SW support for 32 bit maps added
+- SW added DTC filter ON\OFF (Write in the textbox ON or OFF)
+- SW UI New Information solutions dialog added 
+- SW added support for Manufacture DTC format "00000" 
+
+- DODGE Group Tree, added NEW SOLUTIONS
+- DODGE EDC17C69 DTC Solution Added
+
+- CHRYSLER Group Tree, added NEW SOLUTIONS
+- CHRYSLER EDC17C69 DTC Solution Added
+
+- JEEP Group Tree, added NEW SOLUTIONS
+- JEEP EDC17C69 DTC Solution Added
+
+- IVECO Group Tree, added NEW SOLUTIONS
+- IVECO EDC17C69 DPF Solution Added
+- IVECO EDC17C69 DTC Solution Added
+
+- MB EDC16C2 DPF added more file version
+- MB EDC17CP46 DTC Solution Added
+- MB EDC17CP46 DPF Solution Added
+- MB EDC17CP46 EGR Solution Added
+- MB EDC17C43 DTC Solution Added
+- MB EDC17C43 TVA Solution Added
+- MB EDC17C43 FLAPS Solution Added
+
+- BMW MSDxx and MSVxx rewrote all calculation algo
+- BMW EDC17C50 added more file version
+
+- VW PCR 2.1 corrected DPF and EGR solutions
+- VW EDC16xx rewrote all calculation algo
+- VW EDC17CP44 DTC Solution Added
+- VW EDC17CP44 EGR Solution Added
+- VW EDC17CP44 TVA Solution Added
+- VW EDC17CP44 FLAPS Solution Added
+- VW EDC17CP44 DPF Solution Added
+- VW EDC17C64 AdBlue Solution Added
+
+
+version 1.0.12
+
+- New Software Protection, SOFTWARE WORK ONLINE
+- Mercedes Group Tree, added NEW SOLUTIONS
+
+- Vw Delphi DCM6.2 DTC Added 
+- Vw Delphi DCM6.2 DPF Added 
+- Vw Delphi DCM6.2 AdBlue Added
+
+- SMART EDC15C06 DTC Solution Added
+- SMART EDC15C06 EGR Solution Added
+
+- SMART EDC16C31 EGR Solution Added
+- SMART EDC16C31 DPF Solution Added
+- SMART EDC16C31 DTC Solution Added
+
+- MB EDC15C06 DTC Solution Added
+- MB EDC15C06 EGR Solution Added
+
+- MB EDC16C31 EGR Solution Added
+- MB EDC16C31 DPF Solution Added
+- MB EDC16C31 TVA Solution Added
+- MB EDC16C31 DTC Solution Added
+- MB EDC16C31 FLAPS Solution Added
+
+- MB EDC16CP31 EGR Solution Added
+- MB EDC16CP31 DPF Solution Added
+- MB EDC16CP31 TVA Solution Added
+- MB EDC16CP31 FLAPS Solution Added
+- MB EDC16CP31 DTC Solution Added
+
+- MB EDC16C2 DTC Solution Added
+- MB EDC16C2 TVA Solution Added
+- MB EDC16C2 DPF Solution Added
+- MB EDC16C2 FLAPS Solution Added
+
+- FCA Marelli 8F2 Start & Stop Solution Added
+
+- MB EDC17CP01 EGR Solution Added
+- MB EDC17CP01 DPF Solution Added
+- MB EDC17CP01 TVA Solution Added
+- MB EDC17CP01 DTC Solution Added
+- MB EDC17CP01 FLAPS Solution Added
+
+version 1.0.11
+
+- VW Siemens PPD1.2 DPF Solution Added
+- VW EDC17C64 Start & Stop Solution Added
+- VW EDC17CP20 AdBlue Solution Added
+- BMW EDC17CP45 added more file version
+- BMW EDC17CP02 DPF Solution Reviewed 
+- FCA Marelli 8F3 (Ducato) added more variants reported from customer
+
+*******************************************************
+special Thanks at 
+
+-Dragan From Digital Racing
+-Greg From SSPtuning
+-Sinan Aysen
+-Jonny from rutsj
+
+and all other that have sent me files
+
+********************************************************
+version 1.0.10
+
+- VW Siemens PPD1.2 EGR Solution Added
+- VW Siemens PPD1.2 DTC Solution Added
+- VW EDC17C46 AdBlue Solution Added
+- VW Siemens PRC2.1 EGR Solution Added
+- VW EDC17C46 Start & Stop Solution Added
+- VW EDC17C56 Start & Stop Solution Added
+
+- Added Start & Stop Class
+
+version 1.0.9
+
+- VW Siemens PRC2.1 DPF Solution Added
+- VW Siemens PRC2.1 DTC Solution Added
+- VW EDC17CP04 DTC Solution Added
+- VW EDC17CP04 EGR Solution Added
+- VW EDC17CP04 TVA Solution Added
+- VW EDC17CP04 FLAPS Solution Added
+- VW EDC17CP04 DPF Solution Added
+- VW EDC16CP34 added more file version
+- VW EDC17C54 added more file version
+
+version 1.0.8
+
+- VW EDC17CP14 added more file version
+- VW EDC17CP54 added more file version
+- VW EDC17C74 added more file version
+- VW EDC17CP54 DPF Solution Added
+- VW EDC17C74 DPF Solution Added
+
+version 1.0.7
+
+- VW EDC17C74 DTC Solution Added
+- VW EDC17C74 TVA Solution Added
+- VW EDC17C74 FLAPS Solution Added
+- VW EDC17CP54 FLAPS Solution Added
+- VW EDC17CP54 TVA Solution Added
+
+version 1.0.6
+
+
+- VW EDC17CP54 DTC Solution Added
+- VW EDC17C46 EGR Solution Added
+- VW EDC17C54 DPF Solution Added
+- VW EDC17C54 FLAPS Solution Added
+- VW EDC17C54 TVA Solution Added
+- VW EDC17C54 DTC Solution Added
+- VW EDC17C54 EGR Solution Added
+
+- Added Some Edc17 DTC solution                        Reported from customers
+- Corrected Fiat EDC16C39 DPF solution For Euro 5      Reported from customers
+
+
+version 1.0.5
+
+- VW EDC17C64 DPF Solution Added
+- VW EDC17C64 FLAPS Solution Added
+- VW EDC17C64 TVA Solution Added
+- VW EDC17C64 DTC Solution Added
+- VW DCM 3.7 DTC Solution Added
+- VW DCM 3.7 EGR Solution Added
+
+version 1.0.4
+
+- VW EDC17C46 DPF Solution Added
+- VW EDC17C46 FLAPS Solution Added
+- VW EDC17C46 TVA Solution Added
+- VW EDC17C46 DTC Solution Added
+- VW EDC17CP14 DPF Solution Added
+- VW EDC17CP14 EGR Solution Added
+- VW EDC17CP14 TVA Solution Added
+- VW EDC17CP14 FLAPS Solution Added
+- VW EDC17CP20 FLAPS Solution Added
+
+version 1.0.3
+
+- VW EDC17CP14 DTC Solution Added
+- VW EDC17CP20 DTC Solution Added
+- VW EDC17CP20 EGR Solution Added
+- VW EDC17CP20 DPF Solution Added
+- VW EDC17CP20 TVA Solution Added
+
+- Improved Screen Auto-Size and resolution
+- Fixed Some EDC16C31 Problems
+
+version 1.0.2
+
+- BMW All EDC17 Improved EGR Auto DTC Delete 
+
+- VW EDC16u1 DTC Solution Added
+- VW EDC16u1 DPF Solution Added
+- VW EDC16u1 EGR Solution Added
+- VW EDC16u1 TVA Solution Added
+- VW EDC16U31 EGR Solution Added
+- VW EDC16U31 DPF Solution Added
+- VW EDC16U31 DTC Solution Added
+- VW EDC16U31 TVA Solution Added
+- VW EDC16U34 DTC Solution Added
+- VW EDC16U34 DPF Solution Added
+- VW EDC16U34 TVA Solution Added
+- VW EDC16U34 EGR Solution Added
+- VW EDC16cp34 DPF Solution Added
+- VW EDC16cp34 TVA Solution Added
+
+
+- FCA EDC19C39 GENERIC TVA Solution Added
+- FCA Marelli 6JF/6F3 TVA Solution Added
+- FCA Marelli 8F2/8F3 TVA Solution Added
+
+
+
+Version 1.0.1
+
+- Wv Group Tree added NEW SOLUTIONS
+
+- VW EDC15P DTC solution Added
+- VW EDC16c4 DTC solution Added
+- VW EDC16c4 EGR Solution Added
+- VW EDC16c4 Flaps/Swirl Solution Added
+- VW EDC16cp34 DTC solution Added
+- VW EDC16cp34 EGR Solution Added
+- VW EDC16cp34 Flaps/Swirl Solution Added
+
+
+Version 1.0.0 
+
+--------<[ DTC ]>------------
+-------- FCA group ----------
+
+- Bosch EDC15C2 
+- Bosch EDC15C3
+- Bosch EDC16C8
+- Bosch EDC16C39
+- Bosch EDC17C49 ( Doblo, Ducato)
+- Bosch EDC17cP52
+- Bosch EDC17C69
+- Bosch ME17.3.0
+- Magneti Marelli 6JF
+- Magneti Marelli 6F3
+- Magneti Marelli 8DF
+- Magneti Marelli 8F3
+- Magneti Marelli 9DF
+- Delphi DCM 3.5
+- Siemens SID803A
+
+-------- BMW ---------
+
+- Bosch ECD16CP35
+- Bosch ECD16C35
+- Bosch ECD16C31 
+- Bosch EDC17C06
+- Bosch EDC17C41
+- Bosch EDC17C50
+- Bosch EDC17C56
+- Bosch EDC17CP02
+- Bosch EDC17CP06
+- Bosch EDC17CP09
+- Bosch EDC17CP45
+- Bosch MD1CP002
+- Bosch MG1CS201
+- Bosch MEVD17.2.6
+- Bosch MEVD17.2
+- Bosch MEVD17.2.4
+- Bosch MEVD17.2.5
+- Bosch MEVD17.2.7
+- Bosch MEVD17.2.9
+- Siemens MSD80
+- Siemens MSD81
+- Siemens MSD87
+- Siemens MSV90
+
+---- Vw Audi Seat Skoda -----
+
+- Bosch EDC15P
+- Bosch ECD16C4
+- Bosch ECD16C34
+- Bosch EDC16U1
+- Bosch EDC16U31
+- Bosch EDC16U34
+
+
+
+--------<[ EGR ]>------------
+
+-------- FCA group ----------
+
+- Bosch EDC16C8
+- Bosch EDC16C39
+- Magneti Marelli 6JF
+- Magneti Marelli 6F3
+- Magneti Marelli 8DF
+- Magneti Marelli 8F3
+
+-------- BMW ---------
+
+- Bosch ECD16CP35
+- Bosch ECD16C35
+- Bosch ECD16C31 
+- Bosch EDC17C06
+- Bosch EDC17C41
+- Bosch EDC17C50
+- Bosch EDC17C56
+- Bosch EDC17CP09
+- Bosch EDC17CP45
+- Bosch EDC17CP02
+
+---- Vw Audi Seat Skoda -----
+
+- Bosch EDC16U1
+- Bosch ECD16C34
+- Bosch ECD16C4
+- Bosch ECD16C34
+- Bosch EDC16U31
+- Bosch EDC16U34
+
+--------<[ DPF ]>------------
+
+-------- FCA group ----------
+
+- Bosch EDC16C8
+- Bosch EDC16C39
+- Magneti Marelli 6JF
+- Magneti Marelli 6F3
+- Magneti Marelli 8DF
+- Magneti Marelli 8F3
+
+-------- BMW ---------
+
+- Bosch ECD16CP35
+- Bosch ECD16C35
+- Bosch ECD16C31 
+- Bosch EDC17C06
+- Bosch EDC17C41
+- Bosch EDC17C50
+- Bosch EDC17C56
+- Bosch EDC17CP09
+- Bosch EDC17CP45
+- Bosch EDC17CP02
+
+---- Vw Audi Seat Skoda -----
+
+- Bosch EDC16U1
+- Bosch ECD16C34
+- Bosch ECD16C4
+- Bosch ECD16C34
+- Bosch EDC16U31
+- Bosch EDC16U34
+
+

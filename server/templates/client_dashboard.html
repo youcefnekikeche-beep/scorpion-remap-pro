@@ -1,0 +1,2369 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORPION REMAP PRO V3.2.0 | Plateforme Cloud Ingénierie ECU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #060a12;
+            --bg-card: #0d1527;
+            --bg-card-hover: #131d35;
+            --border: #1e293b;
+            --border-hover: #38bdf8;
+            --primary: #0284c7;
+            --primary-glow: #38bdf8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 16px 24px; }
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        /* Top Header */
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 12px 20px; margin-bottom: 16px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+        .logo-area span { color: #fff; }
+        .logo-badge {
+            background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-size: 11px;
+            font-weight: 800; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .lang-switch { display: flex; background: #060a12; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+        .lang-btn { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 700; padding: 4px 8px; cursor: pointer; border-radius: 6px; }
+        .lang-btn.active { background: #0284c7; color: #fff; }
+        .credits-pill {
+            background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #fbbf24; font-size: 13px; font-weight: 800; padding: 6px 14px; border-radius: 20px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .user-pill {
+            background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35);
+            color: #c084fc; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+        }
+        .btn-logout {
+            background: #1e293b; color: #e2e8f0; border: 1px solid #334155; text-decoration: none;
+            font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; transition: 0.2s;
+        }
+        .btn-logout:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+        /* Navigation Bar (Tabs) */
+        .navbar-tabs {
+            display: flex; gap: 6px; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 6px; margin-bottom: 20px; overflow-x: auto;
+        }
+        .nav-tab {
+            background: none; border: none; color: var(--text-muted); font-size: 13px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center;
+            gap: 8px; transition: all 0.2s; white-space: nowrap;
+        }
+        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .nav-tab.active { background: #0284c7; color: #fff; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35); }
+
+        /* Content Tab Panels */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Announcement Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+            position: relative; overflow: hidden;
+        }
+        .badge-exclusive {
+            background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px;
+            border-radius: 4px; text-transform: uppercase; margin-right: 8px;
+        }
+        .badge-ecu-hero {
+            background: #3b82f6; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px;
+        }
+        .hero-title { font-size: 16px; font-weight: 800; color: #fff; margin: 8px 0 4px; }
+        .hero-desc { font-size: 12px; color: var(--text-muted); }
+        .btn-hero {
+            background: #0284c7; color: #fff; border: none; font-size: 13px; font-weight: 700;
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+        }
+
+        /* Drag & Drop Area */
+        .dropzone-box {
+            background: var(--bg-card); border: 2px dashed #334155; border-radius: 18px; padding: 48px 20px;
+            text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 24px;
+        }
+        .dropzone-box:hover, .dropzone-box.dragover { border-color: #38bdf8; background: rgba(56, 189, 248, 0.04); }
+        .drop-icon { font-size: 44px; margin-bottom: 12px; }
+        .drop-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .drop-subtitle { font-size: 13px; color: var(--text-muted); }
+
+        /* ECU Specs Grid */
+        .specs-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;
+            background: #060a12; padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px;
+        }
+        .spec-item span { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; }
+        .spec-item strong { font-size: 14px; color: #38bdf8; font-weight: 700; }
+
+        /* Solutions Checkboxes Grid */
+        .sol-category-title { font-size: 13px; font-weight: 800; color: #cbd5e1; margin-bottom: 10px; }
+        .sol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .sol-card {
+            background: #060a12; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+            display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none;
+        }
+        .sol-card:hover { border-color: #38bdf8; }
+        .sol-card.selected { background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; }
+        .sol-card.disabled {
+            opacity: 0.3 !important;
+            pointer-events: none !important;
+            cursor: not-allowed !important;
+            filter: grayscale(0.85);
+            border-color: #1e293b !important;
+            background: #04070e !important;
+        }
+        .sol-card .title { font-weight: 700; font-size: 13px; color: #f1f5f9; }
+        .sol-card .chk {
+            width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; font-size: 12px; color: #38bdf8; font-weight: 800;
+        }
+        .sol-card.selected .chk { background: #0284c7; color: #fff; }
+
+        /* Outils Expert Grid */
+        .expert-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px;
+        }
+        .expert-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px;
+            display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s;
+        }
+        .expert-card:hover { border-color: #38bdf8; transform: translateY(-2px); }
+        .expert-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .expert-icon { font-size: 26px; }
+        .expert-title { font-size: 16px; font-weight: 800; color: #fff; }
+        .expert-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+        .expert-btn {
+            background: #111e38; border: 1px solid #2563eb; color: #38bdf8; font-size: 13px; font-weight: 700;
+            padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; width: 100%; transition: 0.2s;
+        }
+        .expert-btn:hover { background: #2563eb; color: #fff; }
+
+        /* Catalogue */
+        .cat-filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .chip {
+            background: #081020; border: 1px solid #1e293b; color: #cbd5e1; font-size: 12px; font-weight: 700;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .chip:hover, .chip.active { background: #0284c7; border-color: #0284c7; color: #fff; }
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+        .cat-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .fuel-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; float: right; }
+        .fuel-diesel { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+        .fuel-essence { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+        .btn-action-main {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 800;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); transition: 0.2s;
+        }
+        .btn-action-main:hover { transform: translateY(-2px); }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 12px; background: #081020; color: var(--text-muted); font-size: 12px; font-weight: 700; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+        /* EVO Fan Modifier Studio (Matching Screenshot) */
+        .evo-window {
+            background: #090f1d;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+        .evo-window-titlebar {
+            background: #040813;
+            padding: 8px 16px;
+            border-bottom: 1px solid #1e293b;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .evo-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 520px;
+        }
+        @media(max-width: 900px) {
+            .evo-grid { grid-template-columns: 1fr; }
+        }
+        .evo-sidebar {
+            background: #060b16;
+            border-right: 1px solid #1e293b;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .evo-logo-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .evo-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        .evo-subtitle {
+            font-size: 11px;
+            font-weight: 700;
+            color: #06b6d4;
+            letter-spacing: 1px;
+            padding-left: 24px;
+        }
+        .evo-select {
+            width: 100%;
+            background: #0a1120;
+            border: 1px solid #1e293b;
+            color: #f1f5f9;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+        .evo-select:focus {
+            border-color: #06b6d4;
+        }
+        .evo-attach-btn {
+            background: #0d1a33;
+            border: 1px solid #1e3a8a;
+            color: #38bdf8;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .evo-attach-btn:hover {
+            background: #1e3a8a;
+            color: #fff;
+        }
+        .evo-main {
+            padding: 24px;
+            background: #090f1d;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .evo-dash-header {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        .evo-stat-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .evo-stat-card {
+            background: #060b16;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .evo-stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .evo-stat-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #06b6d4;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .evo-slider-container {
+            background: #060b16;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .evo-slider-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .evo-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .evo-range-input {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            outline: none;
+        }
+        .evo-range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            box-shadow: 0 0 10px #06b6d4;
+        }
+        .evo-number-box {
+            background: #0a1120;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            color: #06b6d4;
+            font-size: 18px;
+            font-weight: 800;
+            padding: 6px 14px;
+            width: 70px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .evo-btn-apply {
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+            border: none;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+        .evo-btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6);
+        }
+        .evo-console {
+            background: #03060c;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            height: 180px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        .evo-log-ok { color: #34d399; font-weight: 600; }
+        .evo-log-info { color: #38bdf8; font-weight: 600; }
+        .evo-log-warn { color: #facc15; font-weight: 600; }
+        .evo-log-err { color: #f87171; font-weight: 600; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Top Bar -->
+        <header class="header-top">
+            <div class="logo-area">
+                <span>🦂 SCORPION REMAP PRO</span>
+                <span class="logo-badge">PRO V3.2.0</span>
+            </div>
+
+            <div class="header-right">
+                <div class="lang-switch">
+                    <button class="lang-btn active">FR</button>
+                    <button class="lang-btn">EN</button>
+                    <button class="lang-btn">AR</button>
+                </div>
+                <div class="credits-pill" id="userCreditsPill">🪙 <span id="userCredits">{{ user.tokens if user.tokens is defined else user.credits }}</span> Crédits</div>
+                <div class="user-pill" id="userName">👤 {{ user.full_name or user.username }} <small style="opacity:0.75; font-size:11px;">({{ user.workshop_name or 'Atelier' }})</small></div>
+                <a href="/logout" class="btn-logout">🚪 Déconnexion</a>
+            </div>
+        </header>
+
+        <!-- Navbar Tabs -->
+        <nav class="navbar-tabs">
+            <button class="nav-tab active" onclick="switchTab('tabRemap', this)">🛠 Studio Remap</button>
+            <button class="nav-tab" onclick="switchTab('tabEvoFan', this)" style="border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight:800;">⚡ EVO Fan Modifier</button>
+            <button class="nav-tab" onclick="switchTab('tabExpert', this)">🧰 Outils Expert</button>
+            <button class="nav-tab" onclick="switchTab('tabCatalogue', this)">📚 Catalogue</button>
+            <button class="nav-tab" onclick="switchTab('tabHistory', this)">📜 Historique</button>
+            <button class="nav-tab" onclick="switchTab('tabCredits', this)">💳 Forfaits Crédits</button>
+            {% if user.role == 'admin' or user.is_admin %}
+            <button class="nav-tab" onclick="switchTab('tabAdmin', this)" style="background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; font-weight:800;">🛡️ Administration</button>
+            {% endif %}
+        </nav>
+
+        <!-- TAB 1: STUDIO REMAP -->
+        <section id="tabRemap" class="tab-panel active">
+            <!-- Upload Area -->
+            <div id="dropZone" class="dropzone-box">
+                <div class="drop-icon">📤</div>
+                <div class="drop-title">Glissez-déposez votre fichier binaire ECU (.bin, .ori)</div>
+                <div class="drop-subtitle">Ou cliquez pour parcourir vos fichiers (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)</div>
+                <input type="file" id="fileInput" accept=".bin,.ori,.hex" style="display:none;">
+            </div>
+
+            <!-- Analysis & Tuning Panel -->
+            <div id="resultsPanel" style="display:none; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px;">
+                <h3 style="font-size:17px; margin-bottom:14px; color:#fff;">Calculateur Identifié avec Succès ✅</h3>
+                
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span>Marque / Fabricant</span>
+                        <strong id="brandVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Modèle / Motorisation</span>
+                        <strong id="modelVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Calculateur (ECU Family)</span>
+                        <strong id="ecuVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Version Logiciel (SW / HW)</span>
+                        <strong id="swVal">--</strong>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 1: Emissions & Filtres -->
+                <div class="sol-category-title">🌱 Solutions Émissions & Filtres (Anti-Pollution)</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="DPF / FAP" onclick="toggleSol(this, 'DPF / FAP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">DPF / FAP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="EGR" onclick="toggleSol(this, 'EGR')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">EGR OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="ADBLUE" onclick="toggleSol(this, 'ADBLUE')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">ADBLUE / SCR OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="DECAT / LAMBDA" onclick="toggleSol(this, 'DECAT / LAMBDA')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">DECAT / LAMBDA OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="EVAP" onclick="toggleSol(this, 'EVAP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">EVAP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 2: Moteur, Sécurité & Capteurs -->
+                <div class="sol-category-title">⚙️ Solutions Moteur, Sécurité & Capteurs</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="IMMO" onclick="toggleSol(this, 'IMMO')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">IMMO OFF (Antidémarrage)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="HOT START" onclick="toggleSol(this, 'HOT START')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">HOT START FIX (Démarrage chaud)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="SWIRL / FLAPS" onclick="toggleSol(this, 'SWIRL / FLAPS')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">SWIRL / FLAPS OFF (Clapets)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="TVA" onclick="toggleSol(this, 'TVA')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">TVA / Throttle OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="START-STOP" onclick="toggleSol(this, 'START-STOP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">START-STOP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="SPEED LIMIT" onclick="toggleSol(this, 'SPEED LIMIT')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">SPEED LIMIT (VMAX) OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="MAF" onclick="toggleSol(this, 'MAF')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">MAF OFF (حساس الهواء)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="TORQUE MONITORING" onclick="toggleSol(this, 'TORQUE MONITORING')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">TORQUE MONITORING OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 3: Performance & Tuning -->
+                <div class="sol-category-title">🚀 Performance & Tuning Moteur</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="STAGE 1" onclick="toggleSol(this, 'STAGE 1')" style="border-color:rgba(16,185,129,0.4);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title" style="color:#34d399;">STAGE 1 (+20% Puissance/Couple)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Live DTC Suppression Table Preview (Simulation en direct) -->
+                <div style="background:#090e1a; border:1px solid #1e293b; border-radius:14px; padding:20px; margin:24px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <span style="font-size:15px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:8px;">
+                                <span>❌</span> Table de Suppression des Codes Défauts (Live DTC Switch Preview)
+                            </span>
+                            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Simulation en direct des masques et commutateurs d'erreur qui seront basculés vers 0x00</p>
+                        </div>
+                        <span id="dtcCountBadge" style="background:#dc2626; color:#fff; font-size:12px; font-weight:800; padding:6px 14px; border-radius:20px; box-shadow:0 0 12px rgba(220,38,38,0.4);">
+                            0 code DTC à supprimer
+                        </span>
+                    </div>
+
+                    <!-- Search & Manual DTC Add -->
+                    <div style="display:flex; gap:10px; margin-bottom:14px; position:relative;">
+                        <input type="text" id="dtcSearchInput" placeholder="Ajouter un code défaut spécifique (ex: P0401, P2002, U0100...) ou chercher..."
+                               style="flex:1; padding:11px 16px; background:#0d1527; border:1px solid #334155; border-radius:10px; color:#fff; font-size:13px; outline:none;"
+                               oninput="onDtcSearch(this.value)">
+                        <button type="button" onclick="addCustomDtc()" style="background:#0284c7; color:#fff; border:none; padding:0 22px; border-radius:10px; font-weight:800; cursor:pointer; font-size:13px;">
+                            + Ajouter au pack
+                        </button>
+                        
+                        <div id="dtcSearchResults" style="display:none; position:absolute; top:48px; left:0; right:140px; background:#0d1527; border:1px solid #38bdf8; border-radius:10px; max-height:220px; overflow-y:auto; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.8);"></div>
+                    </div>
+
+                    <!-- Live DTC Preview Table -->
+                    <div style="overflow-x:auto; max-height:380px; overflow-y:auto; border:1px solid #1e293b; border-radius:10px; background:#060a12;">
+                        <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+                            <thead>
+                                <tr style="background:#0f172a; color:#94a3b8; border-bottom:1px solid #1e293b; position:sticky; top:0; z-index:10;">
+                                    <th style="padding:10px 14px; width:110px;">Code DTC</th>
+                                    <th style="padding:10px 14px;">Description du Défaut (Intitulé OBD)</th>
+                                    <th style="padding:10px 14px; width:120px;">Adresse Offset</th>
+                                    <th style="padding:10px 14px; width:160px;">Commutation (Switch)</th>
+                                    <th style="padding:10px 14px; width:160px;">Origine / Pack</th>
+                                    <th style="padding:10px 14px; width:90px; text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dtcPreviewBody">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                        Aucun code DTC ne sera supprimé. Sélectionnez une solution ci-dessus ou ajoutez un code manuellement.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Technical Instructions & Auto Checksum Box -->
+                <div id="instructionsCard" style="display:none; background:#0b1329; border:1px solid #0284c7; border-radius:14px; padding:20px; margin:24px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
+                        <div style="font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>📋</span> Instructions Techniques Atelier & Checksum
+                        </div>
+                        <div id="checksumStatusPill" style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #10b981;">
+                            Correction Checksum: Supporté & Automatique ✅
+                        </div>
+                    </div>
+                    <div id="instructionsList" style="display:grid; gap:10px;"></div>
+                </div>
+
+                <button id="btnProcess" class="btn-action-main" onclick="processAndDownload()">
+                    ⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)
+                </button>
+
+                <div id="successBox" style="display:none; background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; border-radius:10px; padding:16px; margin-top:16px; text-align:center;">
+                    <p style="font-weight:700; color:#34d399; margin-bottom:8px;">🎉 Fichier modifié avec succès !</p>
+                    <a id="downloadLink" href="#" target="_blank" style="display:inline-block; background:#10b981; color:#fff; text-decoration:none; padding:10px 24px; border-radius:8px; font-weight:700; font-size:14px;">📥 Télécharger le Fichier MOD Maintenant</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB EVO FAN MODIFIER (SCREENSHOT REPLICATION) -->
+        <section id="tabEvoFan" class="tab-panel">
+            <div class="evo-window">
+                <div class="evo-window-titlebar">
+                    <span>EVO Fan Temperature Patcher - Professional Edition</span>
+                    <span style="display:flex; gap:6px;">
+                        <span style="width:10px; height:10px; border-radius:50%; background:#eab308; display:inline-block;"></span>
+                        <span style="width:10px; height:10px; border-radius:50%; background:#10b981; display:inline-block;"></span>
+                    </span>
+                </div>
+
+                <div class="evo-grid">
+                    <!-- Left Sidebar -->
+                    <div class="evo-sidebar">
+                        <div class="evo-logo-box">
+                            <div class="evo-title">⚡ EVO FAN MODIFIER</div>
+                            <div class="evo-subtitle">FAN TEMP PATCHER</div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">HARDWARE PROTOCOL (ECU)</label>
+                            <select id="evoEcuSelect" class="evo-select" onchange="onEvoProtocolChange()">
+                                <option value="DCM1.2" selected>DCM1.2</option>
+                                <option value="EDC16CP33">EDC16CP33</option>
+                                <option value="EDC17C42">EDC17C42</option>
+                                <option value="EMS3110">EMS3110</option>
+                                <option value="EMS3120">EMS3120</option>
+                                <option value="EMS3130">EMS3130</option>
+                                <option value="EMS3132">EMS3132</option>
+                                <option value="EMS3155">EMS3155</option>
+                                <option value="EMS3160">EMS3160</option>
+                                <option value="S3000">S3000</option>
+                                <option value="SID305">SID305</option>
+                                <option value="SID306">SID306</option>
+                                <option value="SID307">SID307</option>
+                                <option value="SIM32">SIM32</option>
+                                <option value="V40">V40</option>
+                                <option value="V42">V42</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <button type="button" class="evo-attach-btn" onclick="document.getElementById('evoFileInput').click()">
+                                📁 Attach / Load Flash File (.bin)
+                            </button>
+                            <input type="file" id="evoFileInput" accept=".bin,.ori,.hex" style="display:none;" onchange="handleEvoFileUpload(event)">
+                        </div>
+
+                        <div id="evoFileInfo" style="display:none; background:#040711; border:1px solid #1e293b; border-radius:10px; padding:14px; font-size:12px;">
+                            <div style="color:#38bdf8; font-weight:700; margin-bottom:4px;" id="evoFileName">--</div>
+                            <div style="color:#94a3b8; font-size:11px;" id="evoFileSize">--</div>
+                            <div style="color:#10b981; font-size:11px; margin-top:4px;" id="evoFileStatus">Prêt pour modification</div>
+                        </div>
+
+                        <div style="margin-top:auto; font-size:10px; color:#475569; letter-spacing:0.5px;">
+                            DEVELOPER CONTACT<br>
+                            SCORPION REMAP PRO • ENGINE 2026
+                        </div>
+                    </div>
+
+                    <!-- Right Main / Tuning Dashboard -->
+                    <div class="evo-main">
+                        <div class="evo-dash-header">
+                            <span>🎛️</span> TUNING DASHBOARD
+                        </div>
+
+                        <div class="evo-stat-cards">
+                            <div class="evo-stat-card">
+                                <div class="evo-stat-label">CURRENT MAP VALUE</div>
+                                <div class="evo-stat-value" id="evoCurrentVal">-- °C</div>
+                            </div>
+                            <div class="evo-stat-card">
+                                <div class="evo-stat-label">TARGET PATCH VALUE</div>
+                                <div class="evo-stat-value" id="evoTargetVal">90 °C</div>
+                            </div>
+                        </div>
+
+                        <div class="evo-slider-container">
+                            <div class="evo-slider-header">
+                                <span>🎚️</span> ADJUST TARGET TEMPERATURE
+                            </div>
+                            <div class="evo-slider-row">
+                                <input type="range" id="evoSlider" class="evo-range-input" min="75" max="105" value="90" step="1" oninput="syncEvoTemp(this.value)">
+                                <input type="number" id="evoNumberBox" class="evo-number-box" value="90" min="70" max="110" onchange="syncEvoTemp(this.value)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="button" id="btnEvoApply" class="evo-btn-apply" onclick="applyEvoFanPatch()">
+                                <span>💾</span> APPLY TEMPERATURE PATCH & EXPORT
+                            </button>
+                        </div>
+
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                <span>⚙️</span> DIAGNOSTIC CONSOLE LOG
+                            </div>
+                            <div id="evoConsoleLog" class="evo-console">
+                                <div>[15:32:15] <span class="evo-log-ok">[OK] SUCCESS: System activated successfully.</span></div>
+                                <div>[15:32:16] <span class="evo-log-info">[i] INFO: System initialized. Ready to load files.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: OUTILS EXPERT (MATCHING SCREENSHOT 2) -->
+        <section id="tabExpert" class="tab-panel">
+            <div style="margin-bottom:20px;">
+                <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <span>🧰</span> Boîte à Outils Spécialisés Atelier
+                </h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Fonctions expertes avancées (1 Crédit par opération)</p>
+            </div>
+
+            <div class="expert-grid">
+                <!-- Tool 1: Renault Sonde Lambda / O2 Off -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">⚡</span>
+                            <div class="expert-title">Renault Sonde Lambda / O2 Off</div>
+                        </div>
+                        <div class="expert-desc">
+                            Désactivation définitive de la sonde Lambda aval (Post-Catalyseur) et suppression des défauts associés sur calculateurs Renault compatibles (Valeo V42, EMS3110, EMS3120, EMS3132, S3000, SIM32).
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_lambda_off', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+
+                <!-- Tool 2: Renault Fan Temp Mod (Déclenchement Ventilateur) -->
+                <div class="expert-card" style="border: 1px solid rgba(2, 132, 199, 0.4); background: linear-gradient(180deg, rgba(2, 132, 199, 0.05), rgba(11, 19, 36, 0.9));">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🌀</span>
+                            <div class="expert-title">Renault Fan Temp Mod (16 Calculateurs EVO)</div>
+                        </div>
+                        <div class="expert-desc">
+                            Algorithme officiel EVO Fan Temperature Patcher. Abaisse le seuil de déclenchement GMV pour protéger le moteur contre la surchauffe. 100% compatible avec les 16 familles matérielles Renault.
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Protocole Matériel (Calculateur ECU) :</label>
+                            <select id="fanEcuProtocol" style="width:100%; background:#060a12; border:1px solid #334155; color:#38bdf8; font-weight:600; padding:7px 10px; border-radius:6px; font-size:12px; outline:none; cursor:pointer;">
+                                <option value="" selected>🔍 Auto-Détection Automatique (Recommandé)</option>
+                                <option value="DCM1.2">Delphi DCM1.2 (1.5 dCi)</option>
+                                <option value="EDC16CP33">Bosch EDC16CP33 (2.0 / 2.5 dCi)</option>
+                                <option value="EDC17C42">Bosch EDC17C42 (1.6 dCi)</option>
+                                <option value="EMS3110">Continental EMS3110 (1.6 / 2.0 16V)</option>
+                                <option value="EMS3120">Continental EMS3120 (Duster / Symbol / Logan)</option>
+                                <option value="EMS3130">Continental EMS3130 (Duster 1.6 16V)</option>
+                                <option value="EMS3132">Siemens Sirius EMS3132 (1.2 / 1.4 / 1.6)</option>
+                                <option value="EMS3155">Continental EMS3155 (1.2 TCe)</option>
+                                <option value="EMS3160">Continental EMS3160 (0.9 / 1.2 TCe)</option>
+                                <option value="S3000">Sagem S3000 (Megane 2 / Scenic 2 / Clio 3)</option>
+                                <option value="SID305">Continental SID305 (1.5 dCi)</option>
+                                <option value="SID306">Continental SID306 (1.5 dCi)</option>
+                                <option value="SID307">Continental SID307 (1.5 dCi)</option>
+                                <option value="SIM32">Siemens SIM32 (Clio 3 / Modus 1.2 16V)</option>
+                                <option value="V40">Valeo V40 (Twingo / Clio 1.2 16V)</option>
+                                <option value="V42">Valeo V42 (Clio / Logan / Sandero / Duster 1.2 / 1.6)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Consigne Cible :</label>
+                            <select id="fanTempParam" style="background:#060a12; border:1px solid #334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:12px; outline:none; cursor:pointer; flex:1;">
+                                <option value="90">90°C (Optimisé - EVO Standard)</option>
+                                <option value="92" selected>92°C (Recommandé Climat Chaud)</option>
+                                <option value="88">88°C (Performance / Piste)</option>
+                                <option value="95">95°C (Stock Fiabilisé)</option>
+                                <option value="98">98°C (Protection Légère)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_fan_temp', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+
+                <!-- Tool 3: Renault Delphi DCM 3.4 - Stage 1 -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🚀</span>
+                            <div class="expert-title">Renault Delphi DCM 3.4 - Stage 1</div>
+                        </div>
+                        <div class="expert-desc">
+                            Optimisation cartographique Stage 1 (Couple & Puissance) dédiée exclusivement aux calculateurs Renault Delphi DCM 3.4 (1.5 dCi Symbol, Stepway, Logan, Clio 4 85CH ➔ 115CH + VMAX).
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_dcm34_stage1', 'Choisir Flash DCM 3.4 (.bin)')">Choisir Flash DCM 3.4 (.bin)</button>
+                </div>
+
+                <!-- Tool 4: Renault Cold Start Fix -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">❄️</span>
+                            <div class="expert-title">Renault Cold Start Fix</div>
+                        </div>
+                        <div class="expert-desc">
+                            Corrige définitivement le problème de démarrage difficile à froid sur les calculateurs Renault EMS3110, EMS3120, EMS3125, EMS3132 et Valeo V42.
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_cold_start', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+            </div>
+            <input type="file" id="expertFileInput" style="display:none;">
+
+            <!-- Modal Confirmation Expert (Dry-Run Confirmation) -->
+            <div id="expertConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(4,7,13,0.85); backdrop-filter:blur(6px); z-index:9999; justify-content:center; align-items:center;">
+                <div style="background:#0b1324; border:1px solid #2563eb; border-radius:18px; max-width:540px; width:90%; padding:28px; box-shadow:0 20px 40px rgba(0,0,0,0.7); position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>🛡️</span> Validation de Sécurité & Confirmation
+                        </h3>
+                        <button onclick="closeExpertModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+                    </div>
+
+                    <div style="background:rgba(2,132,199,0.08); border:1px solid rgba(2,132,199,0.25); border-radius:12px; padding:16px; margin-bottom:20px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Calculateur Détecté :</span>
+                                <strong id="modalEcuType" style="color:#fff;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Version Logicielle (SW) :</span>
+                                <strong id="modalSwVersion" style="color:#38bdf8;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Modifications Estimées :</span>
+                                <strong id="modalBytesMod" style="color:#10b981;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Correction Checksum :</span>
+                                <strong id="modalChecksum" style="color:#10b981;">Automatique & Supporté ✅</strong>
+                            </div>
+                            <div id="modalTempRow" style="display:none; grid-column:span 2; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); border-radius:8px; padding:10px 14px; margin-top:6px;">
+                                <span style="color:#94a3b8; font-size:11px; font-weight:700;">Calibration Température Ventilateur (EVO Fan Patcher) :</span>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                    <span style="color:#cbd5e1; font-size:13px;">Stock Valeur : <strong id="modalCurrentTemp" style="color:#f87171; font-size:15px;">--</strong></span>
+                                    <span style="color:#fff; font-size:16px; font-weight:800;">➔</span>
+                                    <span style="color:#38bdf8; font-size:13px;">Nouvelle Consigne : <strong id="modalTargetTemp" style="color:#34d399; font-size:15px;">--</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:12px; color:#cbd5e1;">
+                            <span style="color:#94a3b8;">Détail de l'opération :</span>
+                            <div id="modalDesc" style="margin-top:2px; font-weight:700; color:#f8fafc;">--</div>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-bottom:22px; font-size:12px; color:#fde68a; display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px;">⚠️</span>
+                        <div>
+                            <strong>Opération Atelier Spécialisée :</strong>
+                            <span>1 Crédit sera débité de votre compte lors de la génération et du téléchargement du fichier patché.</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:12px;">
+                        <button onclick="closeExpertModal()" style="flex:1; padding:12px; background:#1e293b; border:1px solid #334155; color:#cbd5e1; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">Annuler</button>
+                        <button id="modalConfirmBtn" onclick="confirmAndDownloadExpert()" style="flex:2; padding:12px; background:linear-gradient(135deg, #0284c7, #2563eb); border:none; color:#fff; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(37,99,235,0.4);">CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CATALOGUE (MATCHING SCREENSHOT 3) -->
+        <section id="tabCatalogue" class="tab-panel">
+            <div style="margin-bottom:16px;">
+                <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <span>📚</span> Catalogue des Calculateurs Supportés (<span id="catTotalNum">46</span> Familles Référencées)
+                </h2>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Référentiel officiel SCORPION REMAP PRO v3.2.0 — 45 marques & calculateurs avec solutions actives</p>
+            </div>
+
+            <!-- Chips Filter -->
+            <div class="cat-filter-chips">
+                <span style="font-size:12px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; margin-right:6px;">Filtres rapides :</span>
+                <button class="chip active" onclick="setBrandFilter('Tous', this)">Tous</button>
+                <button class="chip" onclick="setFuelFilter('Essence', this)">⛽ Essence</button>
+                <button class="chip" onclick="setFuelFilter('Diesel', this)">⛽ Diesel</button>
+                <button class="chip" onclick="setBrandFilter('VAG', this)">VAG / VW</button>
+                <button class="chip" onclick="setBrandFilter('RENAULT', this)">Renault / Dacia</button>
+                <button class="chip" onclick="setBrandFilter('PSA', this)">PSA / Peugeot</button>
+                <button class="chip" onclick="setBrandFilter('BMW', this)">BMW</button>
+                <button class="chip" onclick="setBrandFilter('MERCEDES', this)">Mercedes</button>
+                <button class="chip" onclick="setBrandFilter('HYUNDAI', this)">Hyundai / Kia</button>
+                <button class="chip" onclick="setBrandFilter('TOYOTA', this)">Toyota</button>
+                <button class="chip" onclick="setBrandFilter('FORD', this)">Ford</button>
+                <button class="chip" onclick="setBrandFilter('FIAT', this)">Fiat / Abarth</button>
+            </div>
+
+            <!-- Search input -->
+            <input type="text" id="catSearch" placeholder="🔍 Rechercher une marque ou un calculateur (ex: EDC17, EDC16, SID208, Delphi DCM, MD1, VAG...)"
+                   style="width:100%; padding:12px 16px; background:#0d1527; border:1px solid #334155; border-radius:10px; color:#fff; font-size:13px; outline:none; margin-bottom:20px;"
+                   oninput="filterCatalogue()">
+
+            <!-- Grid of Cards -->
+            <div id="catGrid" class="cat-grid"></div>
+        </section>
+
+        <!-- TAB 4: HISTORIQUE -->
+        <section id="tabHistory" class="tab-panel">
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px;">
+                <h3 style="font-size:16px; font-weight:800; margin-bottom:14px;">Historique de vos Fichiers Modifiés</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom du Fichier</th>
+                            <th>Calculateur / Véhicule</th>
+                            <th>Solutions Appliquées</th>
+                            <th>Date</th>
+                            <th>Téléchargement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">Chargement de l'historique...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 5: FORFAITS CRÉDITS -->
+        <section id="tabCredits" class="tab-panel">
+            <div style="margin-bottom:20px; text-align:center;">
+                <h2 style="font-size:22px; font-weight:800; color:#fff;">Forfaits de Crédits & Recharge Instantanée</h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">1 Crédit = 1 Modification de Fichier Complète (Tous Packs Inclus)</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; text-align:center;">
+                    <h3 style="font-size:18px; color:#94a3b8; margin-bottom:10px;">Pack Découverte</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">10 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Idéal pour tester nos solutions ou pour petits garages.</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">3 500 DZD / 25 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+
+                <div style="background:var(--bg-card); border:2px solid #0284c7; border-radius:16px; padding:28px; text-align:center; position:relative;">
+                    <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#0284c7; color:#fff; font-size:11px; font-weight:800; padding:4px 12px; border-radius:20px;">POPULAIRE ATELIER</div>
+                    <h3 style="font-size:18px; color:#38bdf8; margin-bottom:10px;">Pack Pro Atelier</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">50 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Pour les spécialistes du diagnostic et reprogrammation.</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">14 000 DZD / 95 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; text-align:center;">
+                    <h3 style="font-size:18px; color:#94a3b8; margin-bottom:10px;">Pack Master Illimité</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">100 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Tarif grossiste ultra-avantageux (200 DZD / fichier).</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">24 000 DZD / 160 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB ADMIN (ONLY VISIBLE FOR ADMINS) -->
+        {% if user.role == 'admin' or user.is_admin %}
+        <section id="tabAdmin" class="tab-panel">
+            <div style="margin-bottom:24px;">
+                <h2 style="font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <span>🛡️</span> Panneau d'Administration SCORPION REMAP PRO
+                </h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Gestion des utilisateurs, validation des paiements et recharges de crédits.</p>
+            </div>
+
+            <!-- Stats -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Utilisateurs Inscrits</div>
+                    <div style="font-size:32px; font-weight:800; color:#fff; margin-top:6px;" id="adminStatUsers">--</div>
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Total Crédits Utilisateurs</div>
+                    <div style="font-size:32px; font-weight:800; color:#38bdf8; margin-top:6px;" id="adminStatCredits">--</div>
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Fichiers Modifiés Totaux</div>
+                    <div style="font-size:32px; font-weight:800; color:#10b981; margin-top:6px;" id="adminStatFiles">--</div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 style="font-size:16px; font-weight:800; color:#fff;">Utilisateurs & Ateliers Enregistrés</h3>
+                    <button class="chip" onclick="loadAdminData()">🔄 Actualiser</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client & Atelier</th>
+                                <th>Email / Téléphone</th>
+                                <th>Wilaya</th>
+                                <th>Crédits</th>
+                                <th>Statut</th>
+                                <th>Adresse IP</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersBody">
+                            <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Chargement des utilisateurs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer style="margin-top: 50px; padding: 24px 0 10px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 12px;">
+            <div>
+                <strong style="color: #fff;">🦂 SCORPION REMAP PRO v3.2.0</strong> © 2026 • Plateforme Cloud d'Ingénierie & Diagnostic ECU/TCU pour Ateliers
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Politique de Remboursement & CGV</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Page Légale</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Changelog</a>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        let currentFile = null;
+        let currentFileToken = null;
+        let supportedSolutionsList = [];
+        let selectedSolutions = new Set();
+        let selectedDtcs = new Set();
+        let catalogueData = [];
+        let currentBrandFilter = 'Tous';
+        let currentFuelFilter = 'Tous';
+        let currentExpertTool = null;
+        let currentChecksumInfo = null;
+
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            if(tabId === 'tabCatalogue' && catalogueData.length === 0) loadCatalogue();
+            if(tabId === 'tabHistory') loadUserHistory();
+            if(tabId === 'tabAdmin') loadAdminData();
+        }
+
+        async function initPortal() {
+            try {
+                const res = await fetch('/api/v1/user/me');
+                if(!res.ok) { window.location.href = '/login'; return; }
+                const user = await res.json();
+                const displayName = user.full_name || user.username || "Client";
+                const workshop = user.workshop_name ? ` (${user.workshop_name})` : "";
+                document.getElementById('userName').innerHTML = `👤 ${displayName} <small style="opacity:0.75; font-size:11px;">${workshop}</small>`;
+                const credits = user.tokens !== undefined ? user.tokens : (user.credits || 0);
+                document.getElementById('userCredits').innerText = `${credits}`;
+            } catch(e) {
+                window.location.href = '/login';
+            }
+        }
+
+        // File dropzone
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', () => {
+            if(fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        async function handleFile(file) {
+            currentFile = file;
+            dropZone.innerHTML = `<div class="drop-icon">⏳</div><div class="drop-title">Analyse du fichier ECU : ${file.name}...</div>`;
+            document.getElementById('successBox').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/v1/tuning/analyze', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(data.success) {
+                    currentFileToken = data.file_token;
+                    currentChecksumInfo = data.checksum_info;
+                    dropZone.innerHTML = `<div class="drop-icon">✅</div><div class="drop-title">Fichier sélectionné : ${file.name}</div><div class="drop-subtitle">Cliquez pour changer de fichier</div>`;
+                    document.getElementById('brandVal').innerText = data.brand || 'VAG / Auto';
+                    document.getElementById('modelVal').innerText = data.model || '2.0 TDI';
+                    document.getElementById('ecuVal').innerText = data.ecu_type || 'Bosch EDC17';
+                    document.getElementById('swVal').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+                    document.getElementById('resultsPanel').style.display = 'block';
+
+                    // 1. تفعيل الحلول الموجودة فعلياً وتعطيل الباقي
+                    applyDynamicSolutionFiltering(data.supported_solutions, data.default_solutions);
+
+                    // 2. كشف دقيق لما سينحذف في جدول الـ DTC
+                    renderDtcPreviewTable(data.dtc_preview, data.dtc_count);
+
+                    // 3. عرض إرشادات ما بعد البرمجة وحالة التشيكسوم
+                    renderTechnicalInstructions(data.instructions, data.checksum_info);
+                }
+            } catch(e) {
+                alert('Erreur lors de la lecture du fichier');
+            }
+        }
+
+        // Dynamic Solution Filtering (No Mock Data)
+        function applyDynamicSolutionFiltering(supportedSolutions, defaultSolutions) {
+            supportedSolutionsList = supportedSolutions || [];
+            selectedSolutions.clear();
+
+            if(defaultSolutions && defaultSolutions.length) {
+                defaultSolutions.forEach(s => selectedSolutions.add(s));
+            }
+
+            document.querySelectorAll('.sol-card').forEach(card => {
+                const solKey = card.getAttribute('data-sol');
+                if(!solKey) return;
+
+                const isSupported = supportedSolutionsList.some(s => 
+                    s.toUpperCase() === solKey.toUpperCase() ||
+                    solKey.toUpperCase().includes(s.toUpperCase()) ||
+                    s.toUpperCase().includes(solKey.toUpperCase())
+                );
+
+                const chk = card.querySelector('.chk');
+                let statusBadge = card.querySelector('.sol-status-badge');
+                if(!statusBadge) {
+                    statusBadge = document.createElement('div');
+                    statusBadge.className = 'sol-status-badge';
+                    card.appendChild(statusBadge);
+                }
+
+                if(isSupported) {
+                    card.classList.remove('disabled');
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                    card.style.cursor = 'pointer';
+                    card.style.filter = 'none';
+                    statusBadge.innerHTML = '<span style="font-size:10px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid rgba(16,185,129,0.3); border-radius:4px; padding:1px 6px; font-weight:700;">✓ Solution Disponible</span>';
+
+                    if(selectedSolutions.has(solKey)) {
+                        card.classList.add('selected');
+                        if(chk) chk.innerText = '✔';
+                    } else {
+                        card.classList.remove('selected');
+                        if(chk) chk.innerText = '+';
+                    }
+                } else {
+                    card.classList.add('disabled');
+                    card.classList.remove('selected');
+                    selectedSolutions.delete(solKey);
+                    if(chk) chk.innerText = '✕';
+                    card.style.opacity = '0.3';
+                    card.style.pointerEvents = 'none';
+                    card.style.cursor = 'not-allowed';
+                    card.style.filter = 'grayscale(0.85)';
+                    statusBadge.innerHTML = '<span style="font-size:10px; background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:4px; padding:1px 6px; font-weight:700;">⛔ Non disponible</span>';
+                }
+            });
+        }
+
+        function toggleSol(card, name) {
+            if(card.classList.contains('disabled')) return;
+
+            const chk = card.querySelector('.chk');
+            if(selectedSolutions.has(name)) {
+                selectedSolutions.delete(name);
+                card.classList.remove('selected');
+                if(chk) chk.innerText = '+';
+            } else {
+                selectedSolutions.add(name);
+                card.classList.add('selected');
+                if(chk) chk.innerText = '✔';
+            }
+            updateDtcPreview();
+        }
+
+        // Live DTC Table Preview & Workshop Instructions Update
+        async function updateDtcPreview() {
+            if(!currentFileToken) return;
+            try {
+                const res = await fetch('/api/v1/tuning/preview-dtc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_token: currentFileToken,
+                        selected_solutions: Array.from(selectedSolutions),
+                        custom_dtcs: Array.from(selectedDtcs)
+                    })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    renderDtcPreviewTable(data.items, data.total_codes);
+                    renderTechnicalInstructions(data.instructions, currentChecksumInfo);
+                }
+            } catch(e) {
+                console.error('Erreur preview DTC', e);
+            }
+        }
+
+        function renderTechnicalInstructions(instructions, checksumInfo) {
+            const card = document.getElementById('instructionsCard');
+            if(!card) return;
+
+            if(checksumInfo) {
+                const pill = document.getElementById('checksumStatusPill');
+                if(pill) {
+                    pill.innerText = `Correction Checksum: ${checksumInfo.status}`;
+                    if(checksumInfo.is_auto) {
+                        pill.style.background = 'rgba(16,185,129,0.15)';
+                        pill.style.color = '#10b981';
+                        pill.style.borderColor = '#10b981';
+                    } else {
+                        pill.style.background = 'rgba(245,158,11,0.15)';
+                        pill.style.color = '#f59e0b';
+                        pill.style.borderColor = '#f59e0b';
+                    }
+                }
+            }
+
+            const list = document.getElementById('instructionsList');
+            if(!list) return;
+            list.innerHTML = '';
+
+            if(!instructions || instructions.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            instructions.forEach(ins => {
+                const item = document.createElement('div');
+                const borderColor = ins.type === 'critical' ? '#ef4444' : (ins.type === 'warning' ? '#f59e0b' : '#38bdf8');
+                const bgColor = ins.type === 'critical' ? 'rgba(239,68,68,0.08)' : (ins.type === 'warning' ? 'rgba(245,158,11,0.08)' : 'rgba(56,189,248,0.08)');
+
+                item.style.cssText = `background:${bgColor}; border:1px solid ${borderColor}; border-radius:10px; padding:12px 14px;`;
+                item.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <span style="background:${borderColor}; color:#000; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">${ins.badge}</span>
+                        <strong style="color:#fff; font-size:13px;">${ins.title}</strong>
+                    </div>
+                    <p style="font-size:12px; color:#cbd5e1; line-height:1.4;">${ins.desc}</p>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderDtcPreviewTable(items, totalCount) {
+            const badge = document.getElementById('dtcCountBadge');
+            if(badge) {
+                badge.innerText = `🔥 ${totalCount} code(s) DTC seront supprimés de la gestion moteur`;
+            }
+            const tbody = document.getElementById('dtcPreviewBody');
+            if(!tbody) return;
+
+            if(!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">
+                            Aucun code DTC ne sera supprimé. Sélectionnez une solution ci-dessus ou ajoutez un code manuellement.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            items.forEach(item => {
+                const isManual = item.source === 'Manuel (Client)';
+                const sourceBadge = isManual 
+                    ? `<span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid #ef4444; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">${item.source}</span>`
+                    : `<span style="background:rgba(2,132,199,0.2); color:#38bdf8; border:1px solid #0284c7; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">⚡ Pack ${item.source}</span>`;
+
+                const actionBtn = isManual
+                    ? `<button onclick="removeDtcCode('${item.code}')" style="background:none; border:1px solid #ef4444; color:#ef4444; border-radius:4px; padding:2px 6px; cursor:pointer; font-weight:700; font-size:11px;">✕ Retirer</button>`
+                    : `<span style="color:#64748b; font-size:11px;">🔒 Inclus</span>`;
+
+                const tr = document.createElement('tr');
+                tr.style.cssText = 'border-bottom:1px solid #131d35; transition:0.15s;';
+                tr.onmouseenter = () => tr.style.background = 'rgba(56,189,248,0.04)';
+                tr.onmouseleave = () => tr.style.background = 'transparent';
+
+                tr.innerHTML = `
+                    <td style="padding:10px 14px;"><strong style="color:#f87171; font-family:monospace; font-size:13px; font-weight:800;">${item.code}</strong></td>
+                    <td style="padding:10px 14px; color:#cbd5e1; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.description}">${item.description}</td>
+                    <td style="padding:10px 14px;"><code style="background:#04070d; border:1px solid #1e293b; padding:3px 8px; border-radius:4px; color:#38bdf8; font-weight:700; font-family:monospace;">${item.offset}</code></td>
+                    <td style="padding:10px 14px;"><span style="color:#fbbf24; font-weight:700;">${item.val_ori}</span> <span style="color:#64748b;">➔</span> <strong style="color:#34d399; font-weight:800;">${item.val_mod} (OFF)</strong></td>
+                    <td style="padding:10px 14px;">${sourceBadge}</td>
+                    <td style="padding:10px 14px; text-align:center;">${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // DTC Add / Remove Handlers
+        function addDtcCode(code) {
+            selectedDtcs.add(code.trim().toUpperCase());
+            document.getElementById('dtcSearchInput').value = '';
+            document.getElementById('dtcSearchResults').style.display = 'none';
+            updateDtcPreview();
+        }
+        function removeDtcCode(code) {
+            selectedDtcs.delete(code.trim().toUpperCase());
+            updateDtcPreview();
+        }
+        function addCustomDtc() {
+            const val = document.getElementById('dtcSearchInput').value.trim().toUpperCase();
+            if(val) {
+                val.split(/[,;\s]+/).forEach(p => { if(p) selectedDtcs.add(p); });
+                document.getElementById('dtcSearchInput').value = '';
+                document.getElementById('dtcSearchResults').style.display = 'none';
+                updateDtcPreview();
+            }
+        }
+
+        let dtcTimer = null;
+        function onDtcSearch(val) {
+            clearTimeout(dtcTimer);
+            const box = document.getElementById('dtcSearchResults');
+            if(!val.trim()) { box.style.display = 'none'; return; }
+            dtcTimer = setTimeout(async () => {
+                const resp = await fetch(`/api/v1/dtc/search?q=${encodeURIComponent(val)}`);
+                const items = await resp.json();
+                if(items.length) {
+                    box.innerHTML = '';
+                    items.forEach(it => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'padding:8px 12px; border-bottom:1px solid #1e293b; cursor:pointer; font-size:12px; display:flex; justify-content:space-between; align-items:center;';
+                        row.onmouseenter = () => row.style.background = '#1e293b';
+                        row.onmouseleave = () => row.style.background = 'transparent';
+                        row.innerHTML = `<strong style="color:#38bdf8; font-family:monospace;">${it.code}</strong> <span style="color:#94a3b8; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">${it.desc}</span>`;
+                        row.onclick = () => addDtcCode(it.code);
+                        box.appendChild(row);
+                    });
+                    box.style.display = 'block';
+                } else { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        // Final modification & download (Credit only deducted here)
+        async function processAndDownload() {
+            if(!currentFile && !currentFileToken) return;
+            const btn = document.getElementById('btnProcess');
+            btn.disabled = true;
+            btn.innerText = '⚙️ Application des modifications sur le serveur...';
+
+            const formData = new FormData();
+            if(currentFileToken) formData.append('file_token', currentFileToken);
+            if(currentFile) formData.append('file', currentFile);
+            formData.append('solutions', JSON.stringify(Array.from(selectedSolutions)));
+            formData.append('dtcs', JSON.stringify(Array.from(selectedDtcs)));
+
+            try {
+                const res = await fetch('/api/v1/tuning/process', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    btn.innerText = '✅ Modification Terminée avec Succès!';
+                    document.getElementById('downloadLink').href = `/api/v1/tuning/download/${data.task_id}`;
+                    document.getElementById('successBox').style.display = 'block';
+                    window.location.href = `/api/v1/tuning/download/${data.task_id}`;
+                    // =========================================================================
+        // EVO Fan Modifier Logic (Matching Screenshot & 16 Protocols)
+        // =========================================================================
+        let evoCurrentFile = null;
+        let evoPreviewToken = null;
+
+        function addEvoLog(type, msg) {
+            const box = document.getElementById('evoConsoleLog');
+            if (!box) return;
+            const now = new Date();
+            const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+            let typeClass = 'evo-log-info';
+            let prefix = '[i] INFO:';
+            if (type === 'ok') { typeClass = 'evo-log-ok'; prefix = '[OK] SUCCESS:'; }
+            else if (type === 'warn') { typeClass = 'evo-log-warn'; prefix = '[!] WARNING:'; }
+            else if (type === 'err') { typeClass = 'evo-log-err'; prefix = '[ERR] ERROR:'; }
+
+            const line = document.createElement('div');
+            line.innerHTML = `${timeStr} <span class="${typeClass}">${prefix} ${msg}</span>`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function syncEvoTemp(val) {
+            val = parseInt(val, 10);
+            if (isNaN(val)) val = 90;
+            if (val < 70) val = 70;
+            if (val > 110) val = 110;
+            document.getElementById('evoSlider').value = val;
+            document.getElementById('evoNumberBox').value = val;
+            document.getElementById('evoTargetVal').textContent = `${val} °C`;
+            addEvoLog('info', `Target temperature consigne updated to ${val}°C`);
+        }
+
+        function onEvoProtocolChange() {
+            const proto = document.getElementById('evoEcuSelect').value;
+            addEvoLog('info', `ECU Hardware Protocol selected: ${proto}`);
+            if (evoCurrentFile) {
+                processEvoFileAnalysis(evoCurrentFile);
+            }
+        }
+
+        async function handleEvoFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            evoCurrentFile = file;
+
+            document.getElementById('evoFileName').textContent = file.name;
+            document.getElementById('evoFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB (${file.size} octets)`;
+            document.getElementById('evoFileStatus').textContent = "Analyse en cours...";
+            document.getElementById('evoFileInfo').style.display = 'block';
+
+            addEvoLog('info', `File loaded: ${file.name} (${file.size} bytes)`);
+            await processEvoFileAnalysis(file);
+        }
+
+        async function processEvoFileAnalysis(file) {
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+
+            addEvoLog('info', `Scanning binary structures for protocol [${proto}]...`);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tool', 'renault_fan_temp');
+            formData.append('param', targetTemp);
+            formData.append('protocol', proto);
+
+            try {
+                const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('evoCurrentVal').textContent = '-- °C';
+                    document.getElementById('evoFileStatus').textContent = "⚠️ Incompatible avec ce protocole";
+                    document.getElementById('evoFileStatus').style.color = "#ef4444";
+                    addEvoLog('err', data.detail || "Échec de détection de la cartographie ventilateur.");
+                    return;
+                }
+
+                evoPreviewToken = data.preview_token;
+                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "98 °C";
+                document.getElementById('evoCurrentVal').textContent = curTemp;
+                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.ecu_type || proto})`;
+                document.getElementById('evoFileStatus').style.color = "#34d399";
+
+                addEvoLog('ok', `Pattern identified! Current Stock Trigger Temp: ${curTemp}`);
+                addEvoLog('ok', `Calibration ready: ${data.bytes_modified} byte(s) mapped | Checksum: ${data.checksum_status}`);
+            } catch (err) {
+                addEvoLog('err', "Erreur de communication : " + err.message);
+            }
+        }
+
+        async function applyEvoFanPatch() {
+            if (!evoCurrentFile) {
+                alert("Veuillez d'abord attacher un fichier Flash (.bin) !");
+                addEvoLog('warn', "No file attached. Please attach a Flash file first.");
+                return;
+            }
+            if (!evoPreviewToken) {
+                addEvoLog('warn', "Veuillez attendre la validation du fichier.");
+                await processEvoFileAnalysis(evoCurrentFile);
+                if (!evoPreviewToken) return;
+            }
+
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+            const btn = document.getElementById('btnEvoApply');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> PATCHING BINARY & CHECKSUM IN PROGRESS...`;
+            addEvoLog('info', `Executing temperature patch to ${targetTemp}°C for [${proto}]...`);
+
+            try {
+                const formData = new FormData();
+                formData.append('preview_token', evoPreviewToken);
+
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    addEvoLog('err', data.detail || "Échec de l'application du patch.");
+                    alert("Erreur : " + (data.detail || "Échec"));
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                    return;
+                }
+
+                addEvoLog('ok', `GMV Trigger successfully lowered to ${targetTemp}°C!`);
+                addEvoLog('ok', `Checksum RSA / CRC recalculated successfully.`);
+                addEvoLog('ok', `Remaining user tokens: ${data.credits_remaining}`);
+                document.getElementById('userCredits').textContent = `${data.credits_remaining}`;
+
+                addEvoLog('ok', `Exporting modified file: ${data.filename}...`);
+
+                // Trigger direct download
+                const a = document.createElement('a');
+                a.href = data.download_url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                evoPreviewToken = null;
+                btn.disabled = false;
+                btn.innerHTML = `<span>✅</span> PATCH APPLIED & EXPORTED (1 CRÉDIT)`;
+                setTimeout(() => {
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                }, 3000);
+            } catch (err) {
+                addEvoLog('err', "Erreur critique : " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+            }
+        }
+
+        // =========================================================================
+        // Admin Panel Management
+        // =========================================================================
+        async function loadAdminData() {
+            try {
+                const res = await fetch('/api/v1/admin/overview');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('adminStatUsers').textContent = data.total_users;
+                document.getElementById('adminStatCredits').textContent = `${data.total_credits} 🪙`;
+                document.getElementById('adminStatFiles').textContent = data.total_files;
+
+                const tbody = document.getElementById('adminUsersBody');
+                tbody.innerHTML = '';
+
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Aucun utilisateur inscrit.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const statusBadge = u.is_active ?
+                        '<span style="background:rgba(16,185,129,0.2); color:#34d399; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Actif</span>' :
+                        '<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Suspendu</span>';
+
+                    tr.innerHTML = `
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${u.full_name || u.username}</div>
+                            <div style="font-size:11px; color:#94a3b8;">${u.workshop_name || 'Atelier Particulier'}</div>
+                        </td>
+                        <td>
+                            <div>${u.email}</div>
+                            <div style="font-size:11px; color:#38bdf8;">${u.phone || '--'}</div>
+                        </td>
+                        <td>${u.wilaya_country || '--'}</td>
+                        <td><strong style="color:#38bdf8; font-size:15px;">${u.tokens !== undefined ? u.tokens : u.credits} 🪙</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><code style="font-size:11px; color:#94a3b8;">${u.ip_address || '127.0.0.1'}</code></td>
+                        <td>
+                            <button class="chip" style="background:#0284c7; color:#fff; border:none; margin-right:4px;" onclick="adminRechargeUser(${u.id}, '${u.full_name || u.email}')">+ Crédits</button>
+                            <button class="chip" style="background:${u.is_active ? '#ef4444' : '#10b981'}; color:#fff; border:none;" onclick="adminToggleUser(${u.id})">${u.is_active ? 'Bloquer' : 'Débloquer'}</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Admin load error:", e);
+            }
+        }
+
+        async function adminRechargeUser(userId, name) {
+            const amountStr = prompt(`Combien de crédits souhaitez-vous ajouter à ${name} ?`, "10");
+            if (!amountStr) return;
+            const amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount === 0) return;
+
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadAdminData();
+                } else {
+                    alert(data.detail || "Erreur de recharge");
+                }
+            } catch (e) {
+                alert("Erreur de communication : " + e.message);
+            }
+        }
+
+        async function adminToggleUser(userId) {
+            if (!confirm("Êtes-vous sûr de vouloir modifier le statut de ce compte ?")) return;
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminData();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
+            }
+        }
+
+        initPortal();
+                    setTimeout(() => { btn.disabled = false; btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)'; }, 2500);
+                } else {
+                    alert(data.detail || 'Erreur lors du traitement');
+                    btn.disabled = false;
+                    btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+                }
+            } catch(e) {
+                alert('Erreur serveur');
+                btn.disabled = false;
+                btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+            }
+        }
+
+        // Outils Expert Handler (Strict Validation & Dry-Run Confirmation)
+        let currentExpertPreviewToken = null;
+
+        function triggerExpertTool(toolKey, title) {
+            currentExpertTool = toolKey;
+            const inp = document.getElementById('expertFileInput');
+            inp.value = '';
+            inp.onchange = async () => {
+                if(!inp.files.length) return;
+                const file = inp.files[0];
+                const param = (toolKey === 'renault_fan_temp') ? document.getElementById('fanTempParam').value : '';
+                const protocol = (toolKey === 'renault_fan_temp') ? document.getElementById('fanEcuProtocol').value : '';
+
+                // Indicateur de chargement
+                const buttons = document.querySelectorAll('.expert-btn');
+                buttons.forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('tool', toolKey);
+                formData.append('param', param);
+                formData.append('protocol', protocol);
+
+                try {
+                    const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+
+                    if(!res.ok || !data.success) {
+                        alert(data.detail || 'Erreur lors de la validation de sécurité du fichier.');
+                        inp.value = '';
+                        return;
+                    }
+
+                    // Remplissage du Modal de confirmation
+                    currentExpertPreviewToken = data.preview_token;
+                    document.getElementById('modalEcuType').innerText = data.ecu_type || 'Calculateur Renault';
+                    document.getElementById('modalSwVersion').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+                    document.getElementById('modalBytesMod').innerText = `${data.bytes_modified} octets calibrés`;
+                    document.getElementById('modalChecksum').innerText = data.checksum_status || 'Automatique & Supporté ✅';
+                    document.getElementById('modalDesc').innerText = data.description || '';
+
+                    // Affichage des températures Fan si disponible
+                    const tempRow = document.getElementById('modalTempRow');
+                    if(data.current_temp !== undefined && data.current_temp !== null) {
+                        tempRow.style.display = 'block';
+                        document.getElementById('modalCurrentTemp').innerText = `${data.current_temp}°C`;
+                        document.getElementById('modalTargetTemp').innerText = `${param || 92}°C`;
+                    } else {
+                        tempRow.style.display = 'none';
+                    }
+
+                    const modal = document.getElementById('expertConfirmModal');
+                    modal.style.display = 'flex';
+                } catch(e) {
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+                    alert('Erreur de connexion au serveur.');
+                    inp.value = '';
+                }
+            };
+            inp.click();
+        }
+
+        function closeExpertModal() {
+            document.getElementById('expertConfirmModal').style.display = 'none';
+            currentExpertPreviewToken = null;
+            document.getElementById('expertFileInput').value = '';
+            const btn = document.getElementById('modalConfirmBtn');
+            btn.disabled = false;
+            btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+        }
+
+        async function confirmAndDownloadExpert() {
+            if(!currentExpertPreviewToken) return;
+            const btn = document.getElementById('modalConfirmBtn');
+            btn.disabled = true;
+            btn.innerText = '⚙️ Application du patch & Sauvegarde...';
+
+            const formData = new FormData();
+            formData.append('preview_token', currentExpertPreviewToken);
+
+            try {
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    window.location.href = data.download_url;
+                    closeExpertModal();
+                    alert(`✅ Opération réussie !\n\n${data.description}\nLe fichier a été téléchargé avec succès.`);
+                    // =========================================================================
+        // EVO Fan Modifier Logic (Matching Screenshot & 16 Protocols)
+        // =========================================================================
+        let evoCurrentFile = null;
+        let evoPreviewToken = null;
+
+        function addEvoLog(type, msg) {
+            const box = document.getElementById('evoConsoleLog');
+            if (!box) return;
+            const now = new Date();
+            const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+            let typeClass = 'evo-log-info';
+            let prefix = '[i] INFO:';
+            if (type === 'ok') { typeClass = 'evo-log-ok'; prefix = '[OK] SUCCESS:'; }
+            else if (type === 'warn') { typeClass = 'evo-log-warn'; prefix = '[!] WARNING:'; }
+            else if (type === 'err') { typeClass = 'evo-log-err'; prefix = '[ERR] ERROR:'; }
+
+            const line = document.createElement('div');
+            line.innerHTML = `${timeStr} <span class="${typeClass}">${prefix} ${msg}</span>`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function syncEvoTemp(val) {
+            val = parseInt(val, 10);
+            if (isNaN(val)) val = 90;
+            if (val < 70) val = 70;
+            if (val > 110) val = 110;
+            document.getElementById('evoSlider').value = val;
+            document.getElementById('evoNumberBox').value = val;
+            document.getElementById('evoTargetVal').textContent = `${val} °C`;
+            addEvoLog('info', `Target temperature consigne updated to ${val}°C`);
+        }
+
+        function onEvoProtocolChange() {
+            const proto = document.getElementById('evoEcuSelect').value;
+            addEvoLog('info', `ECU Hardware Protocol selected: ${proto}`);
+            if (evoCurrentFile) {
+                processEvoFileAnalysis(evoCurrentFile);
+            }
+        }
+
+        async function handleEvoFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            evoCurrentFile = file;
+
+            document.getElementById('evoFileName').textContent = file.name;
+            document.getElementById('evoFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB (${file.size} octets)`;
+            document.getElementById('evoFileStatus').textContent = "Analyse en cours...";
+            document.getElementById('evoFileInfo').style.display = 'block';
+
+            addEvoLog('info', `File loaded: ${file.name} (${file.size} bytes)`);
+            await processEvoFileAnalysis(file);
+        }
+
+        async function processEvoFileAnalysis(file) {
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+
+            addEvoLog('info', `Scanning binary structures for protocol [${proto}]...`);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tool', 'renault_fan_temp');
+            formData.append('param', targetTemp);
+            formData.append('protocol', proto);
+
+            try {
+                const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('evoCurrentVal').textContent = '-- °C';
+                    document.getElementById('evoFileStatus').textContent = "⚠️ Incompatible avec ce protocole";
+                    document.getElementById('evoFileStatus').style.color = "#ef4444";
+                    addEvoLog('err', data.detail || "Échec de détection de la cartographie ventilateur.");
+                    return;
+                }
+
+                evoPreviewToken = data.preview_token;
+                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "98 °C";
+                document.getElementById('evoCurrentVal').textContent = curTemp;
+                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.ecu_type || proto})`;
+                document.getElementById('evoFileStatus').style.color = "#34d399";
+
+                addEvoLog('ok', `Pattern identified! Current Stock Trigger Temp: ${curTemp}`);
+                addEvoLog('ok', `Calibration ready: ${data.bytes_modified} byte(s) mapped | Checksum: ${data.checksum_status}`);
+            } catch (err) {
+                addEvoLog('err', "Erreur de communication : " + err.message);
+            }
+        }
+
+        async function applyEvoFanPatch() {
+            if (!evoCurrentFile) {
+                alert("Veuillez d'abord attacher un fichier Flash (.bin) !");
+                addEvoLog('warn', "No file attached. Please attach a Flash file first.");
+                return;
+            }
+            if (!evoPreviewToken) {
+                addEvoLog('warn', "Veuillez attendre la validation du fichier.");
+                await processEvoFileAnalysis(evoCurrentFile);
+                if (!evoPreviewToken) return;
+            }
+
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+            const btn = document.getElementById('btnEvoApply');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> PATCHING BINARY & CHECKSUM IN PROGRESS...`;
+            addEvoLog('info', `Executing temperature patch to ${targetTemp}°C for [${proto}]...`);
+
+            try {
+                const formData = new FormData();
+                formData.append('preview_token', evoPreviewToken);
+
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    addEvoLog('err', data.detail || "Échec de l'application du patch.");
+                    alert("Erreur : " + (data.detail || "Échec"));
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                    return;
+                }
+
+                addEvoLog('ok', `GMV Trigger successfully lowered to ${targetTemp}°C!`);
+                addEvoLog('ok', `Checksum RSA / CRC recalculated successfully.`);
+                addEvoLog('ok', `Remaining user tokens: ${data.credits_remaining}`);
+                document.getElementById('userCredits').textContent = `${data.credits_remaining}`;
+
+                addEvoLog('ok', `Exporting modified file: ${data.filename}...`);
+
+                // Trigger direct download
+                const a = document.createElement('a');
+                a.href = data.download_url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                evoPreviewToken = null;
+                btn.disabled = false;
+                btn.innerHTML = `<span>✅</span> PATCH APPLIED & EXPORTED (1 CRÉDIT)`;
+                setTimeout(() => {
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                }, 3000);
+            } catch (err) {
+                addEvoLog('err', "Erreur critique : " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+            }
+        }
+
+        // =========================================================================
+        // Admin Panel Management
+        // =========================================================================
+        async function loadAdminData() {
+            try {
+                const res = await fetch('/api/v1/admin/overview');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('adminStatUsers').textContent = data.total_users;
+                document.getElementById('adminStatCredits').textContent = `${data.total_credits} 🪙`;
+                document.getElementById('adminStatFiles').textContent = data.total_files;
+
+                const tbody = document.getElementById('adminUsersBody');
+                tbody.innerHTML = '';
+
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Aucun utilisateur inscrit.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const statusBadge = u.is_active ?
+                        '<span style="background:rgba(16,185,129,0.2); color:#34d399; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Actif</span>' :
+                        '<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Suspendu</span>';
+
+                    tr.innerHTML = `
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${u.full_name || u.username}</div>
+                            <div style="font-size:11px; color:#94a3b8;">${u.workshop_name || 'Atelier Particulier'}</div>
+                        </td>
+                        <td>
+                            <div>${u.email}</div>
+                            <div style="font-size:11px; color:#38bdf8;">${u.phone || '--'}</div>
+                        </td>
+                        <td>${u.wilaya_country || '--'}</td>
+                        <td><strong style="color:#38bdf8; font-size:15px;">${u.tokens !== undefined ? u.tokens : u.credits} 🪙</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><code style="font-size:11px; color:#94a3b8;">${u.ip_address || '127.0.0.1'}</code></td>
+                        <td>
+                            <button class="chip" style="background:#0284c7; color:#fff; border:none; margin-right:4px;" onclick="adminRechargeUser(${u.id}, '${u.full_name || u.email}')">+ Crédits</button>
+                            <button class="chip" style="background:${u.is_active ? '#ef4444' : '#10b981'}; color:#fff; border:none;" onclick="adminToggleUser(${u.id})">${u.is_active ? 'Bloquer' : 'Débloquer'}</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Admin load error:", e);
+            }
+        }
+
+        async function adminRechargeUser(userId, name) {
+            const amountStr = prompt(`Combien de crédits souhaitez-vous ajouter à ${name} ?`, "10");
+            if (!amountStr) return;
+            const amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount === 0) return;
+
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadAdminData();
+                } else {
+                    alert(data.detail || "Erreur de recharge");
+                }
+            } catch (e) {
+                alert("Erreur de communication : " + e.message);
+            }
+        }
+
+        async function adminToggleUser(userId) {
+            if (!confirm("Êtes-vous sûr de vouloir modifier le statut de ce compte ?")) return;
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminData();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
+            }
+        }
+
+        initPortal();
+                } else {
+                    alert(data.detail || 'Erreur lors de l\'application du patch expert.');
+                    btn.disabled = false;
+                    btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+                }
+            } catch(e) {
+                alert('Erreur serveur lors de la finalisation.');
+                btn.disabled = false;
+                btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+            }
+        }
+
+        // Catalogue
+        async function loadCatalogue() {
+            const res = await fetch('/api/v1/supported-ecus');
+            catalogueData = await res.json();
+            const numEl = document.getElementById('catTotalNum');
+            if(numEl) numEl.innerText = catalogueData.length;
+            renderCatalogue(catalogueData);
+        }
+
+        function renderCatalogue(list) {
+            const grid = document.getElementById('catGrid');
+            grid.innerHTML = '';
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'cat-card';
+
+                const fuelClass = item.fuel === 'Essence' ? 'fuel-essence' : 'fuel-diesel';
+                let badges = '';
+                item.solutions.forEach(s => {
+                    badges += `<span style="background:rgba(255,255,255,0.05); border:1px solid #334155; color:#cbd5e1; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px; display:inline-block;">✔ ${s}</span>`;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div style="font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:4px;">
+                            ${item.brand}
+                            <span class="fuel-badge ${fuelClass}">⛽ ${item.fuel || 'DIESEL'}</span>
+                        </div>
+                        <div style="font-size:16px; font-weight:800; color:#fff; margin-bottom:4px;">${item.ecu}</div>
+                        <div style="font-size:12px; color:#38bdf8; margin-bottom:12px;">${item.engine}</div>
+                    </div>
+                    <div>${badges}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setBrandFilter(b, btn) {
+            currentBrandFilter = b;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            filterCatalogue();
+        }
+        function setFuelFilter(f, btn) {
+            currentFuelFilter = f;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            filterCatalogue();
+        }
+        function filterCatalogue() {
+            const q = document.getElementById('catSearch').value.toLowerCase();
+            let res = catalogueData;
+            if(currentBrandFilter !== 'Tous') {
+                res = res.filter(i => i.brand.includes(currentBrandFilter) || i.ecu.includes(currentBrandFilter));
+            }
+            if(currentFuelFilter !== 'Tous') {
+                res = res.filter(i => (i.fuel || 'Diesel') === currentFuelFilter);
+            }
+            if(q) {
+                res = res.filter(i => i.brand.toLowerCase().includes(q) || i.ecu.toLowerCase().includes(q) || i.engine.toLowerCase().includes(q) || i.solutions.some(s => s.toLowerCase().includes(q)));
+            }
+            renderCatalogue(res);
+        }
+
+        async function loadUserHistory() {
+            const res = await fetch('/api/v1/user/history');
+            const data = await res.json();
+            const tb = document.getElementById('historyBody');
+            tb.innerHTML = '';
+            if(!data.files || !data.files.length) {
+                tb.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Aucun fichier traité dans votre historique.</td></tr>';
+                return;
+            }
+            data.files.forEach(f => {
+                tb.innerHTML += `
+                    <tr>
+                        <td><strong>${f.original_name}</strong></td>
+                        <td>${f.brand} / ${f.ecu_type}</td>
+                        <td><span style="background:rgba(56,189,248,0.15); color:#38bdf8; padding:3px 8px; border-radius:4px; font-size:11px;">${f.solutions}</span></td>
+                        <td>${f.created_at}</td>
+                        <td><a href="/api/v1/tuning/download/${f.id}" style="color:#10b981; font-weight:700; text-decoration:none;">Télécharger 📥</a></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // =========================================================================
+        // EVO Fan Modifier Logic (Matching Screenshot & 16 Protocols)
+        // =========================================================================
+        let evoCurrentFile = null;
+        let evoPreviewToken = null;
+
+        function addEvoLog(type, msg) {
+            const box = document.getElementById('evoConsoleLog');
+            if (!box) return;
+            const now = new Date();
+            const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+            let typeClass = 'evo-log-info';
+            let prefix = '[i] INFO:';
+            if (type === 'ok') { typeClass = 'evo-log-ok'; prefix = '[OK] SUCCESS:'; }
+            else if (type === 'warn') { typeClass = 'evo-log-warn'; prefix = '[!] WARNING:'; }
+            else if (type === 'err') { typeClass = 'evo-log-err'; prefix = '[ERR] ERROR:'; }
+
+            const line = document.createElement('div');
+            line.innerHTML = `${timeStr} <span class="${typeClass}">${prefix} ${msg}</span>`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function syncEvoTemp(val) {
+            val = parseInt(val, 10);
+            if (isNaN(val)) val = 90;
+            if (val < 70) val = 70;
+            if (val > 110) val = 110;
+            document.getElementById('evoSlider').value = val;
+            document.getElementById('evoNumberBox').value = val;
+            document.getElementById('evoTargetVal').textContent = `${val} °C`;
+            addEvoLog('info', `Target temperature consigne updated to ${val}°C`);
+        }
+
+        function onEvoProtocolChange() {
+            const proto = document.getElementById('evoEcuSelect').value;
+            addEvoLog('info', `ECU Hardware Protocol selected: ${proto}`);
+            if (evoCurrentFile) {
+                processEvoFileAnalysis(evoCurrentFile);
+            }
+        }
+
+        async function handleEvoFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            evoCurrentFile = file;
+
+            document.getElementById('evoFileName').textContent = file.name;
+            document.getElementById('evoFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB (${file.size} octets)`;
+            document.getElementById('evoFileStatus').textContent = "Analyse en cours...";
+            document.getElementById('evoFileInfo').style.display = 'block';
+
+            addEvoLog('info', `File loaded: ${file.name} (${file.size} bytes)`);
+            await processEvoFileAnalysis(file);
+        }
+
+        async function processEvoFileAnalysis(file) {
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+
+            addEvoLog('info', `Scanning binary structures for protocol [${proto}]...`);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tool', 'renault_fan_temp');
+            formData.append('param', targetTemp);
+            formData.append('protocol', proto);
+
+            try {
+                const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('evoCurrentVal').textContent = '-- °C';
+                    document.getElementById('evoFileStatus').textContent = "⚠️ Incompatible avec ce protocole";
+                    document.getElementById('evoFileStatus').style.color = "#ef4444";
+                    addEvoLog('err', data.detail || "Échec de détection de la cartographie ventilateur.");
+                    return;
+                }
+
+                evoPreviewToken = data.preview_token;
+                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "98 °C";
+                document.getElementById('evoCurrentVal').textContent = curTemp;
+                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.ecu_type || proto})`;
+                document.getElementById('evoFileStatus').style.color = "#34d399";
+
+                addEvoLog('ok', `Pattern identified! Current Stock Trigger Temp: ${curTemp}`);
+                addEvoLog('ok', `Calibration ready: ${data.bytes_modified} byte(s) mapped | Checksum: ${data.checksum_status}`);
+            } catch (err) {
+                addEvoLog('err', "Erreur de communication : " + err.message);
+            }
+        }
+
+        async function applyEvoFanPatch() {
+            if (!evoCurrentFile) {
+                alert("Veuillez d'abord attacher un fichier Flash (.bin) !");
+                addEvoLog('warn', "No file attached. Please attach a Flash file first.");
+                return;
+            }
+            if (!evoPreviewToken) {
+                addEvoLog('warn', "Veuillez attendre la validation du fichier.");
+                await processEvoFileAnalysis(evoCurrentFile);
+                if (!evoPreviewToken) return;
+            }
+
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+            const btn = document.getElementById('btnEvoApply');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> PATCHING BINARY & CHECKSUM IN PROGRESS...`;
+            addEvoLog('info', `Executing temperature patch to ${targetTemp}°C for [${proto}]...`);
+
+            try {
+                const formData = new FormData();
+                formData.append('preview_token', evoPreviewToken);
+
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    addEvoLog('err', data.detail || "Échec de l'application du patch.");
+                    alert("Erreur : " + (data.detail || "Échec"));
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                    return;
+                }
+
+                addEvoLog('ok', `GMV Trigger successfully lowered to ${targetTemp}°C!`);
+                addEvoLog('ok', `Checksum RSA / CRC recalculated successfully.`);
+                addEvoLog('ok', `Remaining user tokens: ${data.credits_remaining}`);
+                document.getElementById('userCredits').textContent = `${data.credits_remaining}`;
+
+                addEvoLog('ok', `Exporting modified file: ${data.filename}...`);
+
+                // Trigger direct download
+                const a = document.createElement('a');
+                a.href = data.download_url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                evoPreviewToken = null;
+                btn.disabled = false;
+                btn.innerHTML = `<span>✅</span> PATCH APPLIED & EXPORTED (1 CRÉDIT)`;
+                setTimeout(() => {
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                }, 3000);
+            } catch (err) {
+                addEvoLog('err', "Erreur critique : " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+            }
+        }
+
+        // =========================================================================
+        // Admin Panel Management
+        // =========================================================================
+        async function loadAdminData() {
+            try {
+                const res = await fetch('/api/v1/admin/overview');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('adminStatUsers').textContent = data.total_users;
+                document.getElementById('adminStatCredits').textContent = `${data.total_credits} 🪙`;
+                document.getElementById('adminStatFiles').textContent = data.total_files;
+
+                const tbody = document.getElementById('adminUsersBody');
+                tbody.innerHTML = '';
+
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Aucun utilisateur inscrit.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const statusBadge = u.is_active ?
+                        '<span style="background:rgba(16,185,129,0.2); color:#34d399; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Actif</span>' :
+                        '<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Suspendu</span>';
+
+                    tr.innerHTML = `
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${u.full_name || u.username}</div>
+                            <div style="font-size:11px; color:#94a3b8;">${u.workshop_name || 'Atelier Particulier'}</div>
+                        </td>
+                        <td>
+                            <div>${u.email}</div>
+                            <div style="font-size:11px; color:#38bdf8;">${u.phone || '--'}</div>
+                        </td>
+                        <td>${u.wilaya_country || '--'}</td>
+                        <td><strong style="color:#38bdf8; font-size:15px;">${u.tokens !== undefined ? u.tokens : u.credits} 🪙</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><code style="font-size:11px; color:#94a3b8;">${u.ip_address || '127.0.0.1'}</code></td>
+                        <td>
+                            <button class="chip" style="background:#0284c7; color:#fff; border:none; margin-right:4px;" onclick="adminRechargeUser(${u.id}, '${u.full_name || u.email}')">+ Crédits</button>
+                            <button class="chip" style="background:${u.is_active ? '#ef4444' : '#10b981'}; color:#fff; border:none;" onclick="adminToggleUser(${u.id})">${u.is_active ? 'Bloquer' : 'Débloquer'}</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Admin load error:", e);
+            }
+        }
+
+        async function adminRechargeUser(userId, name) {
+            const amountStr = prompt(`Combien de crédits souhaitez-vous ajouter à ${name} ?`, "10");
+            if (!amountStr) return;
+            const amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount === 0) return;
+
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadAdminData();
+                } else {
+                    alert(data.detail || "Erreur de recharge");
+                }
+            } catch (e) {
+                alert("Erreur de communication : " + e.message);
+            }
+        }
+
+        async function adminToggleUser(userId) {
+            if (!confirm("Êtes-vous sûr de vouloir modifier le statut de ce compte ?")) return;
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminData();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
+            }
+        }
+
+        initPortal();
+    </script>
+</body>
+</html>

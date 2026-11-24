@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+cloudflared.exe
+cloudflared.log
+uvicorn.log
+public_url.txt
+server/uploads/*
+!server/uploads/.gitkeep
+server/processed/*
+!server/processed/.gitkeep
+.env
+.venv/
+env/
+venv/

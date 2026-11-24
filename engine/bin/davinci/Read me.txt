@@ -1,0 +1,25 @@
+***DV1.015_A4_2.0tdi_EDC16U31_sw383711 (TVA_off OK! deleted like Flaps!)
+TVA disconected !!! DaVinci deleted: DTC 02015 DTC 02016 DTC 03101 DTC 03102 DTC P1028 
+***DV1.015_Pasat 6_3C_2.0TDI_140KS_EDC16U34_sw399387_DPF_EGR_OK_dif.sens DPF and EGR disconected, both! 
+***DV1.015_Skoda_A5_BLS_2007_1.9tdi_105KS_EDC16U34_sw389825_DPF_OFF OK!!! All sensores connected, but temperatures -275C! OK 
+***DV1.026_Skoda Octavia_A5_1.9tdi_EDC16U34_sw381829_DPF_off OK, all sensores disconnected, and everything's OK!
+*** DV1.026 A6_4F_2008y_2.0tdi pd_140hp_automatic_EDC16U31_sw391830_DPF_off_OK_all sensores disconnected_no need full bdm. 
+***DV1.026_Fiat Doblo_1.3MJTD_2012_8F3.D3_sw51908953_S&S+DPF+EGR=OK_all sens. connected 
+***DV1.026_Doblo_1.3MJTD_2006_55KW_6F3.D4_sw3056D446_EGR_OK_egr stayed connected 
+***DV1.026_VW_G6_1.6tdi_2010_PCR2.1_CAYC_105KS_sw9971_EGR=OK, connector EGR must be plugged. (take care about working temperature! A lot of this car 1.6tdi PCR2.1 have a problem with thermostat and temperature of engine!) If temperature is OK, this DV EGR solution will work w/o problems and DPF will work normally. I have tested last car for two months, than write this info! 
+***DV1.026_VW_G6_2.0tdi_CR_2010_MT_103KW_EDC17C46_sw505441_DPF=OK, all connectors plugged 
+I am using DV26 and have tested BMW F10 530d EDC17CP45 EGR Off and it works, no unplugging. It works.
+The second car is BMW F10 520d EDC17C41 tested EGR Off and it works, no unplugging. It works.
+The third car is F48 B4720 EDC17C50 EGR Off and Lambda Off without unplugging. It works.
+DV1.028 Bmw edc16 all edc17c02/c06/c50 dpf egr lambda work all good
+DV1.028 PSA adblue edc17c60 and dcm 6.2, work all good
+DV1.028 VAG edc16 and 17 all dpf and egr work... all good
+DV1.028 Audi A3 8V 1.6 TDI CRKA EDC17C64 HW: 04L906021AQ SW: 548654 DPF EGR OFF (WORKS with Sensors Connected)
+DV1.028 Audi A7 3.0 BiTDI CGQB EDC17CP44 HW: 4G0907589A SW: 526374 DPF EGR OFF (WORKS with Sensors Connected)
+DV1.028 BMW E90 320i Continental MSD8x SW: 4RDQID NOX LAMBDA OFF (WORKS)
+DV1.028 Mercedes-Benz Vito 3.0 V6 CDI EDC17CP10 SW: 512400 EGR OFF (WORKS but I had to manually delete one DTC code after EGR OFF, happens when you do not remove connector, so remove connector or delete DTC afterwards)
+DV1.028 Opel Zafira C Tourer 1.6 CDTI Delco E98 (NOT RECOGNIZED)
+DV1.028 Seat Ibiza 1.2 TDI CFWA Delphi DCM 3.7 HW: 03P906021AA SW: 9978 EGR DPF OFF (WORKS All Sensors Connected)
+DV1.028 Volkswagen Transporter 2.0 TDI Delphi DCM6.2 HW: 04L906056KA SW: 6163 AdBlue OFF (NOT WORKING, VAN DOES NOT START, EVEN AFTER RESET AND WRITE AGAIN AND CONNECTORS REMOVED)
+
+Need to check what I have done more in my other maps but this one is my first map. Delco E98 is definately not working and same goes for Delphi DCM 6.2 for AdBlue.
