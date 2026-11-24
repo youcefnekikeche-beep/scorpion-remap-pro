@@ -1,0 +1,17 @@
+name: Keep Alive Render 24/7
+
+on:
+  schedule:
+    # Runs every 10 minutes to prevent Render free tier from sleeping
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Scorpion Remap Cloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Keep-Alive Ping
+        run: |
+          echo "Pinging Scorpion Remap Pro on Render..."
+          curl -s -f -m 45 https://scorpion-remap-pro.onrender.com/healthz || echo "Ping attempt finished"

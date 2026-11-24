@@ -166,6 +166,7 @@ async def login_page(request: Request):
         return RedirectResponse(url="/portal")
     return templates.TemplateResponse(request, "login.html")
 
+@app.head("/portal")
 @app.get("/portal", response_class=HTMLResponse)
 async def portal_page(request: Request):
     user = get_current_user(request)
@@ -173,6 +174,7 @@ async def portal_page(request: Request):
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(request, "client_dashboard.html", {"user": user})
 
+@app.head("/admin")
 @app.get("/admin", response_class=HTMLResponse)
 async def admin_page(request: Request):
     user = get_current_user(request)
