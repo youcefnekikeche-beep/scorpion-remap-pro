@@ -48,22 +48,6 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 # ================= حماية المنصة وحظر الـ IP المشبوه (Security Middleware) =================
 @app.middleware("http")
 async def security_ip_middleware(request: Request, call_next):
-    # استخراج عنوان الـ IP الحقيقي عبر البروكسي
-    forwarded = request.headers.get("X-Forwarded-For")
-    real_ip = forwarded.split(",")[0].strip() if forwarded else (request.client.host if request.client else "127.0.0.1")
-
-    # فحص الحظر لجميع الطلبات ما عدا مسار فحص السيرفر
-    if not request.url.path.startswith("/healthz") and not request.url.path.startswith("/favicon.ico"):
-        banned, reason = is_ip_banned(real_ip)
-        if banned:
-            return JSONResponse(
-                status_code=403,
-                content={
-                    "detail": reason or "⛔ Votre adresse IP a été bloquée par le système de sécurité suite à de multiples tentatives suspectes.",
-                    "ip": real_ip
-                }
-            )
-
     response = await call_next(request)
 
     # معايير أمان المتصفح الصارمة (OWASP Security Headers)
@@ -389,12 +373,6 @@ async def logout(request: Request):
 async def api_login(payload: dict, request: Request, response: Response):
     identifier = (payload.get("username", "") or payload.get("email", "") or payload.get("identifier", "")).strip()
     password = payload.get("password", "").strip()
-    client_ip = get_client_ip(request)
-
-    # 1. التحقق من حظر الـ IP مسبقاً
-    banned, reason = is_ip_banned(client_ip)
-    if banned:
-        raise HTTPException(status_code=403, detail=reason)
 
     if not identifier or not password:
         raise HTTPException(status_code=400, detail="Veuillez renseigner votre identifiant et mot de passe.")
@@ -404,22 +382,11 @@ async def api_login(payload: dict, request: Request, response: Response):
     except PermissionError as pe:
         raise HTTPException(status_code=403, detail=str(pe))
 
-    # محاولة فاشلة -> تسجيل المحاولة في الحماية وحظر الـ IP تلقائياً إذا بلغت 5 محاولات
     if not user:
-        attempts, just_banned = record_failed_attempt(client_ip, max_attempts=5, ban_minutes=30)
-        if just_banned:
-            raise HTTPException(
-                status_code=429,
-                detail="⛔ تم حظر هذا الجهاز / IP مؤقتاً لمدة 30 دقيقة بسبب تكرار المحاولات الخاطئة (Anti-Brute-Force)."
-            )
-        remaining = max(0, 5 - attempts)
         raise HTTPException(
             status_code=400,
-            detail=f"بيانات الدخول غير صحيحة. المحاولات المتبقية قبل حظر الـ IP تلقائياً: {remaining}"
+            detail="البريد الإلكتروني أو كلمة المرور غير صحيحة. يرجى التحقق وإعادة المحاولة."
         )
-
-    # نجاح الدخول -> مسح عداد المحاولات الفاشلة
-    clear_failed_attempts(client_ip)
 
     token = str(uuid.uuid4())
     SESSIONS[token] = user["id"]
@@ -763,6 +730,18 @@ async def api_admin_recharge_user(user_id: int, payload: dict, admin: dict = Dep
 async def api_admin_toggle_user(user_id: int, admin: dict = Depends(require_admin)):
     new_status = toggle_user_active_status(user_id)
     return {"success": True, "is_active": new_status}
+
+@app.post("/api/v1/admin/users/{user_id}/reset-password")
+async def api_admin_reset_password(user_id: int, payload: dict, admin: dict = Depends(require_admin)):
+    new_password = payload.get("password", "").strip()
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit comporter au moins 6 caractères.")
+    new_hash = hash_password(new_password)
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET password_hash = ? WHERE id = ?", (new_hash, user_id))
+        conn.commit()
+    return {"success": True, "message": "تم تغيير كلمة المرور بنجاح."}
 
 @app.post("/api/v1/admin/users")
 async def api_admin_create_user(payload: dict, admin: dict = Depends(require_admin)):
