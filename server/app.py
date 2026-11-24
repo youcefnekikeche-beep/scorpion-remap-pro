@@ -385,7 +385,7 @@ async def logout(request: Request):
 
 @app.post("/api/v1/auth/login")
 async def api_login(payload: dict, request: Request, response: Response):
-    identifier = payload.get("username", "").strip()
+    identifier = (payload.get("username", "") or payload.get("email", "") or payload.get("identifier", "")).strip()
     password = payload.get("password", "").strip()
     client_ip = get_client_ip(request)
 
@@ -724,6 +724,7 @@ async def api_admin_overview(admin: dict = Depends(require_admin)):
     users = get_all_users()
     for u in users:
         u["credits"] = u.get("tokens", 0)
+        u["username"] = u.get("full_name") or u.get("email") or "Client"
         u["is_admin"] = (u.get("role") == "admin")
 
     with get_db() as conn:
@@ -760,6 +761,38 @@ async def api_admin_recharge_user(user_id: int, payload: dict, admin: dict = Dep
 async def api_admin_toggle_user(user_id: int, admin: dict = Depends(require_admin)):
     new_status = toggle_user_active_status(user_id)
     return {"success": True, "is_active": new_status}
+
+@app.post("/api/v1/admin/users")
+async def api_admin_create_user(payload: dict, admin: dict = Depends(require_admin)):
+    full_name = payload.get("full_name") or payload.get("username", "").strip()
+    workshop_name = payload.get("workshop_name", "Atelier").strip()
+    phone = payload.get("phone", "").strip()
+    email = payload.get("email", "").strip()
+    wilaya_country = payload.get("wilaya_country", "Algeria").strip()
+    password = payload.get("password", "Scorpion2026!")
+    credits = int(payload.get("credits", 10))
+
+    if not phone:
+        phone = f"+213{int(datetime.now().timestamp()) % 1000000000}"
+    if not email:
+        email = f"{full_name.lower().replace(' ', '')}{int(datetime.now().timestamp()) % 10000}@remap.pro"
+
+    try:
+        new_u = register_user(
+            full_name=full_name,
+            workshop_name=workshop_name,
+            phone=phone,
+            email=email,
+            wilaya_country=wilaya_country,
+            password=password,
+            ip="Admin_Created"
+        )
+        if credits != 10:
+            diff = credits - 10
+            add_user_tokens(new_u["id"], diff, "admin_init", f"Ajustement initial crédits ({credits})")
+        return {"success": True, "user": new_u}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @app.get("/api/v1/admin/banned-ips")
 async def api_admin_get_banned_ips(admin: dict = Depends(require_admin)):

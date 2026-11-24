@@ -3,232 +3,548 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة الإدارة العليا | SCORPION REMAP PRO</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <title>لوحة الإدارة العليا | SCORPION REMAP PRO V3.2.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Cairo', sans-serif; }
-        body { background: #080d1a; color: #f8fafc; min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
+        body { background: #070b14; color: #f8fafc; min-height: 100vh; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        
+        /* Header */
         .header {
-            display: flex; justify-content: space-between; align-items: center;
-            background: #111a2e; border: 1px solid #1e293b; border-radius: 16px;
-            padding: 16px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 18px;
+            padding: 18px 26px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
-        .header h1 { font-size: 20px; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 10px; }
+        .header-title { display: flex; align-items: center; gap: 12px; }
+        .header-title h1 { font-size: 22px; font-weight: 900; color: #38bdf8; letter-spacing: 0.5px; }
+        .live-badge {
+            display: inline-flex; align-items: center; gap: 6px; background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.4); color: #4ade80; padding: 4px 10px;
+            border-radius: 20px; font-size: 12px; font-weight: 700;
+        }
+        .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 10px #22c55e; animation: pulse 1.8s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+        
+        .header-actions { display: flex; align-items: center; gap: 12px; }
+        .btn-portal {
+            background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid #0284c7;
+            padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; text-decoration: none; transition: 0.2s;
+        }
+        .btn-portal:hover { background: #0284c7; color: #fff; }
+        .btn-refresh {
+            background: rgba(100, 116, 139, 0.2); color: #cbd5e1; border: 1px solid #475569;
+            padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-refresh:hover { background: #334155; color: #fff; }
         .btn-logout {
-            background: #ef4444; color: #fff; border: none; padding: 8px 16px; border-radius: 8px;
-            font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none;
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: #fff;
+            border: none; padding: 9px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; text-decoration: none; transition: 0.2s; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .btn-logout:hover { opacity: 0.9; }
+
+        /* Realtime Alert Banner */
+        #newUserNotificationBanner {
+            display: none; background: linear-gradient(90deg, #065f46 0%, #047857 100%);
+            border: 1px solid #34d399; border-radius: 14px; padding: 14px 20px; margin-bottom: 24px;
+            color: #ecfdf5; font-size: 15px; font-weight: 700; align-items: center; justify-content: space-between;
+            box-shadow: 0 8px 24px rgba(5, 150, 105, 0.4); animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown { from { transform: translateY(-15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 24px; }
         .stat-card {
-            background: #111a2e; border: 1px solid #1e293b; border-radius: 14px; padding: 20px;
-            display: flex; align-items: center; gap: 16px;
+            background: #0f172a; border: 1px solid rgba(51, 65, 85, 0.7); border-radius: 16px;
+            padding: 22px; display: flex; align-items: center; gap: 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+            position: relative; overflow: hidden;
         }
+        .stat-card::after {
+            content: ''; position: absolute; top: 0; right: 0; width: 4px; height: 100%;
+            background: #38bdf8;
+        }
+        .stat-card.stat-credits::after { background: #f59e0b; }
+        .stat-card.stat-files::after { background: #10b981; }
+        .stat-card.stat-security::after { background: #ef4444; }
+
         .stat-icon {
-            width: 50px; height: 50px; border-radius: 12px; background: rgba(56, 189, 248, 0.15);
-            color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 24px;
+            width: 54px; height: 54px; border-radius: 14px; background: rgba(56, 189, 248, 0.12);
+            color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0;
         }
-        .stat-info h3 { font-size: 26px; font-weight: 800; color: #fff; }
-        .stat-info p { font-size: 13px; color: #94a3b8; }
+        .stat-credits .stat-icon { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+        .stat-files .stat-icon { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+        .stat-security .stat-icon { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+
+        .stat-info h3 { font-size: 28px; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 4px; }
+        .stat-info p { font-size: 13px; color: #94a3b8; font-weight: 600; }
+
+        /* Main Card */
         .main-card {
-            background: #111a2e; border: 1px solid #1e293b; border-radius: 16px; padding: 24px; margin-bottom: 24px;
+            background: #0f172a; border: 1px solid rgba(51, 65, 85, 0.7); border-radius: 18px;
+            padding: 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
         .card-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+            margin-bottom: 20px; padding-bottom: 14px; border-bottom: 1px solid #1e293b;
         }
-        .card-header h2 { font-size: 18px; font-weight: 700; color: #f1f5f9; }
+        .card-header h2 { font-size: 19px; font-weight: 800; color: #f8fafc; display: flex; align-items: center; gap: 10px; }
+        .card-header-actions { display: flex; align-items: center; gap: 12px; }
+        .search-box {
+            background: #070b14; border: 1px solid #334155; border-radius: 10px; padding: 8px 14px;
+            color: #fff; font-size: 13px; outline: none; width: 240px; transition: 0.2s;
+        }
+        .search-box:focus { border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.3); }
+
         .btn-add {
-            background: #0284c7; color: #fff; border: none; padding: 10px 18px; border-radius: 10px;
-            font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #fff; border: none;
+            padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700;
+            cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3);
+            transition: 0.2s;
         }
-        .btn-add:hover { background: #0369a1; }
-        table { width: 100%; border-collapse: collapse; text-align: right; }
-        th { padding: 12px 14px; background: #0b1120; color: #94a3b8; font-size: 13px; border-bottom: 1px solid #1e293b; }
-        td { padding: 14px; border-bottom: 1px solid #1e293b; font-size: 14px; color: #e2e8f0; }
-        tr:hover { background: rgba(255,255,255,0.02); }
+        .btn-add:hover { opacity: 0.95; transform: translateY(-1px); }
+
+        /* Table */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: right; min-width: 900px; }
+        th { padding: 13px 14px; background: #090e17; color: #94a3b8; font-size: 12px; font-weight: 700; border-bottom: 1px solid #1e293b; text-transform: uppercase; }
+        td { padding: 14px; border-bottom: 1px solid rgba(51, 65, 85, 0.4); font-size: 13.5px; color: #e2e8f0; vertical-align: middle; }
+        tr:hover { background: rgba(56, 189, 248, 0.02); }
+
+        .user-cell-title { font-weight: 800; color: #fff; font-size: 14.5px; display: flex; align-items: center; gap: 6px; }
+        .user-cell-sub { font-size: 12px; color: #38bdf8; font-weight: 600; margin-top: 2px; }
+        .contact-cell-email { color: #cbd5e1; font-size: 13px; }
+        .contact-cell-phone { color: #34d399; font-weight: 700; font-size: 12.5px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+
         .badge {
-            display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;
+            display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11.5px; font-weight: 700;
         }
-        .badge-active { background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid #22c55e; }
-        .badge-disabled { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
-        .badge-credits { background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 800; }
-        .action-btns { display: flex; gap: 8px; }
+        .badge-active { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .badge-disabled { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .badge-credits { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); font-weight: 800; font-size: 13px; }
+        .badge-admin { background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid #a855f7; font-size: 11px; }
+
+        .action-btns { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-sm {
-            padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; border: none;
+            padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: none; transition: 0.2s;
         }
-        .btn-charge { background: #10b981; color: #fff; }
-        .btn-charge:hover { background: #059669; }
-        .btn-toggle { background: #334155; color: #f1f5f9; }
-        .btn-toggle:hover { background: #475569; }
+        .btn-charge { background: #059669; color: #fff; }
+        .btn-charge:hover { background: #10b981; }
+        .btn-toggle-freeze { background: #dc2626; color: #fff; }
+        .btn-toggle-freeze:hover { background: #ef4444; }
+        .btn-toggle-activate { background: #2563eb; color: #fff; }
+        .btn-toggle-activate:hover { background: #3b82f6; }
+        .btn-unban { background: #10b981; color: #fff; }
+        .btn-unban:hover { background: #059669; }
+
         /* Modal */
         .modal {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-            align-items: center; justify-content: center; z-index: 100;
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px);
+            align-items: center; justify-content: center; z-index: 1000; padding: 20px;
         }
         .modal-content {
-            background: #111a2e; border: 1px solid #334155; border-radius: 16px; padding: 28px; width: 100%; max-width: 420px;
+            background: #0f172a; border: 1px solid #334155; border-radius: 20px; padding: 28px; width: 100%; max-width: 480px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8); animation: slideDown 0.3s ease;
         }
-        .modal-content h3 { font-size: 18px; margin-bottom: 16px; color: #38bdf8; }
+        .modal-content h3 { font-size: 19px; font-weight: 800; margin-bottom: 18px; color: #38bdf8; display: flex; align-items: center; gap: 8px; }
+        .form-group-modal { margin-bottom: 14px; }
+        .form-group-modal label { display: block; font-size: 12.5px; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
         .modal-input {
-            width: 100%; padding: 12px; background: #080d1a; border: 1px solid #334155; border-radius: 8px;
-            color: #fff; font-size: 14px; margin-bottom: 14px; outline: none;
+            width: 100%; padding: 11px 14px; background: #070b14; border: 1px solid #334155; border-radius: 9px;
+            color: #fff; font-size: 13.5px; outline: none; transition: 0.2s;
         }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+        .modal-input:focus { border-color: #38bdf8; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- الهيدر الرئيسي -->
         <header class="header">
-            <h1><span>🦂</span> SCORPION REMAP PRO | لوحة الإدارة العليا</h1>
-            <div style="display:flex; gap:12px; align-items:center;">
-                <a href="/portal" style="color:#38bdf8; text-decoration:none; font-weight:700; font-size:14px;">بوابة الزبائن ↗</a>
+            <div class="header-title">
+                <h1><span>🦂</span> SCORPION REMAP PRO | لوحة المدير العام</h1>
+                <span class="live-badge"><span class="live-dot"></span> متصل بالسحابة مباشر</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn-refresh" onclick="fetchDashboardData(true)"><span>🔄</span> تحديث فوري</button>
+                <a href="/portal" class="btn-portal">بوابة الورشة والزبائن ↗</a>
                 <a href="/logout" class="btn-logout">تسجيل الخروج</a>
             </div>
         </header>
 
+        <!-- شريط تنبيه فوري بالزبائن الجدد -->
+        <div id="newUserNotificationBanner">
+            <div id="newUserNotificationText">🎉 تم تسجيل زبون جديد للتو في المنصة!</div>
+            <button onclick="document.getElementById('newUserNotificationBanner').style.display='none'" style="background:none; border:none; color:#fff; font-size:18px; cursor:pointer;">✕</button>
+        </div>
+
+        <!-- إحصائيات المنصة -->
         <section class="stats-grid">
             <div class="stat-card">
                 <div class="stat-icon">👥</div>
                 <div class="stat-info">
                     <h3 id="statUsers">--</h3>
-                    <p>إجمالي المشتركين</p>
+                    <p>إجمالي الزبائن والمشتركين</p>
                 </div>
             </div>
-            <div class="stat-card">
-                <div class="stat-icon">⚡</div>
+            <div class="stat-card stat-credits">
+                <div class="stat-icon">🪙</div>
                 <div class="stat-info">
                     <h3 id="statCredits">--</h3>
-                    <p>النقاط الإجمالية المشحونة</p>
+                    <p>رصيد التوكنز والنقاط الفعال</p>
                 </div>
             </div>
-            <div class="stat-card">
+            <div class="stat-card stat-files">
                 <div class="stat-icon">📁</div>
                 <div class="stat-info">
                     <h3 id="statFiles">--</h3>
-                    <p>الملفات المعدلة بنجاح</p>
+                    <p>إجمالي الملفات المعدلة</p>
+                </div>
+            </div>
+            <div class="stat-card stat-security">
+                <div class="stat-icon">🛡️</div>
+                <div class="stat-info">
+                    <h3 id="statBannedIps">0</h3>
+                    <p>عناوين IP محظورة للحماية</p>
                 </div>
             </div>
         </section>
 
-        <!-- إدارة المستخدمين -->
+        <!-- إدارة المشتركين -->
         <section class="main-card">
             <div class="card-header">
-                <h2>إدارة حسابات الزبائن والمشتركين</h2>
-                <button class="btn-add" onclick="openAddUserModal()">+ إضافة زبون جديد</button>
+                <h2><span>👥</span> إدارة حسابات الزبائن وأصحاب الورشات</h2>
+                <div class="card-header-actions">
+                    <input type="text" id="userSearchInput" class="search-box" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." onkeyup="filterUsersTable()">
+                    <button class="btn-add" onclick="openAddUserModal()">+ إضافة حساب زبون جديد</button>
+                </div>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>اسم المستخدم</th>
-                        <th>البريد الإلكتروني</th>
-                        <th>الرصيد المتاح</th>
-                        <th>حالة الحساب</th>
-                        <th>تاريخ التسجيل</th>
-                        <th>إجراءات</th>
-                    </tr>
-                </thead>
-                <tbody id="usersTableBody">
-                    <tr><td colspan="7" style="text-align:center; padding:20px;">جاري تحميل البيانات...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الزبون / الورشة</th>
+                            <th>معلومات الاتصال (الهاتف & البريد)</th>
+                            <th>الولاية / البلد</th>
+                            <th>الرصيد المتاح</th>
+                            <th>عنوان IP الأخير</th>
+                            <th>حالة الحساب</th>
+                            <th>تاريخ التسجيل</th>
+                            <th>إجراءات المدير</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="9" style="text-align:center; padding:24px;">جاري تحميل المشتركين والزبائن...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
-        <!-- سجل الملفات الحديثة -->
+        <!-- سجل الحماية وعناوين الـ IP المحظورة تلقائياً -->
         <section class="main-card">
             <div class="card-header">
-                <h2>سجل عمليات التعديل الحديثة</h2>
+                <h2><span>🛡️</span> جدار الحماية ضد الاختراق وعناوين الـ IP المحظورة (Fail2Ban & Anti-Brute-Force)</h2>
+                <span style="font-size:12.5px; color:#94a3b8;">يتم حظر أي IP يحاول تخمين كلمات المرور تلقائياً لمدة 30 دقيقة لحماية السيرفر</span>
             </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>المستخدم</th>
-                        <th>اسم الملف</th>
-                        <th>نوع السيارة / ECU</th>
-                        <th>الحلول المطبقة</th>
-                        <th>التكلفة</th>
-                        <th>التاريخ</th>
-                        <th>تنزيل</th>
-                    </tr>
-                </thead>
-                <tbody id="filesTableBody">
-                    <tr><td colspan="8" style="text-align:center; padding:20px;">جاري تحميل السجل...</td></tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>عنوان الـ IP</th>
+                            <th>المحاولات الفاشلة</th>
+                            <th>سبب الحظر الأمني</th>
+                            <th>تاريخ انتهاء الحظر</th>
+                            <th>الحالة</th>
+                            <th>إجراء الإلغاء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bannedIpsTableBody">
+                        <tr><td colspan="6" style="text-align:center; padding:16px; color:#34d399;">جاري فحص حالة الحماية...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- سجل التعديلات الأخيرة -->
+        <section class="main-card">
+            <div class="card-header">
+                <h2><span>📁</span> سجل ملفات الـ ECU المعدلة حديثاً</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الزبون</th>
+                            <th>اسم الملف الأصلي</th>
+                            <th>نوع السيارة / ECU</th>
+                            <th>الحلول المطبقة</th>
+                            <th>التكلفة</th>
+                            <th>التاريخ</th>
+                            <th>تحميل</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesTableBody">
+                        <tr><td colspan="8" style="text-align:center; padding:20px;">جاري تحميل سجل الملفات...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </div>
 
-    <!-- Modal إضافة مستخدم -->
+    <!-- نافذة إضافة مستخدم جديد يدوي -->
     <div id="addUserModal" class="modal">
         <div class="modal-content">
-            <h3>إضافة حساب زبون جديد</h3>
-            <input type="text" id="newUsername" class="modal-input" placeholder="اسم المستخدم (Username)..." required>
-            <input type="password" id="newPassword" class="modal-input" placeholder="كلمة المرور..." required>
-            <input type="number" id="newCredits" class="modal-input" placeholder="عدد النقاط المبدئية (Credits)..." value="10">
+            <h3><span>👤</span> إضافة حساب زبون جديد يدوي</h3>
+            <div class="form-group-modal">
+                <label>الاسم الكامل للزبون :</label>
+                <input type="text" id="newFullName" class="modal-input" placeholder="مثال: كريم بن علي" required>
+            </div>
+            <div class="form-group-modal">
+                <label>اسم الورشة أو الكراج :</label>
+                <input type="text" id="newWorkshop" class="modal-input" placeholder="مثال: ورشة المحترف Remap" required>
+            </div>
+            <div class="form-group-modal">
+                <label>رقم الهاتف أو WhatsApp :</label>
+                <input type="text" id="newPhone" class="modal-input" placeholder="مثال: 0555123456" required>
+            </div>
+            <div class="form-group-modal">
+                <label>الولاية / المدينة :</label>
+                <input type="text" id="newWilaya" class="modal-input" placeholder="مثال: سطيف، الجزائر" required>
+            </div>
+            <div class="form-group-modal">
+                <label>البريد الإلكتروني المهني :</label>
+                <input type="email" id="newEmail" class="modal-input" placeholder="contact@workshop.dz" required>
+            </div>
+            <div class="form-group-modal">
+                <label>كلمة المرور :</label>
+                <input type="password" id="newPassword" class="modal-input" placeholder="كلمة المرور..." required>
+            </div>
+            <div class="form-group-modal">
+                <label>عدد النقاط والتوكنز المبدئية :</label>
+                <input type="number" id="newCredits" class="modal-input" placeholder="عدد النقاط..." value="10">
+            </div>
             <div class="modal-actions">
-                <button class="btn-sm btn-toggle" onclick="closeModal('addUserModal')">إلغاء</button>
-                <button class="btn-sm btn-charge" onclick="saveNewUser()">حفظ وإنشاء الحساب</button>
+                <button class="btn-sm" style="background:#334155; color:#fff;" onclick="closeModal('addUserModal')">إلغاء</button>
+                <button class="btn-sm btn-charge" onclick="saveNewUser()">حفظ وتفعيل الحساب</button>
             </div>
         </div>
     </div>
 
     <script>
-        async function fetchDashboardData() {
+        let cachedUsers = [];
+        let previousUserCount = null;
+
+        // دالة تشغيل صوت تنبيه ناعم عند وصول تسجيل جديد
+        function playAlertSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15); // A5
+                gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.45);
+            } catch (e) {
+                console.log("Audio notify:", e);
+            }
+        }
+
+        async function fetchDashboardData(manual = false) {
             try {
                 const res = await fetch('/api/v1/admin/overview');
-                if (!res.ok) { window.location.href = '/login'; return; }
+                if (!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                }
                 const data = await res.json();
                 
                 document.getElementById('statUsers').innerText = data.total_users;
-                document.getElementById('statCredits').innerText = data.total_credits;
+                document.getElementById('statCredits').innerText = `${data.total_credits} 🪙`;
                 document.getElementById('statFiles').innerText = data.total_files;
 
+                // كشف تسجيل زبائن جدد وإظهار تنبيه مباشر
+                if (previousUserCount !== null && data.total_users > previousUserCount) {
+                    const latestUser = data.users.find(u => !u.is_admin) || data.users[0];
+                    if (latestUser) {
+                        const banner = document.getElementById('newUserNotificationBanner');
+                        const txt = document.getElementById('newUserNotificationText');
+                        txt.innerHTML = `🎉 <strong>تسجيل زبون جديد الآن:</strong> ${latestUser.full_name || latestUser.username} | ورشة: <strong>${latestUser.workshop_name || '--'}</strong> | هاتف: <a href="tel:${latestUser.phone}" style="color:#fff; text-decoration:underline;">${latestUser.phone || '--'}</a> (${latestUser.wilaya_country || '--'})`;
+                        banner.style.display = 'flex';
+                        playAlertSound();
+                    }
+                }
+                previousUserCount = data.total_users;
+
                 // رندرة المستخدمين
-                const utb = document.getElementById('usersTableBody');
-                utb.innerHTML = '';
-                data.users.forEach(u => {
-                    utb.innerHTML += `
-                        <tr>
-                            <td>${u.id}</td>
-                            <td><strong>${u.username}</strong> ${u.is_admin ? '<span style="color:#38bdf8">(مدير)</span>' : ''}</td>
-                            <td>${u.email || 'غير محدد'}</td>
-                            <td><span class="badge badge-credits">${u.credits} نقطة</span></td>
-                            <td><span class="badge ${u.is_active ? 'badge-active' : 'badge-disabled'}">${u.is_active ? 'مفعل' : 'معطل'}</span></td>
-                            <td>${u.created_at}</td>
-                            <td>
-                                <div class="action-btns">
-                                    <button class="btn-sm btn-charge" onclick="rechargeUser(${u.id}, '${u.username}')">+ شحن نقاط</button>
-                                    ${!u.is_admin ? `<button class="btn-sm btn-toggle" onclick="toggleUser(${u.id})">${u.is_active ? 'تجميد' : 'تفعيل'}</button>` : ''}
-                                </div>
-                            </td>
-                        </tr>
-                    `;
-                });
+                cachedUsers = data.users || [];
+                renderUsersTable(cachedUsers);
 
                 // رندرة الملفات
                 const ftb = document.getElementById('filesTableBody');
                 ftb.innerHTML = '';
-                if (data.files.length === 0) {
-                    ftb.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8;">لا توجد ملفات معدلة حتى الآن</td></tr>';
+                if (!data.files || data.files.length === 0) {
+                    ftb.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:20px;">لا توجد ملفات معدلة حتى الآن</td></tr>';
                 } else {
                     data.files.forEach(f => {
                         ftb.innerHTML += `
                             <tr>
-                                <td>${f.id}</td>
-                                <td>${f.username}</td>
+                                <td><strong>#${f.id}</strong></td>
+                                <td><strong>${f.full_name || f.username}</strong></td>
                                 <td>${f.original_name}</td>
-                                <td>${f.brand} / ${f.ecu_type}</td>
-                                <td>${f.solutions}</td>
+                                <td><span style="color:#38bdf8; font-weight:700;">${f.brand} / ${f.ecu_type}</span></td>
+                                <td><span style="font-size:12px; background:rgba(56,189,248,0.1); padding:3px 8px; border-radius:6px;">${f.solutions}</span></td>
                                 <td><span class="badge badge-credits">-${f.credits_cost}</span></td>
                                 <td>${f.created_at}</td>
-                                <td><a href="/api/v1/tuning/download/${f.id}" style="color:#38bdf8; text-decoration:none;">تنزيل 📥</a></td>
+                                <td><a href="/api/v1/tuning/download/${f.id}" style="color:#38bdf8; text-decoration:none; font-weight:700;">تحميل 📥</a></td>
                             </tr>
                         `;
                     });
                 }
+
+                // تحميل سجل الـ IPs المحظورة
+                await fetchBannedIps();
+
             } catch(e) {
-                console.error(e);
+                console.error("Dashboard error:", e);
+            }
+        }
+
+        function renderUsersTable(users) {
+            const utb = document.getElementById('usersTableBody');
+            utb.innerHTML = '';
+
+            if (users.length === 0) {
+                utb.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:24px; color:#94a3b8;">لا يوجد مشتركون مطابقون للبحث.</td></tr>';
+                return;
+            }
+
+            users.forEach(u => {
+                const displayName = u.full_name || u.username || 'زبون';
+                const workshop = u.workshop_name || 'ورشة خاصة';
+                const phone = u.phone || '--';
+                const email = u.email || '--';
+                const wilaya = u.wilaya_country || '--';
+                const tokens = u.tokens !== undefined ? u.tokens : u.credits;
+                const ip = u.ip_address || '127.0.0.1';
+                const is_active = u.is_active;
+
+                utb.innerHTML += `
+                    <tr>
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <div class="user-cell-title">
+                                ${displayName}
+                                ${u.is_admin ? '<span class="badge badge-admin">مدير عام</span>' : ''}
+                            </div>
+                            <div class="user-cell-sub">🏢 ${workshop}</div>
+                        </td>
+                        <td>
+                            <div class="contact-cell-email">✉️ ${email}</div>
+                            ${phone !== '--' ? `<div><a href="tel:${phone}" class="contact-cell-phone">📞 ${phone}</a></div>` : ''}
+                        </td>
+                        <td><strong>${wilaya}</strong></td>
+                        <td><span class="badge badge-credits">${tokens} نقطة 🪙</span></td>
+                        <td><code style="color:#94a3b8; font-size:12px;">${ip}</code></td>
+                        <td><span class="badge ${is_active ? 'badge-active' : 'badge-disabled'}">${is_active ? 'نشط ومفعل' : 'مجمد / معطل'}</span></td>
+                        <td style="font-size:12.5px; color:#94a3b8;">${u.created_at}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-sm btn-charge" onclick="rechargeUser(${u.id}, '${displayName}')">+ شحن نقاط</button>
+                                ${!u.is_admin ? `
+                                    <button class="btn-sm ${is_active ? 'btn-toggle-freeze' : 'btn-toggle-activate'}" onclick="toggleUser(${u.id})">
+                                        ${is_active ? 'تجميد' : 'تفعيل'}
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function filterUsersTable() {
+            const query = document.getElementById('userSearchInput').value.trim().toLowerCase();
+            if (!query) {
+                renderUsersTable(cachedUsers);
+                return;
+            }
+            const filtered = cachedUsers.filter(u => {
+                const name = (u.full_name || '').toLowerCase();
+                const workshop = (u.workshop_name || '').toLowerCase();
+                const phone = (u.phone || '').toLowerCase();
+                const email = (u.email || '').toLowerCase();
+                const wilaya = (u.wilaya_country || '').toLowerCase();
+                return name.includes(query) || workshop.includes(query) || phone.includes(query) || email.includes(query) || wilaya.includes(query);
+            });
+            renderUsersTable(filtered);
+        }
+
+        async function fetchBannedIps() {
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('bannedIpsTableBody');
+                const badge = document.getElementById('statBannedIps');
+                if (!tbody) return;
+
+                const banned = data.banned_ips || [];
+                const activeCount = banned.filter(b => b.is_active === 1).length;
+                if (badge) badge.innerText = activeCount;
+
+                tbody.innerHTML = '';
+                if (banned.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:18px; color:#34d399;">لا توجد أي عناوين IP محظورة حالياً. السيرفر آمن تماماً ✅</td></tr>';
+                    return;
+                }
+
+                banned.forEach(b => {
+                    const isActive = b.is_active === 1;
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><code style="color:#ef4444; font-weight:800; font-size:13px;">${b.ip_address}</code></td>
+                            <td><strong>${b.attempts} محاولة</strong></td>
+                            <td style="color:#cbd5e1; font-size:13px;">${b.reason}</td>
+                            <td style="color:#94a3b8; font-size:12.5px;">${b.banned_until}</td>
+                            <td><span class="badge ${isActive ? 'badge-disabled' : 'badge-active'}">${isActive ? '⛔ محظور حالياً' : 'منتهي الصلاحية'}</span></td>
+                            <td>
+                                ${isActive ? `<button class="btn-sm btn-unban" onclick="unbanIp('${b.ip_address}')">فك الحظر فورا</button>` : '<span style="color:#94a3b8; font-size:12px;">--</span>'}
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                console.error("Banned IPs error:", e);
+            }
+        }
+
+        async function unbanIp(ip) {
+            if (!confirm(`هل أنت متأكد من فك الحظر عن عنوان الـ IP: ${ip}؟`)) return;
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    fetchBannedIps();
+                }
+            } catch(e) {
+                alert("خطأ : " + e.message);
             }
         }
 
@@ -236,46 +552,76 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         async function saveNewUser() {
-            const u = document.getElementById('newUsername').value;
-            const p = document.getElementById('newPassword').value;
-            const c = parseInt(document.getElementById('newCredits').value) || 0;
-            if(!u || !p) { alert('يرجى ملء الحقول المطلوبة'); return; }
+            const full_name = document.getElementById('newFullName').value.trim();
+            const workshop_name = document.getElementById('newWorkshop').value.trim();
+            const phone = document.getElementById('newPhone').value.trim();
+            const wilaya_country = document.getElementById('newWilaya').value.trim();
+            const email = document.getElementById('newEmail').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const credits = parseInt(document.getElementById('newCredits').value) || 10;
 
-            const res = await fetch('/api/v1/admin/users', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({username: u, password: p, credits: c})
-            });
-            if(res.ok) {
-                closeModal('addUserModal');
-                fetchDashboardData();
-            } else {
-                const err = await res.json();
-                alert(err.detail || 'حدث خطأ في إضافة المستخدم');
+            if(!full_name || !password) {
+                alert('يرجى ملء الاسم الكامل وكلمة المرور على الأقل.');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/v1/admin/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        full_name,
+                        workshop_name,
+                        phone,
+                        wilaya_country,
+                        email,
+                        password,
+                        credits
+                    })
+                });
+                if(res.ok) {
+                    closeModal('addUserModal');
+                    alert('تم إنشاء وتفعيل حساب الزبون بنجاح!');
+                    fetchDashboardData();
+                } else {
+                    const err = await res.json();
+                    alert(err.detail || 'حدث خطأ في إنشاء الحساب');
+                }
+            } catch (err) {
+                alert("خطأ اتصال : " + err.message);
             }
         }
 
-        async function rechargeUser(userId, username) {
-            const amount = prompt(`أدخل عدد النقاط لشحنها لحساب: ${username}`, '10');
+        async function rechargeUser(userId, name) {
+            const amount = prompt(`كم عدد النقاط التي ترغب في إضافتها لحساب: ${name}؟`, '10');
             if(!amount || isNaN(amount)) return;
-            const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({amount: parseInt(amount)})
-            });
-            if(res.ok) {
-                fetchDashboardData();
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({amount: parseInt(amount)})
+                });
+                if(res.ok) {
+                    fetchDashboardData();
+                }
+            } catch(e) {
+                alert("خطأ في الاتصال : " + e.message);
             }
         }
 
         async function toggleUser(userId) {
             if(!confirm('هل أنت متأكد من تغيير حالة هذا الحساب؟')) return;
-            const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
-            if(res.ok) fetchDashboardData();
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                if(res.ok) fetchDashboardData();
+            } catch(e) {
+                alert("خطأ : " + e.message);
+            }
         }
 
+        // بدء التشغيل والتحديث الدوري التلقائي كل 8 ثوانٍ
         fetchDashboardData();
-        setInterval(fetchDashboardData, 10000); // تحديث دوري كل 10 ثوانٍ
+        setInterval(fetchDashboardData, 8000);
     </script>
 </body>
 </html>
