@@ -106,6 +106,40 @@ def init_db():
         )
         """)
 
+        # جدول التذاكر والدعم الفني المباشر الداخلي 100%
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS support_tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            subject TEXT NOT NULL,
+            vehicle_ecu TEXT NOT NULL,
+            status TEXT DEFAULT 'open',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users (id)
+        )
+        """)
+
+        # جدول رسائل ومرفقات التذاكر (تخزين BLOB للملفات لضمان عدم ضياعها بالسحابة)
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS ticket_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticket_id INTEGER NOT NULL,
+            sender_role TEXT NOT NULL,
+            message_text TEXT NOT NULL,
+            attachment_name TEXT,
+            attachment_data BLOB,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (ticket_id) REFERENCES support_tickets (id)
+        )
+        """)
+
+        # ضبط عداد التذاكر ليبدأ من #1001 إذا كان فارغاً
+        cursor.execute("SELECT COUNT(*) FROM support_tickets")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("DELETE FROM sqlite_sequence WHERE name = 'support_tickets'")
+            cursor.execute("INSERT INTO sqlite_sequence (name, seq) VALUES ('support_tickets', 1000)")
+
         # إنشاء وتحديث حسابات المدراء الرسمية
         admin_accounts = [
             ("Administrateur SCORPION", "SCORPION REMAP HQ", "+213000000000", "admin@scorpion-remap.pro", "AdminScorpion2026!"),
@@ -427,3 +461,117 @@ def manual_ban_ip(ip: str, reason: str = "Bloqué manuellement par Administrateu
         """, (ip, reason, banned_until))
         conn.commit()
         return True
+
+
+# =========================================================================
+# دوال نظام التذاكر والدعم الفني المباشر (Internal Support & File Exchange)
+# =========================================================================
+
+def create_support_ticket(user_id: int, subject: str, vehicle_ecu: str, message_text: str, attachment_name: Optional[str] = None, attachment_data: Optional[bytes] = None) -> int:
+    """إنشاء تذكرة دعم فني جديدة وإضافة أول رسالة مع المرفق"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+        INSERT INTO support_tickets (user_id, subject, vehicle_ecu, status, created_at, updated_at)
+        VALUES (?, ?, ?, 'open', ?, ?)
+        """, (user_id, subject, vehicle_ecu, now, now))
+        ticket_id = cursor.lastrowid
+
+        cursor.execute("""
+        INSERT INTO ticket_messages (ticket_id, sender_role, message_text, attachment_name, attachment_data, created_at)
+        VALUES (?, 'user', ?, ?, ?, ?)
+        """, (ticket_id, message_text, attachment_name, attachment_data, now))
+        conn.commit()
+        return ticket_id
+
+
+def add_ticket_message(ticket_id: int, sender_role: str, message_text: str, attachment_name: Optional[str] = None, attachment_data: Optional[bytes] = None, new_status: Optional[str] = None) -> int:
+    """إضافة رسالة جديدة إلى تذكرة وتحديث حالتها"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        now = datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        cursor.execute("""
+        INSERT INTO ticket_messages (ticket_id, sender_role, message_text, attachment_name, attachment_data, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+        """, (ticket_id, sender_role, message_text, attachment_name, attachment_data, now))
+        msg_id = cursor.lastrowid
+
+        if not new_status:
+            new_status = 'answered' if sender_role == 'admin' else 'open'
+
+        cursor.execute("""
+        UPDATE support_tickets SET status = ?, updated_at = ? WHERE id = ?
+        """, (new_status, now, ticket_id))
+        conn.commit()
+        return msg_id
+
+
+def get_user_tickets(user_id: int) -> List[Dict[str, Any]]:
+    """استرجاع تذاكر الزبون الخاصة به"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT t.*, 
+               (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count,
+               (SELECT message_text FROM ticket_messages WHERE ticket_id = t.id ORDER BY id DESC LIMIT 1) as last_message,
+               (SELECT sender_role FROM ticket_messages WHERE ticket_id = t.id ORDER BY id DESC LIMIT 1) as last_sender
+        FROM support_tickets t
+        WHERE t.user_id = ?
+        ORDER BY t.updated_at DESC
+        """, (user_id,))
+        return [dict(r) for r in cursor.fetchall()]
+
+
+def get_all_support_tickets() -> List[Dict[str, Any]]:
+    """استرجاع كافة تذاكر الزبائن للوحة تحكم المدير"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT t.*, u.full_name as user_name, u.workshop_name, u.email as user_email, u.phone as user_phone, u.tokens as user_tokens,
+               (SELECT COUNT(*) FROM ticket_messages WHERE ticket_id = t.id) as message_count,
+               (SELECT message_text FROM ticket_messages WHERE ticket_id = t.id ORDER BY id DESC LIMIT 1) as last_message
+        FROM support_tickets t
+        JOIN users u ON t.user_id = u.id
+        ORDER BY CASE WHEN t.status = 'open' THEN 1 WHEN t.status = 'answered' THEN 2 ELSE 3 END, t.updated_at DESC
+        """)
+        return [dict(r) for r in cursor.fetchall()]
+
+
+def get_ticket_details(ticket_id: int) -> Optional[Dict[str, Any]]:
+    """استرجاع تفاصيل تذكرة مع كافة رسائلها (بدون بيانات BLOB لتخفيف الرد)"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        SELECT t.*, u.full_name as user_name, u.workshop_name, u.email as user_email, u.phone as user_phone, u.tokens as user_tokens
+        FROM support_tickets t
+        JOIN users u ON t.user_id = u.id
+        WHERE t.id = ?
+        """, (ticket_id,))
+        ticket_row = cursor.fetchone()
+        if not ticket_row:
+            return None
+        ticket = dict(ticket_row)
+
+        cursor.execute("""
+        SELECT id, ticket_id, sender_role, message_text, attachment_name, 
+               CASE WHEN attachment_data IS NOT NULL THEN 1 ELSE 0 END as has_attachment,
+               created_at
+        FROM ticket_messages
+        WHERE ticket_id = ?
+        ORDER BY id ASC
+        """, (ticket_id,))
+        ticket["messages"] = [dict(r) for r in cursor.fetchall()]
+        return ticket
+
+
+def get_ticket_attachment(message_id: int) -> Optional[Tuple[str, bytes]]:
+    """استرجاع الملف المرفق من الرسالة بصيغته الثنائية الحقيقية"""
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT attachment_name, attachment_data FROM ticket_messages WHERE id = ?", (message_id,))
+        row = cursor.fetchone()
+        if row and row["attachment_name"] and row["attachment_data"]:
+            return row["attachment_name"], row["attachment_data"]
+        return None
+
