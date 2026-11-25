@@ -552,6 +552,40 @@
                         <span>Type de Motorisation</span>
                         <strong id="fuelVal"><span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span></strong>
                     </div>
+                    <div class="spec-item">
+                        <span>Architecture & MCU</span>
+                        <strong id="mcuVal" style="color:#38bdf8;">Infineon TriCore / MPC5xx (32-bit)</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Moteur de Checksum</span>
+                        <strong style="color:#10b981;">RSA / CRC32 Auto-Corrigé ✅</strong>
+                    </div>
+                </div>
+
+                <!-- High-Tech Stage 1 Power & Torque Estimator (Like DaVinci / StageX) -->
+                <div id="stage1EstimatorBox" style="background:linear-gradient(135deg, rgba(225,29,72,0.12) 0%, rgba(15,23,42,0.6) 100%); border:1px solid rgba(225,29,72,0.3); border-radius:12px; padding:14px 20px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:26px;">🚀</span>
+                        <div>
+                            <div style="font-size:14px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                                Estimation Dynamique de Puissance & Couple (Stage 1 Remap)
+                                <span style="background:#e11d48; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:10px;">RECOMMANDÉ</span>
+                            </div>
+                            <div style="font-size:12px; color:var(--text-muted); margin-top:2px;">
+                                Cartographies de couple, pression turbo et limiteurs calibrés dans les limites de sécurité constructeur.
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:16px;">
+                        <div style="text-align:right;">
+                            <div style="font-size:11px; color:#94a3b8;">Gain Puissance :</div>
+                            <div style="font-size:16px; font-weight:900; color:#34d399;">+30 à +45 ch ⚡</div>
+                        </div>
+                        <div style="text-align:right; border-left:1px solid rgba(255,255,255,0.1); padding-left:16px;">
+                            <div style="font-size:11px; color:#94a3b8;">Gain Couple :</div>
+                            <div style="font-size:16px; font-weight:900; color:#38bdf8;">+65 à +85 Nm 🏁</div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Solutions Category 1: Emissions & Filtres -->
@@ -688,8 +722,8 @@
                     </div>
 
                     <!-- Modern Search Bar & Quick Add -->
-                    <div style="display:flex; gap:10px; margin-bottom:16px; position:relative;">
-                        <div style="position:relative; flex:1;">
+                    <div style="display:flex; gap:10px; margin-bottom:14px; position:relative; flex-wrap:wrap;">
+                        <div style="position:relative; flex:1; min-width:260px;">
                             <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); color:#9ca3af; font-size:14px;">🔍</span>
                             <input type="text" id="dtcSearchInput" placeholder="Rechercher ou ajouter un code défaut (ex: P0401, P2002, U0100...)"
                                    style="width:100%; padding:12px 16px 12px 40px; background:#08080c; border:1px solid #2a1b22; border-radius:12px; color:#fff; font-size:13px; outline:none; transition:0.2s;"
@@ -1136,7 +1170,7 @@
                     <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">10 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
                     <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Idéal pour tester nos solutions ou pour petits garages.</p>
                     <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">3 500 DZD / 25 €</div>
-                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                    <button class="btn-action-main" onclick="openRechargeModal('Pack Découverte (10 Crédits)', '3 500 DZD / 25 €')">Recharger ce Pack</button>
                 </div>
 
                 <div style="background:var(--bg-card); border:2px solid #0284c7; border-radius:16px; padding:28px; text-align:center; position:relative;">
@@ -1145,7 +1179,7 @@
                     <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">50 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
                     <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Pour les spécialistes du diagnostic et reprogrammation.</p>
                     <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">14 000 DZD / 95 €</div>
-                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                    <button class="btn-action-main" onclick="openRechargeModal('Pack Pro Atelier (50 Crédits)', '14 000 DZD / 95 €')">Recharger ce Pack</button>
                 </div>
 
                 <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; text-align:center;">
@@ -1153,7 +1187,7 @@
                     <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">100 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
                     <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Tarif grossiste ultra-avantageux (200 DZD / fichier).</p>
                     <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">24 000 DZD / 160 €</div>
-                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                    <button class="btn-action-main" onclick="openRechargeModal('Pack Master Illimité (100 Crédits)', '24 000 DZD / 160 €')">Recharger ce Pack</button>
                 </div>
             </div>
         </section>
@@ -3613,6 +3647,126 @@
             setLanguage(savedLang);
         });
 
+    
+
+        // ================= RECHARGE & DTC PRO CONTROLS =================
+        let currentSelectedPack = { title: '', price: '' };
+
+        function openRechargeModal(packTitle, packPrice) {
+            currentSelectedPack = { title: packTitle, price: packPrice };
+            document.getElementById('modalPackTitle').innerText = `${packTitle} — ${packPrice}`;
+            document.getElementById('rechargeModal').style.display = 'flex';
+        }
+
+        function closeRechargeModal() {
+            document.getElementById('rechargeModal').style.display = 'none';
+        }
+
+        function transferToSupportForRecharge() {
+            closeRechargeModal();
+            // Switch to Support tab
+            switchTab('tabSupport', document.getElementById('btnNavSupport'));
+            // Prefill subject and message
+            setTimeout(() => {
+                const subj = document.getElementById('ticketSubject');
+                if(subj) subj.value = 'Modification manuelle';
+                const vEcu = document.getElementById('ticketVehicleEcu');
+                if(vEcu) vEcu.value = `Recharge de Crédits : ${currentSelectedPack.title}`;
+                const msg = document.getElementById('ticketMessage');
+                if(msg) msg.value = `Bonjour,\n\nJe souhaite recharger mon compte avec le ${currentSelectedPack.title} (${currentSelectedPack.price}).\nVeuillez trouver ci-joint mon reçu de paiement.\n\nMerci d'activer mes crédits.`;
+                const fileInp = document.getElementById('ticketAttachment');
+                if(fileInp) fileInp.focus();
+            }, 300);
+        }
+
+        function quickAddCurrentDtc() {
+            const inp = document.getElementById('dtcSearchInput');
+            if(!inp) return;
+            const code = inp.value.trim().toUpperCase();
+            if(!code) {
+                alert("Veuillez saisir un code DTC (ex: P0401, P2002, U0100).");
+                return;
+            }
+            if(typeof addManualDtc === 'function') {
+                addManualDtc(code);
+                inp.value = '';
+            }
+        }
+
+        function clearAllDtcs() {
+            if(confirm("Voulez-vous vraiment effacer tous les codes DTC personnalisés ?")) {
+                if(typeof manualSelectedDtcs !== 'undefined') {
+                    manualSelectedDtcs = [];
+                }
+                if(typeof updateDtcPreview === 'function') {
+                    updateDtcPreview();
+                } else if(typeof previewDtcs === 'function') {
+                    previewDtcs();
+                }
+            }
+        }
+
     </script>
+
+    <!-- VIP RECHARGE & PAYMENT MODAL -->
+    <div id="rechargeModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(8px); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+        <div style="background:#0c0d16; border:1.5px solid #0284c7; border-radius:18px; width:100%; max-width:680px; box-shadow:0 25px 60px rgba(2,132,199,0.25); overflow:hidden;">
+            <!-- Modal Header -->
+            <div style="padding:18px 24px; background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); border-bottom:1px solid #1e293b; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <h3 style="color:#fff; font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                        <span>💳</span> Recharge de Crédits Atelier
+                    </h3>
+                    <div id="modalPackTitle" style="font-size:13px; color:#38bdf8; margin-top:2px; font-weight:700;">Pack Pro Atelier - 50 Crédits</div>
+                </div>
+                <button type="button" onclick="closeRechargeModal()" style="background:rgba(255,255,255,0.08); border:none; color:#fff; width:32px; height:32px; border-radius:8px; font-size:16px; cursor:pointer;">✕</button>
+            </div>
+
+            <!-- Modal Content -->
+            <div style="padding:22px 24px;">
+                <p style="font-size:13px; color:var(--text-muted); margin-bottom:18px;">
+                    Effectuez le paiement via le moyen de votre choix, puis cliquez sur <strong>"Envoyer le reçu au Support"</strong> pour une activation immédiate de vos crédits.
+                </p>
+
+                <!-- Payment Methods Grid -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px;">
+                    <!-- Method 1: BaridiMob & CCP (Algérie) -->
+                    <div style="background:#070a12; border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:16px;">
+                        <div style="font-size:12.5px; font-weight:800; color:#34d399; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                            <span>🇩🇿</span> Algérie (BaridiMob & CCP)
+                        </div>
+                        <div style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px;">RIP BaridiMob :</div>
+                        <div style="background:#111827; padding:6px 10px; border-radius:6px; font-family:monospace; font-size:12px; color:#fff; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span>00799999002345678901</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('00799999002345678901'); alert('RIP BaridiMob copié !');" style="background:#059669; border:none; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; cursor:pointer;">Copier</button>
+                        </div>
+                        <div style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px;">Compte CCP :</div>
+                        <div style="font-size:12px; color:#fff; font-weight:700;">23456789 Clé 45</div>
+                        <div style="font-size:11px; color:#94a3b8; margin-top:2px;">Titulaire : SCORPION REMAP HQ</div>
+                    </div>
+
+                    <!-- Method 2: International & Crypto -->
+                    <div style="background:#070a12; border:1px solid rgba(56,189,248,0.3); border-radius:12px; padding:16px;">
+                        <div style="font-size:12.5px; font-weight:800; color:#38bdf8; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                            <span>🌍</span> International & Crypto
+                        </div>
+                        <div style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px;">Crypto USDT (TRC-20) :</div>
+                        <div style="background:#111827; padding:6px 10px; border-radius:6px; font-family:monospace; font-size:11px; color:#fff; display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <span style="overflow:hidden; text-overflow:ellipsis;">TX9Kz8Wm...28MNq</span>
+                            <button type="button" onclick="navigator.clipboard.writeText('TX9Kz8Wm3xY7qLp28MNq4b'); alert('Adresse USDT copiée !');" style="background:#0284c7; border:none; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px; cursor:pointer;">Copier</button>
+                        </div>
+                        <div style="font-size:11.5px; color:#cbd5e1; margin-bottom:4px;">Carte CIB / Visa / PayPal :</div>
+                        <div style="font-size:12px; color:#fff; font-weight:700;">Sur demande au Support</div>
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <button type="button" onclick="transferToSupportForRecharge()" style="width:100%; background:linear-gradient(135deg, #0284c7, #2563eb); border:none; color:#fff; padding:12px; border-radius:10px; font-size:14px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 0 15px rgba(2,132,199,0.4);">
+                    <span>📩</span> Envoyer le reçu au Support Admin pour validation immédiate ➔
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
