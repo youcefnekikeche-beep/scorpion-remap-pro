@@ -560,29 +560,61 @@ async def api_tuning_registry():
 
 @app.post("/api/v1/tuning/manual-select")
 async def api_tuning_manual_select(payload: dict, user: dict = Depends(require_user)):
-    """تطبيق الاختيار اليدوي الصارم عند عدم التعرف التلقائي على الملف"""
+    """تطبيق الاختيار اليدوي الصارم حصراً على ملف حقيقي تم رفعه مسبقاً (Mandatory Real File Upload First)"""
+    file_token = payload.get("file_token", "").strip()
+    if not file_token:
+        raise HTTPException(
+            status_code=400, 
+            detail="Veuillez d'abord téléverser un fichier binaire (.bin, .ori) avant de choisir un calculateur."
+        )
+
+    # التحقق من وجود الملف الحقيقي على السيرفر
+    target_path = None
+    original_filename = "ECU_File.bin"
+    for fname in os.listdir(UPLOADS_DIR):
+        if fname.startswith(file_token):
+            target_path = os.path.join(UPLOADS_DIR, fname)
+            original_filename = fname.replace(f"{file_token}_", "")
+            break
+
+    if not target_path or not os.path.exists(target_path):
+        raise HTTPException(
+            status_code=404, 
+            detail="Fichier binaire introuvable sur le serveur. Veuillez réuploader votre fichier d'origine."
+        )
+
+    with open(target_path, "rb") as f:
+        binary_data = f.read()
+
     ecu_id = payload.get("ecu_id", "").strip()
     brand = payload.get("brand", "").strip()
-    file_token = payload.get("file_token", "").strip()
     
     ecu_info = get_registry_ecu(brand, ecu_id)
     if not ecu_info:
         raise HTTPException(status_code=400, detail="Calculateur introuvable dans la base de données SCORPION")
+
+    # استخراج رقم السوفتوير الحقيقي من الملف إن أمكن
+    real_ident = identify_ecu(binary_data, original_filename)
+    sw_version = real_ident.get("sw_version") or "Calibration Réelle"
+    hw_version = real_ident.get("hw_version") or ecu_info["name"].split()[0]
         
     return {
         "success": True,
         "recognized": True,
         "manual_selection": True,
         "file_token": file_token,
+        "filename": original_filename,
+        "file_size": len(binary_data),
         "brand": ecu_info["brand"],
         "model": f"Calculateur Moteur ({ecu_info['fuel']})",
         "ecu": ecu_info["name"],
         "ecu_id": ecu_info["id"],
         "ecu_type": ecu_info["name"],
-        "sw_version": "SW_Manuel_Sélectionné",
-        "hw_version": "HW_Manuel_Sélectionné",
+        "sw_version": sw_version,
+        "hw_version": hw_version,
         "fuel": ecu_info["fuel"],
         "fuel_type": ecu_info["fuel"],
+        "fuel_badge": "Moteur Diesel ⛽" if ecu_info["fuel"] == "DIESEL" else "Moteur Essence ⚡",
         "supported_solutions": ecu_info["supported_solutions"],
         "solutions": ecu_info["supported_solutions"],
         "checksum_info": ecu_info.get("checksum_info", {
@@ -612,13 +644,15 @@ async def api_tuning_analyze(file: UploadFile = File(...), user: dict = Depends(
     
     # في حال لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%
     if not ident.get("recognized", True):
+        file_size_kb = round(len(binary_data) / 1024, 1)
         return {
             "success": True,
             "recognized": False,
-            "message": ident.get("message", "Calculateur non reconnu automatiquement. Veuillez sélectionner votre véhicule et calculateur dans notre base de données :"),
+            "message": f"Fichier chargé avec succès (Taille: {file_size_kb} Ko). Veuillez sélectionner manuellement votre véhicule et calculateur dans notre base pour traiter ce fichier :",
             "file_token": file_token,
             "filename": file.filename,
-            "file_size": ident.get("file_size", len(binary_data)),
+            "file_size": len(binary_data),
+            "file_size_kb": file_size_kb,
             "sw_version": ident.get("sw_version"),
             "hw_version": ident.get("hw_version")
         }
@@ -801,12 +835,19 @@ async def api_tuning_process(
     try:
         selected_solutions = json.loads(solutions)
     except:
-        selected_solutions = ["DPF / FAP", "EGR"]
+        selected_solutions = []
 
     try:
         selected_dtcs = json.loads(dtcs)
     except:
         selected_dtcs = []
+
+    # منع التحميل أو خصم الكريديت إذا لم يتم اختيار أي حل أو كود DTC (Strict Policy)
+    if not selected_solutions and not selected_dtcs:
+        raise HTTPException(
+            status_code=400,
+            detail="Veuillez sélectionner au moins une solution ou un code DTC avant de télécharger."
+        )
 
     # تحديد مسار الملف الأصلي
     original_save_path = None

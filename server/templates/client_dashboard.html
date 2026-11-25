@@ -466,29 +466,15 @@
                 <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
             </div>
 
-            <!-- Manual Selection Mode Bar (خاصية التحديد والتعرف اليدوي الدقيق) -->
-            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top: -10px; margin-bottom: 22px; padding: 12px 18px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="font-size:18px;">⚙️</span>
-                    <div>
-                        <div style="font-size:13px; font-weight:700; color:#fff;">Vous préférez sélectionner votre calculateur manuellement ?</div>
-                        <div style="font-size:11.5px; color:#94a3b8;">Pour forcer un modèle ou en cas de doute sur la détection automatique (149 calculateurs certifiés)</div>
-                    </div>
-                </div>
-                <button type="button" onclick="toggleManualSelector()" style="background: linear-gradient(135deg, rgba(2,132,199,0.2), rgba(37,99,235,0.25)); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;">
-                    <span>🔧</span> Mode Sélection Manuelle (تحديد يدوي)
-                </button>
-            </div>
-
-            <!-- Manual Selector Box (Sélection Manuelle Certifiée) -->
-            <div id="unrecognizedBox" style="display:none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);">
+            <!-- Manual Selector Box (Sélection Manuelle Certifiée - Affiché UNIQUEMENT sur fichier réel) -->
+            <div id="unrecognizedBox" style="display:none; background: rgba(18, 10, 14, 0.95); border: 1.5px solid rgba(225, 29, 72, 0.4); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.5);">
                 <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                         <span style="font-size: 26px;">🔧</span>
                         <div>
-                            <h3 id="manualBoxTitle" style="font-size: 16.5px; color: #38bdf8; margin: 0; font-weight: 800;">Sélection Manuelle du Calculateur (149 calculateurs officiels)</h3>
+                            <h3 id="manualBoxTitle" style="font-size: 16.5px; color: #fb7185; margin: 0; font-weight: 800;">Sélection Manuelle du Calculateur (149 calculateurs officiels)</h3>
                             <p id="manualBoxSubtitle" style="font-size: 13px; color: #cbd5e1; margin-top: 4px; margin-bottom: 0;">
-                                Sélectionnez la marque de votre véhicule et votre calculateur pour charger directement ses solutions certifiées :
+                                Sélectionnez la marque de votre véhicule et votre calculateur pour charger directement ses solutions certifiées sur ce fichier :
                             </p>
                         </div>
                     </div>
@@ -498,13 +484,13 @@
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; margin-bottom: 18px;">
                     <div>
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">1. Marque / Constructeur :</label>
-                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0c0c11; border: 1px solid rgba(225, 29, 72, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
                             <option value="">-- Choisir la marque / constructeur --</option>
                         </select>
                     </div>
                     <div>
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">2. Calculateur / ECU :</label>
-                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0c0c11; border: 1px solid rgba(225, 29, 72, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
                             <option value="">-- Choisir le calculateur --</option>
                         </select>
                     </div>
@@ -512,7 +498,7 @@
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
                     <span style="font-size: 12px; color: var(--text-muted);">Votre calculateur ne figure pas dans la liste officielle ?</span>
-                    <button type="button" onclick="requestManualProcessing()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                    <button type="button" onclick="requestManualProcessing()" style="background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
                         📩 Calculateur non supporté - Demander un traitement manuel
                     </button>
                 </div>
@@ -1342,6 +1328,13 @@
         }
 
         async function toggleManualSelector(forceOpen) {
+            // قاعدة الرفع الإجباري أولاً: منع فتح الاختيار اليدوي إذا لم يرفع المستخدم ملفاً بعد
+            if (!currentFileToken && !currentFile) {
+                alert("⚠️ Veuillez d'abord téléverser un fichier binaire ECU (.bin, .ori) avant de sélectionner un calculateur.");
+                const fi = document.getElementById('fileInput');
+                if (fi) fi.click();
+                return;
+            }
             const box = document.getElementById('unrecognizedBox');
             if (!box) return;
             if (forceOpen === true || box.style.display === 'none') {
@@ -1354,6 +1347,10 @@
         }
 
         async function onManualEcuChange() {
+            if (!currentFileToken && !currentFile) {
+                alert("⚠️ Veuillez d'abord téléverser un fichier binaire ECU (.bin, .ori) avant de sélectionner un calculateur.");
+                return;
+            }
             const brandSel = document.getElementById('manualBrandSelect');
             const ecuSel = document.getElementById('manualEcuSelect');
             const brand = brandSel.value;
@@ -1377,11 +1374,11 @@
                     const badge = document.getElementById('detectedModeBadge');
                     if (badge) {
                         badge.innerText = 'Sélection Manuelle ⚙️';
-                        badge.style.background = 'rgba(56, 189, 248, 0.2)';
-                        badge.style.color = '#38bdf8';
-                        badge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+                        badge.style.background = 'rgba(225, 29, 72, 0.2)';
+                        badge.style.color = '#fb7185';
+                        badge.style.borderColor = 'rgba(225, 29, 72, 0.4)';
                     }
-                    displayIdentifiedEcu(data, currentFile ? currentFile.name : (data.ecu_type || 'Calculateur_Sélectionné.bin'));
+                    displayIdentifiedEcu(data, currentFile ? currentFile.name : (data.filename || 'Calculateur_Sélectionné.bin'));
                 } else {
                     alert(data.detail || 'Erreur lors de la sélection du calculateur');
                 }
@@ -1747,7 +1744,17 @@
 
         // Final modification & download (Credit only deducted here)
         async function processAndDownload() {
-            if(!currentFile && !currentFileToken) return;
+            if(!currentFile && !currentFileToken) {
+                alert("⚠️ Veuillez d'abord téléverser un fichier binaire ECU (.bin, .ori).");
+                return;
+            }
+
+            // منع التحميل إذا لم يتم اختيار أي حل أو كود DTC (Strict Global Standard)
+            if(selectedSolutions.size === 0 && selectedDtcs.size === 0) {
+                alert("Veuillez sélectionner au moins une solution ou un code DTC avant de télécharger.");
+                return;
+            }
+
             const btn = document.getElementById('btnProcess');
             btn.disabled = true;
             btn.innerText = '⚙️ Application des modifications sur le serveur...';
