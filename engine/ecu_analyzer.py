@@ -2,6 +2,7 @@
 SCORPION REMAP PRO - Core ECU Analyzer Engine (V3.2.0)
 SVEdit v1.1.38.3 Deep Integration & Multi-Brand ECU Registry
 Full coverage of all 18 Brands & 80 ECUs with Strict Fuel Type Isolation.
+DaVinci v1.0.28 + v1.0.30 Deep Binary Extraction — APPEND-ONLY (Nov 2026).
 """
 
 import re
@@ -16,6 +17,16 @@ from engine.toyota_nissan import TOYOTA_NISSAN_REGISTRY, apply_toyota_nissan_pat
 from engine.mazda_mitsubishi_subaru import MAZDA_MITSUBISHI_SUBARU_REGISTRY, apply_mazda_mitsubishi_subaru_patch
 from engine.ford_fca_others import FORD_FCA_OTHERS_REGISTRY, apply_ford_fca_others_patch
 
+# ── NEW: DaVinci v1.0.28 + v1.0.30 Deep Extraction Modules (APPEND-ONLY) ──
+from engine.davinci_vag_bmw_mb import (
+    get_all_davinci_vag_bmw_mb_registries,
+    apply_davinci_vag_bmw_mb_patch,
+)
+from engine.davinci_psa_renault_fca import (
+    get_all_davinci_psa_renault_fca_registries,
+    apply_davinci_psa_renault_fca_patch,
+)
+
 # All modular registries for lookup and validation
 ALL_MODULE_REGISTRIES = [
     HYUNDAI_KIA_REGISTRY,
@@ -26,29 +37,44 @@ ALL_MODULE_REGISTRIES = [
     FORD_FCA_OTHERS_REGISTRY,
 ]
 
-# Flat lookup map by ECU ID
+# DaVinci-sourced registries (merged AFTER existing ones — no overwrite)
+_DAVINCI_VAG_BMW_MB = get_all_davinci_vag_bmw_mb_registries()
+_DAVINCI_PSA_REN_FCA = get_all_davinci_psa_renault_fca_registries()
+_DAVINCI_ALL = {**_DAVINCI_VAG_BMW_MB, **_DAVINCI_PSA_REN_FCA}
+
+# Flat lookup map by ECU ID (SVEdit base, then DaVinci APPEND — no overwrite)
 FLAT_ECU_REGISTRY: Dict[str, Dict[str, Any]] = {}
 for reg in ALL_MODULE_REGISTRIES:
     for ecu_id, info in reg.items():
         FLAT_ECU_REGISTRY[ecu_id] = info
 
+# Merge DaVinci-sourced ECUs (only new IDs, never overwrite existing)
+for ecu_id, info in _DAVINCI_ALL.items():
+    if ecu_id not in FLAT_ECU_REGISTRY:
+        FLAT_ECU_REGISTRY[ecu_id] = info
+
 # Structured Registry Grouped by Brand (Strict Backend Registry for UI Dropdowns)
 SUPPORTED_REGISTRY: Dict[str, List[Dict[str, Any]]] = {}
-for reg in ALL_MODULE_REGISTRIES:
-    for ecu_id, info in reg.items():
-        brand = info["brand"]
-        if brand not in SUPPORTED_REGISTRY:
-            SUPPORTED_REGISTRY[brand] = []
+_all_registries_combined = list(FLAT_ECU_REGISTRY.values())
+for info in _all_registries_combined:
+    brand = info["brand"]
+    if brand not in SUPPORTED_REGISTRY:
+        SUPPORTED_REGISTRY[brand] = []
+    # avoid duplicates
+    existing_ids = [e["id"] for e in SUPPORTED_REGISTRY[brand]]
+    if info["id"] not in existing_ids:
         SUPPORTED_REGISTRY[brand].append({
             "id": info["id"],
             "name": info["name"],
             "brand": brand,
             "fuel": info["fuel_type"],
             "supported_solutions": info["solutions"],
+            "plug_notes": info.get("plug_notes", ""),
+            "source": info.get("source", "SVEdit v1.1.38"),
             "checksum_info": {
                 "status": "Supporté & Automatique ✅",
                 "is_auto": True,
-                "algorithm": "SVEdit v1.1.38 Certified Engine"
+                "algorithm": info.get("source", "SVEdit v1.1.38 Certified Engine")
             }
         })
 
@@ -248,9 +274,14 @@ def preview_dtcs(binary_data: bytes, ecu_info: dict, selected_solutions: list) -
 
 
 def get_technical_instructions(ecu_info: dict, selected_solutions: list) -> str:
-    """Instructions techniques après écriture"""
-    instructions = ["1. Calculateur calibré avec le moteur certifié SVEdit v1.1.38.3."]
+    """Instructions techniques après écriture + notes fiche DaVinci"""
+    instructions = ["1. Calculateur calibré avec le moteur certifié SVEdit v1.1.38.3 / DaVinci v1.0.30."]
     sol_str = " ".join([str(s).upper() for s in selected_solutions])
+
+    # Notes spécifiques à l'ECU (plug_notes) si disponibles
+    plug_note = ecu_info.get("plug_notes", "")
+    if plug_note:
+        instructions.append(f"Note fiche: {plug_note}")
 
     if "DPF" in sol_str or "FAP" in sol_str:
         instructions.append("2. Débrancher impérativement les capteurs de pression différentielle et de température FAP avant le premier démarrage.")
@@ -258,10 +289,43 @@ def get_technical_instructions(ecu_info: dict, selected_solutions: list) -> str:
         instructions.append("3. La vanne EGR peut être condamnée mécaniquement avec une plaque d'obturation.")
     if "ADBLUE" in sol_str or "SCR" in sol_str:
         instructions.append("4. Débrancher le fusible de la pompe AdBlue ou le module SCR externe.")
-    if "CAT" in sol_str or "EURO 2" in sol_str:
+    if "CAT" in sol_str or "LAMBDA" in sol_str:
         instructions.append("5. La seconde sonde Lambda (Aval / Post-Cat) peut être débranchée ou laissée en place.")
+    if "TVA" in sol_str or "FLAP" in sol_str or "VSA" in sol_str:
+        instructions.append("6. Les volets d'admission / TVA peuvent être condamnés mécaniquement ou fiche débranchée selon la note ECU.")
+    if "START-STOP" in sol_str:
+        instructions.append("7. La fonction Start & Stop est désactivée en permanence — aucun voyant au tableau de bord.")
+    if "MAF" in sol_str:
+        instructions.append("8. Débrancher le débitmètre d'air (MAF) après l'écriture du fichier.")
     if "P0315" in sol_str:
-        instructions.append("6. Le défaut de variation de vilebrequin P0315 est annulé sans besoin de procédure d'apprentissage avec outil de diagnostic.")
+        instructions.append("9. Le défaut de variation de vilebrequin P0315 est annulé sans procédure d'apprentissage.")
 
-    instructions.append("Contrôle de somme Checksum recalculé automatiquement.")
+    instructions.append("✅ Contrôle de somme Checksum recalculé automatiquement.")
     return "\n".join(instructions)
+
+
+def apply_solution_unified(data: bytearray, ecu_id: str, solution: str) -> Tuple[bool, int, str]:
+    """
+    Point d'entrée unifié pour appliquer une solution sur un ECU.
+    Cherche dans l'ordre : SVEdit base → DaVinci VAG/BMW/MB → DaVinci PSA/Renault/FCA.
+    """
+    # 1. SVEdit base engines
+    if ecu_id in HYUNDAI_KIA_REGISTRY:
+        return apply_hyundai_kia_patch(data, ecu_id, solution)
+    if ecu_id in VAG_GROUP_REGISTRY:
+        return apply_vag_group_patch(data, ecu_id, solution)
+    if ecu_id in HONDA_REGISTRY:
+        return apply_honda_patch(data, ecu_id, solution)
+    if ecu_id in TOYOTA_NISSAN_REGISTRY:
+        return apply_toyota_nissan_patch(data, ecu_id, solution)
+    if ecu_id in MAZDA_MITSUBISHI_SUBARU_REGISTRY:
+        return apply_mazda_mitsubishi_subaru_patch(data, ecu_id, solution)
+    if ecu_id in FORD_FCA_OTHERS_REGISTRY:
+        return apply_ford_fca_others_patch(data, ecu_id, solution)
+    # 2. DaVinci VAG/BMW/MB
+    if ecu_id in _DAVINCI_VAG_BMW_MB:
+        return apply_davinci_vag_bmw_mb_patch(data, ecu_id, solution)
+    # 3. DaVinci PSA/Renault/FCA
+    if ecu_id in _DAVINCI_PSA_REN_FCA:
+        return apply_davinci_psa_renault_fca_patch(data, ecu_id, solution)
+    return False, 0, f"ECU {ecu_id} non trouvé dans aucun registre."

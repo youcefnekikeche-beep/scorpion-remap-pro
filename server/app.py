@@ -191,22 +191,41 @@ async def supported_ecus_page(request: Request):
 
 @app.get("/api/v1/supported-ecus")
 async def api_get_supported_ecus():
+    """
+    Retourne la liste complète des ECUs supportés:
+    - SVEdit v1.1.38.3 (base)
+    - DaVinci v1.0.28 + v1.0.30 (DaVinci Deep Extraction — APPEND)
+    Champ fuel: DIESEL ou ESSENCE (isolement strict carburant).
+    """
     ecus_list = []
+    seen_ids = set()
     for brand, ecus in SUPPORTED_REGISTRY.items():
         for ecu in ecus:
-            name = ecu.get("name", ecu.get("id"))
-            fuel = ecu.get("fuel_type", "DIESEL")
-            sols = ecu.get("supported_solutions", ["DTC OFF", "Stage 1"])
+            ecu_id = ecu.get("id", "")
+            if ecu_id in seen_ids:
+                continue
+            seen_ids.add(ecu_id)
+            name = ecu.get("name", ecu_id)
+            # support both "fuel" and "fuel_type" key names
+            fuel = ecu.get("fuel", ecu.get("fuel_type", "DIESEL"))
+            sols = ecu.get("supported_solutions", ecu.get("solutions", ["DTC OFF"]))
+            plug_note = ecu.get("plug_notes", ecu.get("plug_note", ""))
+            source = ecu.get("source", "SVEdit v1.1.38")
             ecus_list.append({
+                "id": ecu_id,
                 "brand": brand,
                 "name": name,
                 "ecu": name,
-                "engine": f"Architecture {brand} (SVEdit)",
+                "engine": f"{brand}",
                 "fuel": fuel,
                 "fuel_type": fuel,
                 "solutions": sols,
-                "description": f"Calculateur officiel SVEdit v1.1.38.3 - {name}"
+                "plug_notes": plug_note,
+                "source": source,
+                "description": ecu.get("description", f"Calculateur {brand} — {name}")
             })
+    # Sort by brand then name
+    ecus_list.sort(key=lambda x: (x["brand"], x["name"]))
     return ecus_list
 
 @app.post("/api/v1/expert/preview")
