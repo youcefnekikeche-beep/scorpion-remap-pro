@@ -430,8 +430,6 @@
 
             if (data.access_token) {
                 localStorage.setItem('ecu_token', data.access_token);
-                sessionStorage.setItem('ecu_token', data.access_token);
-                document.cookie = `ecu_token=${data.access_token}; path=/; max-age=2592000; SameSite=Lax`;
             }
 
             showAlert("Connexion réussie ! Redirection...", true);
@@ -482,8 +480,6 @@
 
             if (data.access_token) {
                 localStorage.setItem('ecu_token', data.access_token);
-                sessionStorage.setItem('ecu_token', data.access_token);
-                document.cookie = `ecu_token=${data.access_token}; path=/; max-age=2592000; SameSite=Lax`;
             }
 
             const welcomeMsg = data.bonus_granted ?

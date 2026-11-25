@@ -1,1335 +1,2249 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SCORPION REMAP PRO V3.2.0 - Plateforme ECU Remap & Déconnexion Expert</title>
-  <link rel="stylesheet" href="/static/css/style.css?v=20261125_pro">
-  <script src="/static/js/translations.js?v=20261125_pro"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCORPION REMAP PRO V3.2.0 | Plateforme Cloud Ingénierie ECU</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Cairo:wght@600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #060a12;
+            --bg-card: #0d1527;
+            --bg-card-hover: #131d35;
+            --border: #1e293b;
+            --border-hover: #38bdf8;
+            --primary: #0284c7;
+            --primary-glow: #38bdf8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-orange: #f59e0b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background: var(--bg-main); color: var(--text-main); min-height: 100vh; padding: 16px 24px; }
+        .container { max-width: 1280px; margin: 0 auto; }
+
+        /* Top Header */
+        .header-top {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px;
+            padding: 12px 20px; margin-bottom: 16px;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 19px; }
+        .logo-area span { color: #fff; }
+        .logo-badge {
+            background: linear-gradient(135deg, #0284c7, #38bdf8); color: #fff; font-size: 11px;
+            font-weight: 800; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.5px;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        .lang-switch { display: flex; background: #060a12; border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+        .lang-btn { background: none; border: none; color: var(--text-muted); font-size: 11px; font-weight: 700; padding: 4px 8px; cursor: pointer; border-radius: 6px; }
+        .lang-btn.active { background: #0284c7; color: #fff; }
+        .credits-pill {
+            background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35);
+            color: #fbbf24; font-size: 13px; font-weight: 800; padding: 6px 14px; border-radius: 20px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .user-pill {
+            background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.35);
+            color: #c084fc; font-size: 12px; font-weight: 700; padding: 6px 14px; border-radius: 20px;
+        }
+        .btn-logout {
+            background: #1e293b; color: #e2e8f0; border: 1px solid #334155; text-decoration: none;
+            font-size: 12px; font-weight: 700; padding: 7px 14px; border-radius: 8px; transition: 0.2s;
+        }
+        .btn-logout:hover { background: #ef4444; border-color: #ef4444; color: #fff; }
+
+        /* Navigation Bar (Tabs) */
+        .navbar-tabs {
+            display: flex; gap: 6px; background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 12px; padding: 6px; margin-bottom: 20px; overflow-x: auto;
+        }
+        .nav-tab {
+            background: none; border: none; color: var(--text-muted); font-size: 13px; font-weight: 700;
+            padding: 8px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center;
+            gap: 8px; transition: all 0.2s; white-space: nowrap;
+        }
+        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.03); }
+        .nav-tab.active { background: #0284c7; color: #fff; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35); }
+
+        /* Content Tab Panels */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+
+        /* Announcement Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.2), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;
+            position: relative; overflow: hidden;
+        }
+        .badge-exclusive {
+            background: #ef4444; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px;
+            border-radius: 4px; text-transform: uppercase; margin-right: 8px;
+        }
+        .badge-ecu-hero {
+            background: #3b82f6; color: #fff; font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px;
+        }
+        .hero-title { font-size: 16px; font-weight: 800; color: #fff; margin: 8px 0 4px; }
+        .hero-desc { font-size: 12px; color: var(--text-muted); }
+        .btn-hero {
+            background: #0284c7; color: #fff; border: none; font-size: 13px; font-weight: 700;
+            padding: 10px 18px; border-radius: 8px; cursor: pointer; white-space: nowrap;
+        }
+
+        /* Drag & Drop Area */
+        .dropzone-box {
+            background: var(--bg-card); border: 2px dashed #334155; border-radius: 18px; padding: 48px 20px;
+            text-align: center; cursor: pointer; transition: all 0.3s; margin-bottom: 24px;
+        }
+        .dropzone-box:hover, .dropzone-box.dragover { border-color: #38bdf8; background: rgba(56, 189, 248, 0.04); }
+        .drop-icon { font-size: 44px; margin-bottom: 12px; }
+        .drop-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 6px; }
+        .drop-subtitle { font-size: 13px; color: var(--text-muted); }
+
+        /* ECU Specs Grid */
+        .specs-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;
+            background: #060a12; padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px;
+        }
+        .spec-item span { display: block; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; }
+        .spec-item strong { font-size: 14px; color: #38bdf8; font-weight: 700; }
+
+        /* Fuel Type Badges */
+        .badge-fuel {
+            display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px;
+            border-radius: 6px; font-size: 12.5px; font-weight: 800; letter-spacing: 0.3px;
+        }
+        .badge-diesel {
+            background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+        }
+        .badge-petrol {
+            background: rgba(14, 165, 233, 0.15); color: #38bdf8; border: 1px solid rgba(14, 165, 233, 0.4);
+            box-shadow: 0 0 10px rgba(14, 165, 233, 0.15);
+        }
+
+        /* Solutions Checkboxes Grid */
+        .sol-category-title { font-size: 13px; font-weight: 800; color: #cbd5e1; margin-bottom: 10px; }
+        .sol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .sol-card {
+            background: #060a12; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+            display: flex; flex-direction: column; align-items: flex-start; gap: 4px; cursor: pointer; transition: 0.2s; user-select: none;
+        }
+        .sol-card:hover { border-color: #38bdf8; transform: translateY(-1px); }
+        .sol-card.selected { background: rgba(56, 189, 248, 0.15); border-color: #38bdf8; }
+        .sol-card.disabled { display: none !important; }
+        .sol-card .title { font-weight: 700; font-size: 13px; color: #f1f5f9; }
+        .sol-card .chk {
+            width: 20px; height: 20px; border-radius: 5px; background: rgba(255,255,255,0.05);
+            display: flex; align-items: center; justify-content: center; font-size: 12px; color: #38bdf8; font-weight: 800;
+        }
+        .sol-card.selected .chk { background: #0284c7; color: #fff; }
+
+        /* Outils Expert Grid */
+        .expert-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px;
+        }
+        .expert-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 22px;
+            display: flex; flex-direction: column; justify-content: space-between; transition: 0.2s;
+        }
+        .expert-card:hover { border-color: #38bdf8; transform: translateY(-2px); }
+        .expert-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+        .expert-icon { font-size: 26px; }
+        .expert-title { font-size: 16px; font-weight: 800; color: #fff; }
+        .expert-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 16px; }
+        .expert-btn {
+            background: #111e38; border: 1px solid #2563eb; color: #38bdf8; font-size: 13px; font-weight: 700;
+            padding: 10px; border-radius: 8px; cursor: pointer; text-align: center; width: 100%; transition: 0.2s;
+        }
+        .expert-btn:hover { background: #2563eb; color: #fff; }
+
+        /* Catalogue */
+        .cat-filter-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .chip {
+            background: #081020; border: 1px solid #1e293b; color: #cbd5e1; font-size: 12px; font-weight: 700;
+            padding: 6px 12px; border-radius: 6px; cursor: pointer; transition: 0.2s;
+        }
+        .chip:hover, .chip.active { background: #0284c7; border-color: #0284c7; color: #fff; }
+        .cat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+        .cat-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .fuel-badge { font-size: 10px; font-weight: 800; padding: 3px 8px; border-radius: 4px; text-transform: uppercase; float: right; }
+        .fuel-diesel { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+        .fuel-essence { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+
+        .btn-action-main {
+            width: 100%; padding: 16px; background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: none; border-radius: 10px; color: #fff; font-size: 16px; font-weight: 800;
+            cursor: pointer; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); transition: 0.2s;
+        }
+        .btn-action-main:hover { transform: translateY(-2px); }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 12px; background: #081020; color: var(--text-muted); font-size: 12px; font-weight: 700; }
+        td { padding: 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+
+        /* EVO Fan Modifier Studio (Matching Screenshot) */
+        .evo-window {
+            background: #090f1d;
+            border: 1px solid #1e293b;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        }
+        .evo-window-titlebar {
+            background: #040813;
+            padding: 8px 16px;
+            border-bottom: 1px solid #1e293b;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .evo-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            min-height: 520px;
+        }
+        @media(max-width: 900px) {
+            .evo-grid { grid-template-columns: 1fr; }
+        }
+        .evo-sidebar {
+            background: #060b16;
+            border-right: 1px solid #1e293b;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .evo-logo-box {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .evo-title {
+            font-size: 17px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        .evo-subtitle {
+            font-size: 11px;
+            font-weight: 700;
+            color: #06b6d4;
+            letter-spacing: 1px;
+            padding-left: 24px;
+        }
+        .evo-select {
+            width: 100%;
+            background: #0a1120;
+            border: 1px solid #1e293b;
+            color: #f1f5f9;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            outline: none;
+            cursor: pointer;
+        }
+        .evo-select:focus {
+            border-color: #06b6d4;
+        }
+        .evo-attach-btn {
+            background: #0d1a33;
+            border: 1px solid #1e3a8a;
+            color: #38bdf8;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .evo-attach-btn:hover {
+            background: #1e3a8a;
+            color: #fff;
+        }
+        .evo-main {
+            padding: 24px;
+            background: #090f1d;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .evo-dash-header {
+            font-size: 16px;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.5px;
+        }
+        .evo-stat-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+        .evo-stat-card {
+            background: #060b16;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        .evo-stat-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .evo-stat-value {
+            font-size: 42px;
+            font-weight: 800;
+            color: #06b6d4;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .evo-slider-container {
+            background: #060b16;
+            border: 1px solid #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+        }
+        .evo-slider-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+        }
+        .evo-slider-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .evo-range-input {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 6px;
+            background: #1e293b;
+            border-radius: 3px;
+            outline: none;
+        }
+        .evo-range-input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #06b6d4;
+            cursor: pointer;
+            box-shadow: 0 0 10px #06b6d4;
+        }
+        .evo-number-box {
+            background: #0a1120;
+            border: 1px solid #1e293b;
+            border-radius: 8px;
+            color: #06b6d4;
+            font-size: 18px;
+            font-weight: 800;
+            padding: 6px 14px;
+            width: 70px;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .evo-btn-apply {
+            background: linear-gradient(135deg, #7c3aed, #6366f1);
+            border: none;
+            color: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(124, 58, 237, 0.4);
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+        .evo-btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(124, 58, 237, 0.6);
+        }
+        .evo-console {
+            background: #03060c;
+            border: 1px solid #1e293b;
+            border-radius: 10px;
+            padding: 14px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #94a3b8;
+            height: 180px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        .evo-log-ok { color: #34d399; font-weight: 600; }
+        .evo-log-info { color: #38bdf8; font-weight: 600; }
+        .evo-log-warn { color: #facc15; font-weight: 600; }
+        .evo-log-err { color: #f87171; font-weight: 600; }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <!-- Top Bar -->
+        <header class="header-top">
+            <div class="logo-area">
+                <span>🦂 SCORPION REMAP PRO</span>
+                <span class="logo-badge">PRO V3.2.0</span>
+            </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="toast-container"></div>
+            <div class="header-right">
+                <div class="lang-switch">
+                    <button class="lang-btn active">FR</button>
+                    <button class="lang-btn">EN</button>
+                    <button class="lang-btn">AR</button>
+                </div>
+                <div class="credits-pill" id="userCreditsPill">🪙 <span id="userCredits">{{ user.tokens if user.tokens is defined else user.credits }}</span> Crédits</div>
+                <div class="user-pill" id="userName">👤 {{ user.full_name or user.username }} <small style="opacity:0.75; font-size:11px;">({{ user.workshop_name or 'Atelier' }})</small></div>
+                <a href="/logout" class="btn-logout">🚪 Déconnexion</a>
+            </div>
+        </header>
 
-  <!-- NAVIGATION BAR (AUTOTUNING STUDIO DESIGN ENGINE) -->
-  <nav class="navbar">
-    <!-- ROW 1: BRAND LOGO + CONTROLS -->
-    <div class="navbar-top">
-      <div class="navbar-top-row1">
-        <div class="brand-logo">
-          <span class="brand-title-desktop">⚡ SCORPION REMAP PRO</span>
-          <span class="brand-title-mobile">⚡ SCORPION</span>
-          <span class="brand-badge" data-i18n="brand_badge">PRO v3.2.0</span>
-        </div>
+        <!-- Navbar Tabs -->
+        <nav class="navbar-tabs">
+            <button class="nav-tab active" onclick="switchTab('tabRemap', this)">🛠 Studio Remap</button>
+            <button class="nav-tab" onclick="switchTab('tabEvoFan', this)" style="border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight:800;">⚡ EVO Fan Modifier</button>
+            <button class="nav-tab" onclick="switchTab('tabExpert', this)">🧰 Outils Expert</button>
+            <button class="nav-tab" onclick="switchTab('tabCatalogue', this)">📚 Catalogue</button>
+            <button class="nav-tab" onclick="switchTab('tabHistory', this)">📜 Historique</button>
+            <button class="nav-tab" onclick="switchTab('tabCredits', this)">💳 Forfaits Crédits</button>
+            {% if user.role == 'admin' or user.is_admin %}
+            <button class="nav-tab" onclick="switchTab('tabAdmin', this)" style="background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; font-weight:800;">🛡️ Administration</button>
+            {% endif %}
+        </nav>
 
-        <div class="user-quick-info">
-          <!-- Language Selector (FR / EN / AR) -->
-          <div class="lang-selector" id="langSelector">
-            <button type="button" class="lang-btn active" data-lang="fr" onclick="setAppLanguage('fr')" title="Français">FR</button>
-            <button type="button" class="lang-btn" data-lang="en" onclick="setAppLanguage('en')" title="English">EN</button>
-            <button type="button" class="lang-btn" data-lang="ar" onclick="setAppLanguage('ar')" title="العربية">AR</button>
-          </div>
+        <!-- TAB 1: STUDIO REMAP -->
+        <section id="tabRemap" class="tab-panel active">
+            <!-- Upload Area -->
+            <div id="dropZone" class="dropzone-box">
+                <div class="drop-icon">📤</div>
+                <div class="drop-title">Glissez-déposez votre fichier binaire ECU (.bin, .ori)</div>
+                <div class="drop-subtitle">Ou cliquez pour parcourir vos fichiers (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)</div>
+                <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
+            </div>
 
-          <!-- Tokens / Credits Pill -->
-          <div class="credit-pill">
-            <span>🪙</span>
-            <span id="userCreditsDisplay">0</span>
-            <span data-i18n="nav.credits_label" class="credits-text-unit">Crédits</span>
-          </div>
-        </div>
-      </div>
+            <!-- Unrecognized File Strict Manual Selector (قاعدة بيانات الكمبيوترات المبرمجة فعلياً فقط) -->
+            <div id="unrecognizedBox" style="display:none; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+                    <span style="font-size: 26px;">⚠️</span>
+                    <div>
+                        <h3 style="font-size: 16.5px; color: #fca5a5; margin: 0; font-weight: 800;">Calculateur non reconnu automatiquement</h3>
+                        <p style="font-size: 13px; color: #cbd5e1; margin-top: 4px; margin-bottom: 0;">
+                            Veuillez sélectionner votre véhicule et calculateur dans notre base de données :
+                        </p>
+                    </div>
+                </div>
 
-      <!-- User Session Controls -->
-      <div class="user-session-bar">
-        <div id="userProfileBadge">
-          <span>👤</span>
-          <span id="navUsername">Chargement...</span>
-          <span id="navRoleBadge" style="background:#0284c7; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px;">MEMBRE</span>
-        </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; margin-bottom: 18px;">
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">1. Marque / Constructeur :</label>
+                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                            <option value="">-- Choisir la marque / constructeur --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">2. Calculateur / ECU :</label>
+                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                            <option value="">-- Choisir le calculateur --</option>
+                        </select>
+                    </div>
+                </div>
 
-        <div class="user-action-buttons">
-          <button class="btn-icon-nav" id="btnChangePassword" onclick="openChangePasswordModal()" title="Changer mot de passe">🔑</button>
-          <button class="btn-switch-account" onclick="logout()" title="Déconnexion">
-            <span>🚪</span> <span data-i18n="nav.logout" class="switch-account-label">Déconnexion</span>
-          </button>
-        </div>
-      </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
+                    <span style="font-size: 12px; color: var(--text-muted);">Votre calculateur ne figure pas dans la liste officielle ?</span>
+                    <button type="button" onclick="requestManualProcessing()" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                        📩 Calculateur non supporté - Demander un traitement manuel
+                    </button>
+                </div>
+            </div>
+
+            <!-- Analysis & Tuning Panel -->
+            <div id="resultsPanel" style="display:none; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px;">
+                <h3 style="font-size:17px; margin-bottom:14px; color:#fff;">Calculateur Identifié avec Succès ✅</h3>
+                
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <span>Marque / Fabricant</span>
+                        <strong id="brandVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Modèle / Motorisation</span>
+                        <strong id="modelVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Calculateur (ECU Family)</span>
+                        <strong id="ecuVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Version Logiciel (SW / HW)</span>
+                        <strong id="swVal">--</strong>
+                    </div>
+                    <div class="spec-item">
+                        <span>Type de Motorisation</span>
+                        <strong id="fuelVal"><span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span></strong>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 1: Emissions & Filtres -->
+                <div class="sol-category-title">🌱 Solutions Émissions & Filtres (Anti-Pollution)</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="DPF / FAP" onclick="toggleSol(this, 'DPF / FAP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">DPF / FAP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="EGR" onclick="toggleSol(this, 'EGR')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">EGR OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="ADBLUE" onclick="toggleSol(this, 'ADBLUE')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">ADBLUE / SCR OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="DECAT / LAMBDA" onclick="toggleSol(this, 'DECAT / LAMBDA')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">CAT OFF (Decat / Lambda)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="EVAP" onclick="toggleSol(this, 'EVAP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">EVAP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 2: Moteur, Sécurité & Capteurs -->
+                <div class="sol-category-title">⚙️ Solutions Moteur, Sécurité & Capteurs</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="IMMO" onclick="toggleSol(this, 'IMMO')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">IMMO OFF (Antidémarrage)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="HOT START" onclick="toggleSol(this, 'HOT START')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">HOT START FIX (Démarrage chaud)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="SWIRL / FLAPS" onclick="toggleSol(this, 'SWIRL / FLAPS')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">VSA / SWIRL FLAPS OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="TVA" onclick="toggleSol(this, 'TVA')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">TVA OFF (Papillon / Throttle)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="START-STOP" onclick="toggleSol(this, 'START-STOP')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">START-STOP OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="SPEED LIMIT" onclick="toggleSol(this, 'SPEED LIMIT')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">SPEED LIMIT (VMAX) OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="MAF" onclick="toggleSol(this, 'MAF')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">MAF OFF (حساس الهواء)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                    <div class="sol-card" data-sol="TORQUE MONITORING" onclick="toggleSol(this, 'TORQUE MONITORING')">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title">TORQUE MONITORING OFF</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Solutions Category 3: Performance & Tuning -->
+                <div class="sol-category-title">🚀 Performance & Tuning Moteur</div>
+                <div class="sol-grid">
+                    <div class="sol-card" data-sol="STAGE 1" onclick="toggleSol(this, 'STAGE 1')" style="border-color:rgba(16,185,129,0.4);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                            <span class="title" style="color:#34d399;">STAGE 1 (+20% Puissance/Couple)</span>
+                            <span class="chk">+</span>
+                        </div>
+                        <div class="sol-status-badge"></div>
+                    </div>
+                </div>
+
+                <!-- Live DTC Suppression Table Preview (Simulation en direct) -->
+                <div style="background:#090e1a; border:1px solid #1e293b; border-radius:14px; padding:20px; margin:24px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                        <div>
+                            <span style="font-size:15px; font-weight:800; color:#38bdf8; display:flex; align-items:center; gap:8px;">
+                                <span>❌</span> Table de Suppression des Codes Défauts (Live DTC Switch Preview)
+                            </span>
+                            <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Simulation en direct des masques et commutateurs d'erreur qui seront basculés vers 0x00</p>
+                        </div>
+                        <span id="dtcCountBadge" style="background:#dc2626; color:#fff; font-size:12px; font-weight:800; padding:6px 14px; border-radius:20px; box-shadow:0 0 12px rgba(220,38,38,0.4);">
+                            0 code DTC à supprimer
+                        </span>
+                    </div>
+
+                    <!-- Search & Manual DTC Add -->
+                    <div style="display:flex; gap:10px; margin-bottom:14px; position:relative;">
+                        <input type="text" id="dtcSearchInput" placeholder="Ajouter un code défaut spécifique (ex: P0401, P2002, U0100...) ou chercher..."
+                               style="flex:1; padding:11px 16px; background:#0d1527; border:1px solid #334155; border-radius:10px; color:#fff; font-size:13px; outline:none;"
+                               oninput="onDtcSearch(this.value)">
+                        <button type="button" onclick="addCustomDtc()" style="background:#0284c7; color:#fff; border:none; padding:0 22px; border-radius:10px; font-weight:800; cursor:pointer; font-size:13px;">
+                            + Ajouter au pack
+                        </button>
+                        
+                        <div id="dtcSearchResults" style="display:none; position:absolute; top:48px; left:0; right:140px; background:#0d1527; border:1px solid #38bdf8; border-radius:10px; max-height:220px; overflow-y:auto; z-index:100; box-shadow:0 8px 24px rgba(0,0,0,0.8);"></div>
+                    </div>
+
+                    <!-- Live DTC Preview Table -->
+                    <div style="overflow-x:auto; max-height:380px; overflow-y:auto; border:1px solid #1e293b; border-radius:10px; background:#060a12;">
+                        <table style="width:100%; border-collapse:collapse; font-size:12px; text-align:left;">
+                            <thead>
+                                <tr style="background:#0f172a; color:#94a3b8; border-bottom:1px solid #1e293b; position:sticky; top:0; z-index:10;">
+                                    <th style="padding:10px 14px; width:110px;">Code DTC</th>
+                                    <th style="padding:10px 14px;">Description du Défaut (Intitulé OBD)</th>
+                                    <th style="padding:10px 14px; width:120px;">Adresse Offset</th>
+                                    <th style="padding:10px 14px; width:160px;">Commutation (Switch)</th>
+                                    <th style="padding:10px 14px; width:160px;">Origine / Pack</th>
+                                    <th style="padding:10px 14px; width:90px; text-align:center;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dtcPreviewBody">
+                                <tr>
+                                    <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                        Aucun code DTC ne sera supprimé. Sélectionnez une solution ci-dessus ou ajoutez un code manuellement.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Technical Instructions & Auto Checksum Box -->
+                <div id="instructionsCard" style="display:none; background:#0b1329; border:1px solid #0284c7; border-radius:14px; padding:20px; margin:24px 0;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px; border-bottom:1px solid #1e293b; padding-bottom:12px;">
+                        <div style="font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>📋</span> Instructions Techniques Atelier & Checksum
+                        </div>
+                        <div id="checksumStatusPill" style="font-size:12px; font-weight:700; padding:4px 12px; border-radius:20px; background:rgba(16,185,129,0.15); color:#10b981; border:1px solid #10b981;">
+                            Correction Checksum: Supporté & Automatique ✅
+                        </div>
+                    </div>
+                    <div id="instructionsList" style="display:grid; gap:10px;"></div>
+                </div>
+
+                <button id="btnProcess" class="btn-action-main" onclick="processAndDownload()">
+                    ⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)
+                </button>
+
+                <div id="successBox" style="display:none; background:rgba(16, 185, 129, 0.15); border:1px solid #10b981; border-radius:10px; padding:16px; margin-top:16px; text-align:center;">
+                    <p style="font-weight:700; color:#34d399; margin-bottom:8px;">🎉 Fichier modifié avec succès !</p>
+                    <a id="downloadLink" href="#" target="_blank" style="display:inline-block; background:#10b981; color:#fff; text-decoration:none; padding:10px 24px; border-radius:8px; font-weight:700; font-size:14px;">📥 Télécharger le Fichier MOD Maintenant</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB EVO FAN MODIFIER (SCREENSHOT REPLICATION) -->
+        <section id="tabEvoFan" class="tab-panel">
+            <div class="evo-window">
+                <div class="evo-window-titlebar">
+                    <span>EVO Fan Temperature Patcher - Professional Edition</span>
+                    <span style="display:flex; gap:6px;">
+                        <span style="width:10px; height:10px; border-radius:50%; background:#eab308; display:inline-block;"></span>
+                        <span style="width:10px; height:10px; border-radius:50%; background:#10b981; display:inline-block;"></span>
+                    </span>
+                </div>
+
+                <div class="evo-grid">
+                    <!-- Left Sidebar -->
+                    <div class="evo-sidebar">
+                        <div class="evo-logo-box">
+                            <div class="evo-title">⚡ EVO FAN MODIFIER</div>
+                            <div class="evo-subtitle">FAN TEMP PATCHER</div>
+                        </div>
+
+                        <div>
+                            <label style="font-size:11px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:0.5px; display:block; margin-bottom:8px;">HARDWARE PROTOCOL (ECU)</label>
+                            <select id="evoEcuSelect" class="evo-select" onchange="onEvoProtocolChange()">
+                                <option value="" selected>🔍 Auto-Détection Automatique (Recommandé)</option>
+                                <option value="DCM1.2">Delphi DCM1.2 (1.5 dCi)</option>
+                                <option value="EDC16CP33">EDC16CP33</option>
+                                <option value="EDC17C42">EDC17C42</option>
+                                <option value="EMS3110">EMS3110</option>
+                                <option value="EMS3120">EMS3120</option>
+                                <option value="EMS3130">EMS3130</option>
+                                <option value="EMS3132">EMS3132</option>
+                                <option value="EMS3155">EMS3155</option>
+                                <option value="EMS3160">EMS3160</option>
+                                <option value="S3000">S3000</option>
+                                <option value="SID305">SID305</option>
+                                <option value="SID306">SID306</option>
+                                <option value="SID307">SID307</option>
+                                <option value="SIM32">SIM32</option>
+                                <option value="V40">V40</option>
+                                <option value="V42">V42</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <button type="button" class="evo-attach-btn" onclick="document.getElementById('evoFileInput').click()">
+                                📁 Attach / Load Flash File (.bin)
+                            </button>
+                            <input type="file" id="evoFileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;" onchange="handleEvoFileUpload(event)">
+                        </div>
+
+                        <div id="evoFileInfo" style="display:none; background:#040711; border:1px solid #1e293b; border-radius:10px; padding:14px; font-size:12px;">
+                            <div style="color:#38bdf8; font-weight:700; margin-bottom:4px;" id="evoFileName">--</div>
+                            <div style="color:#94a3b8; font-size:11px;" id="evoFileSize">--</div>
+                            <div style="color:#10b981; font-size:11px; margin-top:4px;" id="evoFileStatus">Prêt pour modification</div>
+                        </div>
+
+                        <div style="margin-top:auto; font-size:10px; color:#475569; letter-spacing:0.5px;">
+                            DEVELOPER CONTACT<br>
+                            SCORPION REMAP PRO • ENGINE 2026
+                        </div>
+                    </div>
+
+                    <!-- Right Main / Tuning Dashboard -->
+                    <div class="evo-main">
+                        <div class="evo-dash-header">
+                            <span>🎛️</span> TUNING DASHBOARD
+                        </div>
+
+                        <div class="evo-stat-cards">
+                            <div class="evo-stat-card">
+                                <div class="evo-stat-label">CURRENT MAP VALUE</div>
+                                <div class="evo-stat-value" id="evoCurrentVal">-- °C</div>
+                            </div>
+                            <div class="evo-stat-card">
+                                <div class="evo-stat-label">TARGET PATCH VALUE</div>
+                                <div class="evo-stat-value" id="evoTargetVal">90 °C</div>
+                            </div>
+                        </div>
+
+                        <div class="evo-slider-container">
+                            <div class="evo-slider-header">
+                                <span>🎚️</span> ADJUST TARGET TEMPERATURE
+                            </div>
+                            <div class="evo-slider-row">
+                                <input type="range" id="evoSlider" class="evo-range-input" min="75" max="105" value="90" step="1" oninput="syncEvoTemp(this.value)">
+                                <input type="number" id="evoNumberBox" class="evo-number-box" value="90" min="70" max="110" onchange="syncEvoTemp(this.value)">
+                            </div>
+                        </div>
+
+                        <div>
+                            <button type="button" id="btnEvoApply" class="evo-btn-apply" onclick="applyEvoFanPatch()">
+                                <span>💾</span> APPLY TEMPERATURE PATCH & EXPORT
+                            </button>
+                        </div>
+
+                        <div>
+                            <div style="font-size:11px; font-weight:700; color:#94a3b8; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                                <span>⚙️</span> DIAGNOSTIC CONSOLE LOG
+                            </div>
+                            <div id="evoConsoleLog" class="evo-console">
+                                <div>[15:32:15] <span class="evo-log-ok">[OK] SUCCESS: System activated successfully.</span></div>
+                                <div>[15:32:16] <span class="evo-log-info">[i] INFO: System initialized. Ready to load files.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: OUTILS EXPERT (MATCHING SCREENSHOT 2) -->
+        <section id="tabExpert" class="tab-panel">
+            <div style="margin-bottom:20px;">
+                <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <span>🧰</span> Boîte à Outils Spécialisés Atelier
+                </h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Fonctions expertes avancées (1 Crédit par opération)</p>
+            </div>
+
+            <div class="expert-grid">
+                <!-- Tool 1: Renault Sonde Lambda / O2 Off -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">⚡</span>
+                            <div class="expert-title">Renault Sonde Lambda / O2 Off</div>
+                        </div>
+                        <div class="expert-desc">
+                            Désactivation définitive de la sonde Lambda aval (Post-Catalyseur) et suppression des défauts associés sur calculateurs Renault compatibles (Valeo V42, EMS3110, EMS3120, EMS3132, S3000, SIM32).
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_lambda_off', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+
+                <!-- Tool 2: Renault Fan Temp Mod (Déclenchement Ventilateur) -->
+                <div class="expert-card" style="border: 1px solid rgba(2, 132, 199, 0.4); background: linear-gradient(180deg, rgba(2, 132, 199, 0.05), rgba(11, 19, 36, 0.9));">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🌀</span>
+                            <div class="expert-title">Renault Fan Temp Mod (16 Calculateurs EVO)</div>
+                        </div>
+                        <div class="expert-desc">
+                            Algorithme officiel EVO Fan Temperature Patcher. Abaisse le seuil de déclenchement GMV pour protéger le moteur contre la surchauffe. 100% compatible avec les 16 familles matérielles Renault.
+                        </div>
+                        <div style="margin-bottom:12px;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Protocole Matériel (Calculateur ECU) :</label>
+                            <select id="fanEcuProtocol" style="width:100%; background:#060a12; border:1px solid #334155; color:#38bdf8; font-weight:600; padding:7px 10px; border-radius:6px; font-size:12px; outline:none; cursor:pointer;">
+                                <option value="" selected>🔍 Auto-Détection Automatique (Recommandé)</option>
+                                <option value="DCM1.2">Delphi DCM1.2 (1.5 dCi)</option>
+                                <option value="EDC16CP33">Bosch EDC16CP33 (2.0 / 2.5 dCi)</option>
+                                <option value="EDC17C42">Bosch EDC17C42 (1.6 dCi)</option>
+                                <option value="EMS3110">Continental EMS3110 (1.6 / 2.0 16V)</option>
+                                <option value="EMS3120">Continental EMS3120 (Duster / Symbol / Logan)</option>
+                                <option value="EMS3130">Continental EMS3130 (Duster 1.6 16V)</option>
+                                <option value="EMS3132">Siemens Sirius EMS3132 (1.2 / 1.4 / 1.6)</option>
+                                <option value="EMS3155">Continental EMS3155 (1.2 TCe)</option>
+                                <option value="EMS3160">Continental EMS3160 (0.9 / 1.2 TCe)</option>
+                                <option value="S3000">Sagem S3000 (Megane 2 / Scenic 2 / Clio 3)</option>
+                                <option value="SID305">Continental SID305 (1.5 dCi)</option>
+                                <option value="SID306">Continental SID306 (1.5 dCi)</option>
+                                <option value="SID307">Continental SID307 (1.5 dCi)</option>
+                                <option value="SIM32">Siemens SIM32 (Clio 3 / Modus 1.2 16V)</option>
+                                <option value="V40">Valeo V40 (Twingo / Clio 1.2 16V)</option>
+                                <option value="V42">Valeo V42 (Clio / Logan / Sandero / Duster 1.2 / 1.6)</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Consigne Cible :</label>
+                            <select id="fanTempParam" style="background:#060a12; border:1px solid #334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:12px; outline:none; cursor:pointer; flex:1;">
+                                <option value="90">90°C (Optimisé - EVO Standard)</option>
+                                <option value="92" selected>92°C (Recommandé Climat Chaud)</option>
+                                <option value="88">88°C (Performance / Piste)</option>
+                                <option value="95">95°C (Stock Fiabilisé)</option>
+                                <option value="98">98°C (Protection Légère)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_fan_temp', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+
+                <!-- Tool 3: Renault Delphi DCM 3.4 - Stage 1 -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🚀</span>
+                            <div class="expert-title">Renault Delphi DCM 3.4 - Stage 1</div>
+                        </div>
+                        <div class="expert-desc">
+                            Optimisation cartographique Stage 1 (Couple & Puissance) dédiée exclusivement aux calculateurs Renault Delphi DCM 3.4 (1.5 dCi Symbol, Stepway, Logan, Clio 4 85CH ➔ 115CH + VMAX).
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_dcm34_stage1', 'Choisir Flash DCM 3.4 (.bin)')">Choisir Flash DCM 3.4 (.bin)</button>
+                </div>
+
+                <!-- Tool 4: Renault Cold Start Fix -->
+                <div class="expert-card">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">❄️</span>
+                            <div class="expert-title">Renault Cold Start Fix</div>
+                        </div>
+                        <div class="expert-desc">
+                            Corrige définitivement le problème de démarrage difficile à froid sur les calculateurs Renault EMS3110, EMS3120, EMS3125, EMS3132 et Valeo V42.
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('renault_cold_start', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+            </div>
+            <input type="file" id="expertFileInput" style="display:none;">
+
+            <!-- Modal Confirmation Expert (Dry-Run Confirmation) -->
+            <div id="expertConfirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(4,7,13,0.85); backdrop-filter:blur(6px); z-index:9999; justify-content:center; align-items:center;">
+                <div style="background:#0b1324; border:1px solid #2563eb; border-radius:18px; max-width:540px; width:90%; padding:28px; box-shadow:0 20px 40px rgba(0,0,0,0.7); position:relative;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h3 style="font-size:18px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>🛡️</span> Validation de Sécurité & Confirmation
+                        </h3>
+                        <button onclick="closeExpertModal()" style="background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;">✕</button>
+                    </div>
+
+                    <div style="background:rgba(2,132,199,0.08); border:1px solid rgba(2,132,199,0.25); border-radius:12px; padding:16px; margin-bottom:20px;">
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:13px;">
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Calculateur Détecté :</span>
+                                <strong id="modalEcuType" style="color:#fff;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Version Logicielle (SW) :</span>
+                                <strong id="modalSwVersion" style="color:#38bdf8;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Modifications Estimées :</span>
+                                <strong id="modalBytesMod" style="color:#10b981;">--</strong>
+                            </div>
+                            <div>
+                                <span style="color:#94a3b8; display:block; font-size:11px;">Correction Checksum :</span>
+                                <strong id="modalChecksum" style="color:#10b981;">Automatique & Supporté ✅</strong>
+                            </div>
+                            <div id="modalTempRow" style="display:none; grid-column:span 2; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); border-radius:8px; padding:10px 14px; margin-top:6px;">
+                                <span style="color:#94a3b8; font-size:11px; font-weight:700;">Calibration Température Ventilateur (EVO Fan Patcher) :</span>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+                                    <span style="color:#cbd5e1; font-size:13px;">Stock Valeur : <strong id="modalCurrentTemp" style="color:#f87171; font-size:15px;">--</strong></span>
+                                    <span style="color:#fff; font-size:16px; font-weight:800;">➔</span>
+                                    <span style="color:#38bdf8; font-size:13px;">Nouvelle Consigne : <strong id="modalTargetTemp" style="color:#34d399; font-size:15px;">--</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(255,255,255,0.06); font-size:12px; color:#cbd5e1;">
+                            <span style="color:#94a3b8;">Détail de l'opération :</span>
+                            <div id="modalDesc" style="margin-top:2px; font-weight:700; color:#f8fafc;">--</div>
+                        </div>
+                    </div>
+
+                    <div style="background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:10px; padding:12px; margin-bottom:22px; font-size:12px; color:#fde68a; display:flex; align-items:center; gap:10px;">
+                        <span style="font-size:18px;">⚠️</span>
+                        <div>
+                            <strong>Opération Atelier Spécialisée :</strong>
+                            <span>1 Crédit sera débité de votre compte lors de la génération et du téléchargement du fichier patché.</span>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:12px;">
+                        <button onclick="closeExpertModal()" style="flex:1; padding:12px; background:#1e293b; border:1px solid #334155; color:#cbd5e1; border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;">Annuler</button>
+                        <button id="modalConfirmBtn" onclick="confirmAndDownloadExpert()" style="flex:2; padding:12px; background:linear-gradient(135deg, #0284c7, #2563eb); border:none; color:#fff; border-radius:8px; font-size:13px; font-weight:800; cursor:pointer; box-shadow:0 4px 14px rgba(37,99,235,0.4);">CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: CATALOGUE (MATCHING SCREENSHOT 3) -->
+        <section id="tabCatalogue" class="tab-panel">
+            <div style="margin-bottom:16px;">
+                <h2 style="font-size:18px; font-weight:800; display:flex; align-items:center; gap:8px;">
+                    <span>📚</span> Catalogue des Calculateurs Supportés (<span id="catTotalNum">46</span> Familles Référencées)
+                </h2>
+                <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Référentiel officiel SCORPION REMAP PRO v3.2.0 — 45 marques & calculateurs avec solutions actives</p>
+            </div>
+
+            <!-- Chips Filter -->
+            <div class="cat-filter-chips">
+                <span style="font-size:12px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; margin-right:6px;">Filtres rapides :</span>
+                <button class="chip active" onclick="setBrandFilter('Tous', this)">Tous</button>
+                <button class="chip" onclick="setFuelFilter('Essence', this)">⛽ Essence</button>
+                <button class="chip" onclick="setFuelFilter('Diesel', this)">⛽ Diesel</button>
+                <button class="chip" onclick="setBrandFilter('VAG', this)">VAG / VW</button>
+                <button class="chip" onclick="setBrandFilter('RENAULT', this)">Renault / Dacia</button>
+                <button class="chip" onclick="setBrandFilter('PSA', this)">PSA / Peugeot</button>
+                <button class="chip" onclick="setBrandFilter('BMW', this)">BMW</button>
+                <button class="chip" onclick="setBrandFilter('MERCEDES', this)">Mercedes</button>
+                <button class="chip" onclick="setBrandFilter('HYUNDAI', this)">Hyundai / Kia</button>
+                <button class="chip" onclick="setBrandFilter('TOYOTA', this)">Toyota</button>
+                <button class="chip" onclick="setBrandFilter('FORD', this)">Ford</button>
+                <button class="chip" onclick="setBrandFilter('FIAT', this)">Fiat / Abarth</button>
+            </div>
+
+            <!-- Search input -->
+            <input type="text" id="catSearch" placeholder="🔍 Rechercher une marque ou un calculateur (ex: EDC17, EDC16, SID208, Delphi DCM, MD1, VAG...)"
+                   style="width:100%; padding:12px 16px; background:#0d1527; border:1px solid #334155; border-radius:10px; color:#fff; font-size:13px; outline:none; margin-bottom:20px;"
+                   oninput="filterCatalogue()">
+
+            <!-- Grid of Cards -->
+            <div id="catGrid" class="cat-grid"></div>
+        </section>
+
+        <!-- TAB 4: HISTORIQUE -->
+        <section id="tabHistory" class="tab-panel">
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px;">
+                <h3 style="font-size:16px; font-weight:800; margin-bottom:14px;">Historique de vos Fichiers Modifiés</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom du Fichier</th>
+                            <th>Calculateur / Véhicule</th>
+                            <th>Solutions Appliquées</th>
+                            <th>Date</th>
+                            <th>Téléchargement</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">Chargement de l'historique...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 5: FORFAITS CRÉDITS -->
+        <section id="tabCredits" class="tab-panel">
+            <div style="margin-bottom:20px; text-align:center;">
+                <h2 style="font-size:22px; font-weight:800; color:#fff;">Forfaits de Crédits & Recharge Instantanée</h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">1 Crédit = 1 Modification de Fichier Complète (Tous Packs Inclus)</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:20px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; text-align:center;">
+                    <h3 style="font-size:18px; color:#94a3b8; margin-bottom:10px;">Pack Découverte</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">10 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Idéal pour tester nos solutions ou pour petits garages.</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">3 500 DZD / 25 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+
+                <div style="background:var(--bg-card); border:2px solid #0284c7; border-radius:16px; padding:28px; text-align:center; position:relative;">
+                    <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:#0284c7; color:#fff; font-size:11px; font-weight:800; padding:4px 12px; border-radius:20px;">POPULAIRE ATELIER</div>
+                    <h3 style="font-size:18px; color:#38bdf8; margin-bottom:10px;">Pack Pro Atelier</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">50 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Pour les spécialistes du diagnostic et reprogrammation.</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">14 000 DZD / 95 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:28px; text-align:center;">
+                    <h3 style="font-size:18px; color:#94a3b8; margin-bottom:10px;">Pack Master Illimité</h3>
+                    <div style="font-size:36px; font-weight:800; color:#fff; margin-bottom:14px;">100 <span style="font-size:16px; color:#38bdf8;">Crédits</span></div>
+                    <p style="font-size:13px; color:var(--text-muted); margin-bottom:20px;">Tarif grossiste ultra-avantageux (200 DZD / fichier).</p>
+                    <div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:20px;">24 000 DZD / 160 €</div>
+                    <button class="btn-action-main" onclick="alert('Contactez votre administrateur pour valider la recharge par Edahabia / CIB ou virement.')">Recharger ce Pack</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB ADMIN (ONLY VISIBLE FOR ADMINS) -->
+        {% if user.role == 'admin' or user.is_admin %}
+        <section id="tabAdmin" class="tab-panel">
+            <div style="margin-bottom:24px;">
+                <h2 style="font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                    <span>🛡️</span> Panneau d'Administration SCORPION REMAP PRO
+                </h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Gestion des utilisateurs, validation des paiements et recharges de crédits.</p>
+            </div>
+
+            <!-- Stats -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-bottom:24px;">
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Utilisateurs Inscrits</div>
+                    <div style="font-size:32px; font-weight:800; color:#fff; margin-top:6px;" id="adminStatUsers">--</div>
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Total Crédits Utilisateurs</div>
+                    <div style="font-size:32px; font-weight:800; color:#38bdf8; margin-top:6px;" id="adminStatCredits">--</div>
+                </div>
+                <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
+                    <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Fichiers Modifiés Totaux</div>
+                    <div style="font-size:32px; font-weight:800; color:#10b981; margin-top:6px;" id="adminStatFiles">--</div>
+                </div>
+            </div>
+
+            <!-- Users Table -->
+            <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h3 style="font-size:16px; font-weight:800; color:#fff;">Utilisateurs & Ateliers Enregistrés</h3>
+                    <button class="chip" onclick="loadAdminData()">🔄 Actualiser</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Client & Atelier</th>
+                                <th>Email / Téléphone</th>
+                                <th>Wilaya</th>
+                                <th>Crédits</th>
+                                <th>Statut</th>
+                                <th>Adresse IP</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminUsersBody">
+                            <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Chargement des utilisateurs...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Anti-Brute-Force & Banned IPs Table -->
+            <div style="background:var(--bg-card); border:1px solid rgba(239, 68, 68, 0.3); border-radius:14px; padding:20px; margin-top:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:16px; font-weight:800; color:#f87171; display:flex; align-items:center; gap:8px;">
+                            <span>🛡️</span> Protection Anti-Brute-Force & IPs Bloquées
+                        </h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">
+                            يتم حظر أي جهاز يحاول تخمين كلمة المرور أكثر من 5 مرات تلقائياً لحماية حسابات المنصة وسيرفر الـ Admin.
+                        </p>
+                    </div>
+                    <button class="chip" onclick="loadBannedIps()">🔄 Actualiser les IPs</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Adresse IP</th>
+                                <th>Tentatives</th>
+                                <th>Raison du Blocage</th>
+                                <th>Bloqué Jusqu'à</th>
+                                <th>Statut</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminBannedIpsBody">
+                            <tr><td colspan="6" style="text-align:center; padding:16px; color:var(--text-muted);">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Footer -->
+        <footer style="margin-top: 50px; padding: 24px 0 10px 0; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); flex-wrap: wrap; gap: 12px;">
+            <div>
+                <strong style="color: #fff;">🦂 SCORPION REMAP PRO v3.2.0</strong> © 2026 • Plateforme Cloud d'Ingénierie & Diagnostic ECU/TCU pour Ateliers
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Politique de Remboursement & CGV</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Page Légale</a>
+                <a href="#" style="color: var(--text-muted); text-decoration: none;">Changelog</a>
+            </div>
+        </footer>
     </div>
 
-    <!-- ROW 2: TABS NAVIGATION -->
-    <div class="navbar-bottom">
-      <div class="nav-links">
-        <a class="nav-item active" id="tabLink-studio" onclick="switchTab('studio')" data-i18n="nav.studio">🛠️ Studio Remap</a>
-        <a class="nav-item" id="tabLink-expert" onclick="switchTab('expert')" data-i18n="nav.expert">🧰 Outils Expert</a>
-        <a class="nav-item" id="tabLink-catalog" onclick="switchTab('catalog')" data-i18n="nav.catalog">📚 Catalogue</a>
-        <a class="nav-item" id="tabLink-history" onclick="switchTab('history')" data-i18n="nav.history">📜 Historique</a>
-        <a class="nav-item" id="tabLink-credits" onclick="switchTab('credits')" data-i18n="nav.credits">💳 Forfaits Crédits</a>
-        <a class="nav-item" onclick="openChangelogModal()" style="color:#c084fc; font-weight:700; cursor:pointer;" title="Consulter le Changelog">
-          <span data-i18n="nav.changelog">📋 Changelog</span> <span class="nav-changelog-badge">v3.2.0</span>
-        </a>
-        <a class="nav-item" id="navLinkAdmin" onclick="switchTab('admin')" style="display:none; color:#f59e0b; font-weight:700;">
-          <span data-i18n="nav.admin">⚙️ Administration</span>
-        </a>
-      </div>
-    </div>
-  </nav>
+    <script>
+        let currentFile = null;
+        let currentFileToken = null;
+        let supportedSolutionsList = [];
+        let selectedSolutions = new Set();
+        let selectedDtcs = new Set();
+        let catalogueData = [];
+        let currentBrandFilter = 'Tous';
+        let currentFuelFilter = 'Tous';
+        let currentExpertTool = null;
+        let currentChecksumInfo = null;
 
-  <!-- MAIN CONTAINER -->
-  <main class="container">
-
-    <!-- ANNOUNCEMENT BANNER (NEON CARDS) -->
-    <div id="systemAnnouncementBanner" class="system-announcement-banner">
-      <div class="announcement-content" style="cursor:pointer;" onclick="openChangelogModal()" title="Cliquer pour afficher les détails du Changelog">
-        <span class="announcement-icon" id="announcementIcon">🚀</span>
-        <div class="announcement-text">
-          <strong id="announcementTitle">SCORPION REMAP PRO v3.2.0 Déployé</strong> : 
-          <span id="announcementMessage">Moteur SVEdit v1.1.38.3 complet intégré (80 calculateurs, 18 marques, isolation Diesel/Essence stricte, DTC tables).</span>
-          <span style="display:inline-block; margin-left:8px; color:#fff; text-decoration:underline; font-size:0.8rem; font-weight:700;">📋 Voir le Changelog &rarr;</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== TAB 1: STUDIO REMAP ==================== -->
-    <div id="tab-studio" class="tab-pane active">
-
-      <!-- Upload Zone -->
-      <div class="upload-card" id="dropZone" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon">📤</div>
-        <div class="upload-title" data-i18n="studio.drop_title">Glissez-déposez votre fichier binaire ECU (.bin, .ori)</div>
-        <div class="upload-subtitle" data-i18n="studio.drop_subtitle">Ou cliquez pour parcourir vos fichiers (Bosch EDC16/EDC17/MED17/MD1, Delphi, Denso, Keihin, Hitachi, Melco, Siemens SID/EMS...)</div>
-        <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
-      </div>
-
-      <!-- Manual Overrides Bar (Exact 1:1 match to autotuningstudio.win & screenshot) -->
-      <div id="manualSelectBox" class="manual-select-container">
-        <span class="manual-select-label" data-i18n="studio.adjust_label">⚙️ Ajuster si nécessaire :</span>
-        <div class="select-group">
-          <label for="selectBrand" data-i18n="studio.brand_label">Marque</label>
-          <select id="selectBrand" class="custom-select" onchange="onManualBrandChange()">
-            <option value="">Sélectionner la marque...</option>
-          </select>
-        </div>
-        <div class="select-group">
-          <label for="selectEcu" data-i18n="studio.ecu_label">Calculateur (ECU)</label>
-          <select id="selectEcu" class="custom-select" onchange="onManualEcuChange()" disabled>
-            <option value="">Sélectionner le calculateur...</option>
-          </select>
-        </div>
-        <div id="quickFuelBadge" style="display:none; margin-left:auto;">
-          <span class="badge-fuel badge-diesel" id="quickFuelBadgeText">Moteur Diesel ⛽</span>
-        </div>
-      </div>
-
-      <!-- Unrecognized File Strict Alert Box -->
-      <div id="unrecognizedBox" style="display:none; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.4); border-radius: 12px; padding: 18px 22px; margin-top: 14px; margin-bottom: 18px;">
-        <div style="display:flex; align-items:flex-start; gap:12px;">
-          <span style="font-size:24px;">⚠️</span>
-          <div>
-            <h4 style="margin:0 0 6px 0; color:#ef4444; font-size:15px; font-weight:800;">Calculateur non reconnu automatiquement</h4>
-            <p style="margin:0 0 10px 0; color:#cbd5e1; font-size:13px; line-height:1.5;">
-              Veuillez sélectionner votre marque et votre calculateur dans la barre ci-dessus parmi les calculateurs officiellement supportés par notre moteur, ou demandez un traitement manuel par notre équipe.
-            </p>
-            <button type="button" onclick="requestManualSupport()" style="background:#0f172a; border:1px solid #ef4444; color:#ef4444; padding:6px 14px; border-radius:6px; font-weight:700; font-size:12px; cursor:pointer;">
-              📩 Calculateur non supporté - Demander un traitement manuel
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ECU Identification Details Card -->
-      <div id="ecuInfoCard" class="ecu-info-card" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
-          <div>
-            <div style="display:flex; align-items:center; gap:8px;">
-              <span id="infoBrand" style="font-size:1.25rem; font-weight:800; color:#fff;">BOSCH</span>
-              <span id="infoEcu" style="font-size:1.25rem; font-weight:800; color:var(--primary);">EDC17C57</span>
-            </div>
-            <div id="infoFilename" style="font-size:0.85rem; color:var(--text-muted); margin-top:3px;">Fichier : dump.bin</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div id="infoFuelBadge">
-              <span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span>
-            </div>
-            <div id="infoChecksumBadge">
-              <span style="background:rgba(56, 189, 248, 0.15); border:1px solid rgba(56, 189, 248, 0.4); color:#38bdf8; padding:6px 12px; border-radius:8px; font-size:12px; font-weight:700;">Checksum : Calculé Automatiquement ✅</span>
-            </div>
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:10px; background:rgba(0,0,0,0.25); padding:12px; border-radius:8px; border:1px solid #1e293b;">
-          <div>
-            <div style="font-size:0.75rem; color:var(--text-muted);">Taille du fichier</div>
-            <div id="infoFileSize" style="font-weight:700; color:#fff; font-size:0.9rem;">2 097 152 octets (2.0 MB)</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem; color:var(--text-muted);">Famille de Microcontrôleur</div>
-            <div id="infoMcu" style="font-weight:700; color:#fff; font-size:0.9rem;">TriCore TC1724 / TC1797</div>
-          </div>
-          <div>
-            <div style="font-size:0.75rem; color:var(--text-muted);">Statut de Validation</div>
-            <div id="infoValidation" style="font-weight:700; color:#34d399; font-size:0.9rem;">Binaire Certifié SVEdit 100%</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Solutions & Options Grid -->
-      <div id="optionsSection" style="display:none; margin-top:24px;">
-        <h3 class="section-title" data-i18n="studio.select_options_title">⚙️ Sélectionnez les modifications à appliquer</h3>
-
-        <div class="options-grid" id="solutionsGrid">
-          <!-- DPF / FAP OFF (Diesel only) -->
-          <div class="option-card" id="card-dpf" onclick="toggleOption('dpf', event)">
-            <input type="checkbox" id="opt-dpf" class="option-checkbox" onchange="syncOption('dpf', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.dpf_title">💨 DPF / FAP OFF</h4>
-              <p data-i18n="options.dpf_desc">Désactivation cycles régénération FAP, capteur différentiel et sondes EGT.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- EGR OFF (Diesel only) -->
-          <div class="option-card" id="card-egr" onclick="toggleOption('egr', event)">
-            <input type="checkbox" id="opt-egr" class="option-checkbox" onchange="syncOption('egr', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.egr_title">🔄 EGR OFF</h4>
-              <p data-i18n="options.egr_desc">Fermeture permanente de la vanne EGR (hystérésis zéro & masquage DTCs associés).</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- AdBlue / SCR OFF (Diesel only) -->
-          <div class="option-card" id="card-adblue" onclick="toggleOption('adblue', event)">
-            <input type="checkbox" id="opt-adblue" class="option-checkbox" onchange="syncOption('adblue', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.adblue_title">💧 AdBlue / SCR OFF</h4>
-              <p data-i18n="options.adblue_desc">Suppression complète de la pompe urée, sondes NOx, DCU17 et compte à rebours démarrage.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- TVA / Swirl Flaps OFF -->
-          <div class="option-card" id="card-tva" onclick="toggleOption('tva', event)">
-            <input type="checkbox" id="opt-tva" class="option-checkbox" onchange="syncOption('tva', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.flaps_title">🌪️ TVA / Swirl Flaps OFF</h4>
-              <p data-i18n="options.flaps_desc">Neutralisation des volets d'admission d'air et du boîtier papillon d'admission.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- VSA OFF (Swirl Flaps / Variable Suction) -->
-          <div class="option-card" id="card-vsa" onclick="toggleOption('vsa', event)">
-            <input type="checkbox" id="opt-vsa" class="option-checkbox" onchange="syncOption('vsa', event)">
-            <div class="option-details">
-              <h4>🌀 VSA OFF</h4>
-              <p>Désactivation du système de tubulures d'admission à géométrie variable (VSA).</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- Decat / CAT OFF (Essence only) -->
-          <div class="option-card" id="card-cat" onclick="toggleOption('cat', event)">
-            <input type="checkbox" id="opt-cat" class="option-checkbox" onchange="syncOption('cat', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.decat_title">🔥 Decat / Catalyseur OFF</h4>
-              <p data-i18n="options.decat_desc">Suppression surveillance efficacité catalyseur (P0420) et sonde lambda aval O2.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- Lambda / O2 OFF (Essence only) -->
-          <div class="option-card" id="card-lambda" onclick="toggleOption('lambda', event)">
-            <input type="checkbox" id="opt-lambda" class="option-checkbox" onchange="syncOption('lambda', event)">
-            <div class="option-details">
-              <h4>🧪 Lambda / O2 Post-Cat OFF</h4>
-              <p>Désactivation de la sonde lambda secondaire aval après suppression du catalyseur.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- EVAP OFF (Essence only) -->
-          <div class="option-card" id="card-evap" onclick="toggleOption('evap', event)">
-            <input type="checkbox" id="opt-evap" class="option-checkbox" onchange="syncOption('evap', event)">
-            <div class="option-details">
-              <h4>💨 EVAP / Canister OFF</h4>
-              <p>Suppression des électrovannes et du circuit de recyclage des vapeurs de carburant.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- IMMO OFF (Diesel & Essence) -->
-          <div class="option-card" id="card-immo" onclick="toggleOption('immo', event)">
-            <input type="checkbox" id="opt-immo" class="option-checkbox" onchange="syncOption('immo', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.immo_off_title">🔑 IMMO OFF</h4>
-              <p data-i18n="options.immo_off_desc">Désactivation antidémarrage électronique (Bosch MEDC17, EDC16, SIM2K, VAG...).</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- DTC OFF (All ECUs) -->
-          <div class="option-card" id="card-dtc" onclick="toggleOption('dtc', event)">
-            <input type="checkbox" id="opt-dtc" class="option-checkbox" onchange="syncOption('dtc', event)">
-            <div class="option-details">
-              <h4>⚠️ DTC OFF (Table Sur-Mesure)</h4>
-              <p>Suppression chirurgicale des codes défauts spécifiques sans altérer le reste de la cartographie.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- Stage 1 Remap -->
-          <div class="option-card" id="card-stage1" onclick="toggleOption('stage1', event)">
-            <input type="checkbox" id="opt-stage1" class="option-checkbox" onchange="syncOption('stage1', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.stage1_title">🏁 Stage 1 Remap (+25% à +35%)</h4>
-              <p data-i18n="options.stage1_desc">Optimisation couple moteur, injection de carburant, pression turbo et limiteurs constructeur.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-
-          <!-- Vmax Speed Limiter OFF -->
-          <div class="option-card" id="card-vmax" onclick="toggleOption('vmax', event)">
-            <input type="checkbox" id="opt-vmax" class="option-checkbox" onchange="syncOption('vmax', event)">
-            <div class="option-details">
-              <h4 data-i18n="options.vmax_title">🚀 Vmax OFF (Speed Limiter)</h4>
-              <p data-i18n="options.vmax_desc">Débridage et relèvement complet de la limitation de vitesse électronique maximale.</p>
-              <div class="option-cost">Inclus ⚡</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Custom DTC Input & Live DTC Inspection Box -->
-        <div class="dtc-box" style="margin-top:24px;">
-          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.3rem;">
-            <label style="font-weight:700; font-size:1rem; margin:0;" data-i18n="studio.custom_dtc_title">⚠️ Suppression de Codes Défauts DTC Sur-Mesure</label>
-            <button type="button" class="btn-refill" id="btnOpenDtcViewer" onclick="openDtcViewerModal()" style="background:#0f172a; border:1px solid var(--primary); color:var(--primary); font-size:0.85rem; font-weight:700; padding:0.4rem 0.85rem; border-radius:6px; display:inline-flex; align-items:center; gap:0.4rem; cursor:pointer;" data-i18n="studio.custom_dtc_btn">
-              🔍 Examiner la Table DTC (ON / OFF)
-            </button>
-          </div>
-          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:2px;" data-i18n="studio.custom_dtc_desc">Entrez vos codes OBD-II séparés par des virgules (ex: P20EE, P2201, P0420) ou ouvrez l'afficheur pour inspecter l'état actuel de la table DTC du dump.</p>
-          <input type="text" id="customDtcInput" class="dtc-input" placeholder="Exemple : P20EE, P2201, P0420" oninput="onDtcInputChange()" data-i18n-placeholder="studio.custom_dtc_placeholder">
-        </div>
-
-        <!-- Action Bar (Pricing & Generation) -->
-        <div class="action-bar" style="margin-top:24px;">
-          <div>
-            <div class="total-credits">
-              <span data-i18n="studio.total_required">Total Requis :</span> 
-              <span id="totalCost" style="color:var(--primary); font-weight:800;">1</span> 
-              <span data-i18n="options.credits">Crédit</span>
-            </div>
-            <div style="font-size:0.85rem; color:var(--text-muted);">
-              <span data-i18n="studio.current_balance">Solde actuel :</span> 
-              <span id="currentBalance" style="color:#fff; font-weight:700;">0</span> 
-              <span data-i18n="options.credits">Crédits</span>
-            </div>
-          </div>
-          <button class="btn-process" id="btnProcess" onclick="processTuningFile()" data-i18n="studio.btn_process">
-            ⚡ Patcher & Générer (.MOD)
-          </button>
-        </div>
-
-        <!-- Progress / Result Card -->
-        <div id="processResultBox" style="display:none; margin-top:20px; background:#0b1320; border:1px solid var(--accent); border-radius:12px; padding:20px;">
-          <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
-            <div style="display:flex; align-items:center; gap:12px;">
-              <span style="font-size:28px;">✅</span>
-              <div>
-                <h4 style="margin:0 0 4px 0; color:var(--accent); font-size:16px; font-weight:800;">Fichier patché avec succès !</h4>
-                <div id="resultSummaryText" style="color:var(--text-muted); font-size:13px;">Toutes les solutions sélectionnées et le checksum ont été appliqués.</div>
-              </div>
-            </div>
-            <a id="btnDownloadMod" href="#" class="btn-refill" style="background:var(--accent); color:#000; font-weight:800; padding:10px 22px; text-decoration:none; border-radius:8px; display:inline-flex; align-items:center; gap:8px;">
-              📥 Télécharger le fichier (.MOD)
-            </a>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ==================== TAB 2: OUTILS EXPERT ==================== -->
-    <div id="tab-expert" class="tab-pane" style="display:none;">
-      <h2 style="margin-bottom:0.5rem;" data-i18n="expert.title">🧰 Boîte à Outils Spécialisés Atelier</h2>
-      <p style="color:var(--text-muted); margin-bottom:1.5rem;" data-i18n="expert.subtitle">Fonctions expertes avancées (1 Crédit par opération)</p>
-
-      <div class="options-grid">
-        <!-- Delphi DCM1.2 Fan Temp Patch -->
-        <div class="catalog-item" style="border:1px solid var(--primary); background:#111827; border-radius:12px; padding:20px;">
-          <div style="font-size:2rem; margin-bottom:0.5rem;">🌡️</div>
-          <h3 style="font-size:1.2rem; color:#fff;">Renault Delphi DCM1.2 - Déclenchement Ventilateur Radiateur</h3>
-          <p style="color:var(--text-muted); font-size:0.85rem; margin:0.5rem 0;">
-            Ajustement ciblé de la température de déclenchement du moto-ventilateur de 98°C vers 85°C - 92°C pour préserver le joint de culasse sur moteurs K9K 1.5 dCi.
-          </p>
-          <div style="margin:14px 0;">
-            <label style="font-size:12px; color:var(--text-muted); font-weight:700;">Température cible (°C) :</label>
-            <input type="number" id="fanTargetTemp" min="80" max="95" value="90" style="background:#0b1320; border:1px solid #1e293b; color:#fff; padding:6px 12px; border-radius:6px; width:100px; margin-left:10px;">
-          </div>
-          <input type="file" id="dcmFileInput" style="display:none;" accept=".bin,.ori,.hex" onchange="handleExpertFileSelect(event)">
-          <button class="btn-refill" style="width:100%; margin-top:1rem;" onclick="document.getElementById('dcmFileInput').click()">
-            Choisir Fichier DCM1.2 (256 Ko / 512 Ko)
-          </button>
-          <div id="expertStatus" style="font-size:0.85rem; margin-top:0.75rem;"></div>
-          <button id="btnApplyExpert" onclick="applyExpertOperation()" style="display:none; width:100%; margin-top:10px; background:var(--accent); color:#000; font-weight:800; border:none; padding:10px; border-radius:8px; cursor:pointer;">
-            ⚡ Appliquer la Modification & Télécharger (1 Crédit)
-          </button>
-        </div>
-
-        <!-- Checksum Verification Tool -->
-        <div class="catalog-item" style="border:1px solid #334155; background:#111827; border-radius:12px; padding:20px;">
-          <div style="font-size:2rem; margin-bottom:0.5rem;">🛡️</div>
-          <h3 style="font-size:1.2rem; color:#fff;">Correcteur & Vérificateur de Checksum TriCore / MPC</h3>
-          <p style="color:var(--text-muted); font-size:0.85rem; margin:0.5rem 0;">
-            Recalcule et valide les blocs de contrôle d'intégrité (CRC32, MD5, Bosch TriCore TC17xx, MPC55xx, Siemens SID) avant injection OBD / Bench / Boot.
-          </p>
-          <button class="btn-refill" style="width:100%; margin-top:1rem; opacity:0.8;" onclick="toast('Le recalcul de checksum est automatiquement intégré et exécuté lors de chaque patch dans le Studio Remap !', 'info')">
-            Inclus Automatiquement dans le Studio Remap ✅
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== TAB 3: CATALOGUE CALCULATEURS ==================== -->
-    <div id="tab-catalog" class="tab-pane" style="display:none;">
-      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem; margin-bottom:1.5rem;">
-        <div>
-          <h2 style="margin:0;" data-i18n="catalog.title">📚 Catalogue des Calculateurs Supportés</h2>
-          <p style="color:var(--text-muted); margin:0.25rem 0 0 0;" data-i18n="catalog.subtitle">Base de données officielle issue de nos 80 calculateurs SVEdit</p>
-        </div>
-        <input type="text" id="catalogSearchInput" placeholder="Rechercher par marque ou calculateur (ex: EDC17, SIM2K, Keihin...)" oninput="filterCatalog()" style="background:#111827; border:1px solid var(--border-color); color:#fff; padding:0.6rem 1rem; border-radius:8px; width:340px; max-width:100%;">
-      </div>
-
-      <div style="display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap;">
-        <button class="lang-btn active" id="catFilter-all" onclick="setCatalogFilter('ALL')">Tous (80)</button>
-        <button class="lang-btn" id="catFilter-diesel" onclick="setCatalogFilter('DIESEL')">Moteurs Diesel ⛽</button>
-        <button class="lang-btn" id="catFilter-essence" onclick="setCatalogFilter('ESSENCE')">Moteurs Essence ⚡</button>
-      </div>
-
-      <div class="catalog-grid" id="catalogGrid">
-        <div style="color:var(--text-muted); padding:20px;">Chargement du catalogue des calculateurs...</div>
-      </div>
-    </div>
-
-    <!-- ==================== TAB 4: HISTORIQUE DES FICHIERS ==================== -->
-    <div id="tab-history" class="tab-pane" style="display:none;">
-      <h2 style="margin-bottom:0.5rem;" data-i18n="history.title">📜 Historique de vos Fichiers Traités</h2>
-      <p style="color:var(--text-muted); margin-bottom:1.5rem;" data-i18n="history.subtitle">Retrouvez et retéléchargez à tout moment vos fichiers originaux et modifiés</p>
-
-      <div style="background:#111827; border:1px solid #1e293b; border-radius:12px; overflow:hidden;">
-        <table class="dtc-preview-table" id="historyTable">
-          <thead>
-            <tr>
-              <th>ID Tâche</th>
-              <th>Date / Heure</th>
-              <th>Calculateur</th>
-              <th>Solutions Appliquées</th>
-              <th>Fichier Original</th>
-              <th>Fichier Modifié (.MOD)</th>
-            </tr>
-          </thead>
-          <tbody id="historyTableBody">
-            <tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">Chargement de l'historique...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ==================== TAB 5: FORFAITS CRÉDITS ==================== -->
-    <div id="tab-credits" class="tab-pane" style="display:none;">
-      <h2 style="margin-bottom:0.5rem;" data-i18n="credits.title">💳 Recharges & Forfaits Crédits</h2>
-      <p style="color:var(--text-muted); margin-bottom:2rem;" data-i18n="credits.subtitle">Tarifs préférentiels pour ateliers et reprogrammateurs indépendants</p>
-
-      <div class="options-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));">
-        <!-- Pack 1 -->
-        <div class="catalog-item" style="background:#111827; border:1px solid #1e293b; border-radius:12px; padding:24px; text-align:center;">
-          <h3 style="color:#fff; font-size:1.4rem; margin-top:0;">Pack Découverte</h3>
-          <div style="font-size:2.5rem; font-weight:800; color:var(--primary); margin:12px 0;">10 <span style="font-size:1rem; color:var(--text-muted);">Tokens</span></div>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Idéal pour tester la plateforme sur plusieurs fichiers.</p>
-          <ul style="text-align:left; color:#cbd5e1; font-size:0.85rem; line-height:1.8; margin:18px 0; padding-left:20px;">
-            <li>10 modifications complètes</li>
-            <li>Accès à tous les calculateurs SVEdit</li>
-            <li>Correction Checksum automatique</li>
-          </ul>
-          <button class="btn-refill" style="width:100%;" onclick="contactSupportForCredits(10)">Contacter l'Admin pour Recharger</button>
-        </div>
-
-        <!-- Pack 2 -->
-        <div class="catalog-item" style="background:#111827; border:2px solid var(--primary); border-radius:12px; padding:24px; text-align:center; position:relative;">
-          <div style="position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--primary); color:#000; font-weight:800; font-size:0.75rem; padding:3px 12px; border-radius:999px;">LE PLUS POPULAIRE</div>
-          <h3 style="color:#fff; font-size:1.4rem; margin-top:0;">Pack Atelier</h3>
-          <div style="font-size:2.5rem; font-weight:800; color:var(--accent); margin:12px 0;">50 <span style="font-size:1rem; color:var(--text-muted);">Tokens</span></div>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Conçu pour les garages et professionnels de l'auto.</p>
-          <ul style="text-align:left; color:#cbd5e1; font-size:0.85rem; line-height:1.8; margin:18px 0; padding-left:20px;">
-            <li>50 modifications complètes</li>
-            <li>Support prioritaire WhatsApp</li>
-            <li>Accès illimité aux Outils Expert</li>
-          </ul>
-          <button class="btn-refill" style="width:100%; background:var(--primary); color:#000; font-weight:800;" onclick="contactSupportForCredits(50)">Contacter l'Admin pour Recharger</button>
-        </div>
-
-        <!-- Pack 3 -->
-        <div class="catalog-item" style="background:#111827; border:1px solid #1e293b; border-radius:12px; padding:24px; text-align:center;">
-          <h3 style="color:#fff; font-size:1.4rem; margin-top:0;">Pack Pro Master</h3>
-          <div style="font-size:2.5rem; font-weight:800; color:#f59e0b; margin:12px 0;">100 <span style="font-size:1rem; color:var(--text-muted);">Tokens</span></div>
-          <p style="color:var(--text-muted); font-size:0.9rem;">Pour ateliers à fort volume et préparateurs.</p>
-          <ul style="text-align:left; color:#cbd5e1; font-size:0.85rem; line-height:1.8; margin:18px 0; padding-left:20px;">
-            <li>100 modifications complètes</li>
-            <li>Traitement de fichiers sur-mesure</li>
-            <li>Assistance directe aux techniciens</li>
-          </ul>
-          <button class="btn-refill" style="width:100%;" onclick="contactSupportForCredits(100)">Contacter l'Admin pour Recharger</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ==================== TAB 6: ADMINISTRATION ==================== -->
-    <div id="tab-admin" class="tab-pane" style="display:none;">
-      <h2 style="margin-bottom:0.5rem;" data-i18n="admin.title">⚙️ Panneau d'Administration SCORPION REMAP PRO</h2>
-      <p style="color:var(--text-muted); margin-bottom:1.5rem;">Gestion globale des utilisateurs, crédits et sécurité serveur</p>
-
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:14px; margin-bottom:24px;">
-        <div style="background:#111827; border:1px solid #1e293b; border-radius:10px; padding:18px;">
-          <div style="color:var(--text-muted); font-size:0.85rem;">Utilisateurs Inscrits</div>
-          <div id="adminStatUsers" style="font-size:1.8rem; font-weight:800; color:#fff; margin-top:4px;">0</div>
-        </div>
-        <div style="background:#111827; border:1px solid #1e293b; border-radius:10px; padding:18px;">
-          <div style="color:var(--text-muted); font-size:0.85rem;">Fichiers Traités</div>
-          <div id="adminStatFiles" style="font-size:1.8rem; font-weight:800; color:var(--primary); margin-top:4px;">0</div>
-        </div>
-        <div style="background:#111827; border:1px solid #1e293b; border-radius:10px; padding:18px;">
-          <div style="color:var(--text-muted); font-size:0.85rem;">Adresses IP Bannies</div>
-          <div id="adminStatBans" style="font-size:1.8rem; font-weight:800; color:#ef4444; margin-top:4px;">0</div>
-        </div>
-      </div>
-
-      <h3 style="color:#fff; margin:20px 0 10px 0;">Gestion des Comptes Utilisateurs</h3>
-      <div style="background:#111827; border:1px solid #1e293b; border-radius:12px; overflow:hidden;">
-        <table class="dtc-preview-table" id="adminUsersTable">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Email</th>
-              <th>Rôle</th>
-              <th>Solde Crédits</th>
-              <th>Statut</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="adminUsersTableBody">
-            <tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-muted);">Chargement des utilisateurs...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <h3 style="color:#fff; margin:28px 0 10px 0;">Sécurité Réseau (Bannissements IP)</h3>
-      <div style="background:#111827; border:1px solid #1e293b; border-radius:12px; padding:18px;">
-        <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
-          <input type="text" id="inputBanIp" placeholder="Adresse IP à bannir (ex: 192.168.1.50)" style="background:#0b1320; border:1px solid #1e293b; color:#fff; padding:8px 12px; border-radius:6px; flex:1; min-width:220px;">
-          <input type="text" id="inputBanReason" placeholder="Raison (optionnel)" style="background:#0b1320; border:1px solid #1e293b; color:#fff; padding:8px 12px; border-radius:6px; flex:1; min-width:220px;">
-          <button type="button" onclick="adminBanIp()" class="btn-refill" style="background:#ef4444; color:#fff;">Bannir l'IP</button>
-        </div>
-        <div id="adminBannedIpsList" style="font-size:13px; color:var(--text-muted);">Chargement des IP...</div>
-      </div>
-    </div>
-
-  </main>
-
-  <!-- ==================== MODALS ==================== -->
-
-  <!-- Modal 1: Changelog -->
-  <div id="changelogModal" class="modal-backdrop">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 style="margin:0; font-size:1.2rem; color:#fff;">📋 Journal des Modifications (Changelog)</h3>
-        <button type="button" class="modal-close" onclick="closeModal('changelogModal')">&times;</button>
-      </div>
-      <div style="padding:24px; overflow-y:auto; max-height:70vh; font-size:13.5px; line-height:1.7; color:#cbd5e1;">
-        <h4 style="color:var(--primary); margin-top:0;">⚡ SCORPION REMAP PRO v3.2.0 (Novembre 2026)</h4>
-        <ul>
-          <li><strong>Intégration Moteur SVEdit v1.1.38.3 à 100% :</strong> Extraction sans omission de 80 calculateurs authentiques sur 18 marques mondiales.</li>
-          <li><strong>Architecture Modulaire Python :</strong> Moteurs Hyundai/Kia (21 ECUs), VAG Group (5 ECUs), Honda Keihin/Hitachi (13 ECUs), Toyota/Nissan (11 ECUs), Mazda/Mitsubishi/Subaru (12 ECUs), Ford/FCA/Autres (18 ECUs).</li>
-          <li><strong>Isolation Stricte Diesel vs Essence :</strong> Élimination absolue des mélanges de solutions.</li>
-          <li><strong>Sélecteur Manuel Authentique :</strong> Barre d'ajustement direct 1:1 identique à AutoTuning Studio.</li>
-          <li><strong>Outil Expert Renault DCM1.2 :</strong> Patch signature de température ventilateur (98°C -> 85-92°C).</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 2: DTC Viewer -->
-  <div id="dtcViewerModal" class="modal-backdrop">
-    <div class="modal-card" style="max-width:800px;">
-      <div class="modal-header">
-        <h3 style="margin:0; font-size:1.2rem; color:#fff;">🔍 Inspection Table DTC du Binaire</h3>
-        <button type="button" class="modal-close" onclick="closeModal('dtcViewerModal')">&times;</button>
-      </div>
-      <div style="padding:20px; overflow-y:auto; max-height:70vh;">
-        <p style="font-size:13px; color:var(--text-muted); margin-top:0;">
-          Codes défauts détectés et analysés dans la cartographie courante :
-        </p>
-        <div id="dtcViewerContent">
-          <div style="text-align:center; padding:20px; color:var(--text-muted);">Veuillez d'abord charger un fichier binaire dans le Studio Remap.</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Modal 3: Change Password -->
-  <div id="changePasswordModal" class="modal-backdrop">
-    <div class="modal-card" style="max-width:450px;">
-      <div class="modal-header">
-        <h3 style="margin:0; font-size:1.1rem; color:#fff;">🔑 Modifier le Mot de Passe</h3>
-        <button type="button" class="modal-close" onclick="closeModal('changePasswordModal')">&times;</button>
-      </div>
-      <div style="padding:20px;">
-        <div style="margin-bottom:14px;">
-          <label style="font-size:12px; color:var(--text-muted); font-weight:700;">Nouveau Mot de Passe :</label>
-          <input type="password" id="newPasswordInput" style="width:100%; box-sizing:border-box; background:#0b1320; border:1px solid #1e293b; color:#fff; padding:8px 12px; border-radius:6px; margin-top:4px;">
-        </div>
-        <button type="button" onclick="submitPasswordChange()" class="btn-refill" style="width:100%;">Enregistrer le Nouveau Mot de Passe</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== FRONTEND UI & INTERACTION STATE ENGINE ==================== -->
-  <script>
-    // Global State
-    let currentUser = null;
-    let fullRegistry = {};
-    let activeFile = null;
-    let activeAnalysis = null;
-    let selectedOptions = new Set();
-    let expertFile = null;
-    let catalogFilterMode = 'ALL';
-
-    // 1. Initial Load & Auth Sync
-    async function initPlatform() {
-      try {
-        const res = await fetch('/api/v1/user/me');
-        if (!res.ok) {
-          window.location.href = '/login';
-          return;
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btn.classList.add('active');
+            if(tabId === 'tabCatalogue' && catalogueData.length === 0) loadCatalogue();
+            if(tabId === 'tabHistory') loadUserHistory();
+            if(tabId === 'tabAdmin') loadAdminData();
         }
-        currentUser = await res.json();
-        renderUserProfile();
-        await loadRegistry();
-        await loadCatalogData();
-      } catch (err) {
-        console.error("Auth init error:", err);
-        window.location.href = '/login';
-      }
-    }
 
-    function renderUserProfile() {
-      if (!currentUser) return;
-      document.getElementById('navUsername').innerText = currentUser.email || 'Utilisateur';
-      document.getElementById('userCreditsDisplay').innerText = currentUser.tokens !== undefined ? currentUser.tokens : 0;
-      document.getElementById('currentBalance').innerText = currentUser.tokens !== undefined ? currentUser.tokens : 0;
+        function getAuthHeaders(extra = {}) {
+            const token = localStorage.getItem('ecu_token');
+            const headers = { ...extra };
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+            return headers;
+        }
 
-      const roleBadge = document.getElementById('navRoleBadge');
-      if (currentUser.role === 'admin') {
-        roleBadge.innerText = 'ADMINISTRATEUR';
-        roleBadge.style.background = '#f59e0b';
-        document.getElementById('navLinkAdmin').style.display = 'inline-block';
-      } else {
-        roleBadge.innerText = 'MEMBRE PRO';
-      }
-    }
+        async function initPortal() {
+            try {
+                const res = await fetch('/api/v1/user/me', {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
+                });
+                if(!res.ok) {
+                    if (res.status === 401 || res.status === 403) {
+                        window.location.href = '/login';
+                        return;
+                    }
+                    return;
+                }
+                const user = await res.json();
+                const displayName = user.full_name || user.username || "Client";
+                const workshop = user.workshop_name ? ` (${user.workshop_name})` : "";
+                document.getElementById('userName').innerHTML = `👤 ${displayName} <small style="opacity:0.75; font-size:11px;">${workshop}</small>`;
+                const credits = user.tokens !== undefined ? user.tokens : (user.credits || 0);
+                document.getElementById('userCredits').innerText = `${credits}`;
+            } catch(e) {
+                console.error("Portal init warning:", e);
+            }
+        }
 
-    // 2. Navigation Tabs Switching (Smooth Single Page View)
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
-      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
-      const targetPane = document.getElementById('tab-' + tabId);
-      const targetLink = document.getElementById('tabLink-' + tabId);
-      if (targetPane) targetPane.style.display = 'block';
-      if (targetLink) targetLink.classList.add('active');
-
-      if (tabId === 'history') loadHistoryData();
-      if (tabId === 'admin' && currentUser && currentUser.role === 'admin') loadAdminData();
-    }
-
-    // 3. Modals Management
-    function openModal(id) {
-      const m = document.getElementById(id);
-      if (m) m.style.display = 'flex';
-    }
-    function closeModal(id) {
-      const m = document.getElementById(id);
-      if (m) m.style.display = 'none';
-    }
-    function openChangelogModal() { openModal('changelogModal'); }
-    function openChangePasswordModal() { openModal('changePasswordModal'); }
-
-    // 4. Registry Loading & Strict Dropdowns (SVEdit 80 Authentic ECUs)
-    async function loadRegistry() {
-      try {
-        const res = await fetch('/api/v1/tuning/registry');
-        const data = await res.json();
-        fullRegistry = data.registry || {};
-
-        const brandSelect = document.getElementById('selectBrand');
-        brandSelect.innerHTML = '<option value="">Sélectionner la marque...</option>';
-        const brands = Object.keys(fullRegistry).sort();
-        brands.forEach(b => {
-          const opt = document.createElement('option');
-          opt.value = b;
-          opt.innerText = b.toUpperCase();
-          brandSelect.appendChild(opt);
+        // File dropzone
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if(e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
         });
-      } catch (err) {
-        console.error("Registry load error:", err);
-      }
-    }
-
-    function onManualBrandChange() {
-      const brand = document.getElementById('selectBrand').value;
-      const ecuSelect = document.getElementById('selectEcu');
-      ecuSelect.innerHTML = '<option value="">Sélectionner le calculateur...</option>';
-
-      if (!brand || !fullRegistry[brand]) {
-        ecuSelect.disabled = true;
-        return;
-      }
-
-      ecuSelect.disabled = false;
-      const ecus = fullRegistry[brand];
-      ecus.forEach(e => {
-        const opt = document.createElement('option');
-        opt.value = e.id;
-        opt.innerText = e.name + (e.fuel_type ? ' (' + e.fuel_type + ')' : '');
-        ecuSelect.appendChild(opt);
-      });
-    }
-
-    async function onManualEcuChange() {
-      const brand = document.getElementById('selectBrand').value;
-      const ecuId = document.getElementById('selectEcu').value;
-      if (!brand || !ecuId) return;
-
-      try {
-        const res = await fetch('/api/v1/tuning/manual-select', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ brand: brand, ecu_id: ecuId })
-        });
-        const data = await res.json();
-        if (data.status === 'ok') {
-          activeAnalysis = {
-            brand: data.brand,
-            ecu: data.ecu,
-            ecu_id: data.ecu_id,
-            fuel_type: data.fuel_type,
-            supported_solutions: data.supported_solutions || []
-          };
-          applyEcuToInterface(activeAnalysis);
-          document.getElementById('unrecognizedBox').style.display = 'none';
-          toast("Calculateur " + data.ecu + " sélectionné manuellement avec succès.", "success");
-        }
-      } catch (err) {
-        console.error("Manual ECU select error:", err);
-      }
-    }
-
-    // 5. File Upload & Automatic Analysis
-    const dropZone = document.getElementById('dropZone');
-    const fileInput = document.getElementById('fileInput');
-
-    ['dragenter', 'dragover'].forEach(e => {
-      dropZone.addEventListener(e, (evt) => { evt.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; });
-    });
-    ['dragleave', 'drop'].forEach(e => {
-      dropZone.addEventListener(e, (evt) => { evt.preventDefault(); dropZone.style.borderColor = 'var(--border-color)'; });
-    });
-    dropZone.addEventListener('drop', (evt) => {
-      evt.preventDefault();
-      if (evt.dataTransfer.files.length > 0) {
-        handleFileUpload(evt.dataTransfer.files[0]);
-      }
-    });
-    fileInput.addEventListener('change', (evt) => {
-      if (evt.target.files.length > 0) {
-        handleFileUpload(evt.target.files[0]);
-      }
-    });
-
-    async function handleFileUpload(file) {
-      activeFile = file;
-      selectedOptions.clear();
-      document.querySelectorAll('.option-checkbox').forEach(cb => cb.checked = false);
-      document.querySelectorAll('.option-card').forEach(c => c.classList.remove('active'));
-
-      const formData = new FormData();
-      formData.append('file', file);
-
-      toast("Analyse du fichier en cours...", "info");
-
-      try {
-        const res = await fetch('/api/v1/tuning/analyze', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.status === 'success' || data.recognized) {
-          activeAnalysis = data;
-          applyEcuToInterface(data);
-          document.getElementById('unrecognizedBox').style.display = 'none';
-          toast("Calculateur identifié : " + data.ecu, "success");
-        } else {
-          // Unrecognized File
-          document.getElementById('unrecognizedBox').style.display = 'block';
-          document.getElementById('ecuInfoCard').style.display = 'none';
-          document.getElementById('optionsSection').style.display = 'none';
-          document.getElementById('quickFuelBadge').style.display = 'none';
-          toast("Calculateur non reconnu automatiquement. Veuillez choisir ci-dessus.", "warning");
-        }
-      } catch (err) {
-        toast("Erreur lors de l'analyse du fichier : " + err.message, "danger");
-      }
-    }
-
-    // 6. Apply ECU, Fuel Isolation, and Filter Supported Solutions
-    function applyEcuToInterface(data) {
-      document.getElementById('ecuInfoCard').style.display = 'block';
-      document.getElementById('optionsSection').style.display = 'block';
-
-      document.getElementById('infoBrand').innerText = (data.brand || 'ECU').toUpperCase();
-      document.getElementById('infoEcu').innerText = data.ecu || data.name || 'Générique';
-      document.getElementById('infoFilename').innerText = 'Fichier : ' + (activeFile ? activeFile.name : 'binaire.bin');
-
-      const isDiesel = (data.fuel_type || '').toUpperCase() === 'DIESEL';
-      const fuelHtml = isDiesel ? '<span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span>' : '<span class="badge-fuel badge-essence">Moteur Essence ⚡</span>';
-      document.getElementById('infoFuelBadge').innerHTML = fuelHtml;
-
-      // Quick fuel badge next to selector
-      const quickBadge = document.getElementById('quickFuelBadge');
-      quickBadge.style.display = 'inline-block';
-      document.getElementById('quickFuelBadgeText').className = isDiesel ? 'badge-fuel badge-diesel' : 'badge-fuel badge-essence';
-      document.getElementById('quickFuelBadgeText').innerText = isDiesel ? 'Moteur Diesel ⛽' : 'Moteur Essence ⚡';
-
-      // Synchronize Dropdowns
-      if (data.brand && fullRegistry[data.brand]) {
-        document.getElementById('selectBrand').value = data.brand;
-        onManualBrandChange();
-        if (data.ecu_id) {
-          document.getElementById('selectEcu').value = data.ecu_id;
-        }
-      }
-
-      // STRICT SOLUTION FILTERING (Rule 2 & Rule 3)
-      const supp = (data.supported_solutions || []).map(s => s.toLowerCase());
-
-      const solutionCards = {
-        'dpf': document.getElementById('card-dpf'),
-        'egr': document.getElementById('card-egr'),
-        'adblue': document.getElementById('card-adblue'),
-        'tva': document.getElementById('card-tva'),
-        'vsa': document.getElementById('card-vsa'),
-        'cat': document.getElementById('card-cat'),
-        'lambda': document.getElementById('card-lambda'),
-        'evap': document.getElementById('card-evap'),
-        'immo': document.getElementById('card-immo'),
-        'dtc': document.getElementById('card-dtc'),
-        'stage1': document.getElementById('card-stage1'),
-        'vmax': document.getElementById('card-vmax')
-      };
-
-      for (const [key, card] of Object.entries(solutionCards)) {
-        if (!card) continue;
-        let isEligible = false;
-
-        if (isDiesel) {
-          // Fuel isolation: no petrol options on diesel
-          if (['cat', 'lambda', 'evap'].includes(key)) {
-            card.style.display = 'none';
-            continue;
-          }
-        } else {
-          // Fuel isolation: no diesel options on petrol
-          if (['dpf', 'adblue'].includes(key)) {
-            card.style.display = 'none';
-            continue;
-          }
-        }
-
-        // Check if supported by ECU algorithms
-        if (key === 'dpf' && supp.includes('dpf off')) isEligible = true;
-        else if (key === 'egr' && supp.includes('egr off')) isEligible = true;
-        else if (key === 'adblue' && (supp.includes('adblue off') || supp.includes('scr off'))) isEligible = true;
-        else if (key === 'tva' && supp.includes('tva off')) isEligible = true;
-        else if (key === 'vsa' && supp.includes('vsa off')) isEligible = true;
-        else if (key === 'cat' && (supp.includes('cat off') || supp.includes('decat'))) isEligible = true;
-        else if (key === 'lambda' && supp.includes('lambda off')) isEligible = true;
-        else if (key === 'evap' && supp.includes('evap off')) isEligible = true;
-        else if (key === 'immo' && supp.includes('immo off')) isEligible = true;
-        else if (key === 'dtc' && supp.includes('dtc off')) isEligible = true;
-        else if (key === 'stage1' || key === 'vmax') isEligible = true; // Calibrated universal maps
-
-        card.style.display = isEligible ? 'flex' : 'none';
-      }
-    }
-
-    // 7. Options Selection Handlers
-    function toggleOption(optKey, evt) {
-      if (evt && evt.target && evt.target.tagName === 'INPUT') return;
-      const cb = document.getElementById('opt-' + optKey);
-      if (cb) {
-        cb.checked = !cb.checked;
-        syncOption(optKey);
-      }
-    }
-
-    function syncOption(optKey) {
-      const cb = document.getElementById('opt-' + optKey);
-      const card = document.getElementById('card-' + optKey);
-      if (cb && cb.checked) {
-        selectedOptions.add(optKey);
-        if (card) card.classList.add('active');
-      } else {
-        selectedOptions.delete(optKey);
-        if (card) card.classList.remove('active');
-      }
-    }
-
-    function onDtcInputChange() {
-      const val = document.getElementById('customDtcInput').value.trim();
-      if (val.length > 0) {
-        selectedOptions.add('dtc');
-        const cb = document.getElementById('opt-dtc');
-        const card = document.getElementById('card-dtc');
-        if (cb) cb.checked = true;
-        if (card) card.classList.add('active');
-      }
-    }
-
-    // 8. DTC Interactive Inspection Modal
-    async function openDtcViewerModal() {
-      openModal('dtcViewerModal');
-      const container = document.getElementById('dtcViewerContent');
-
-      if (!activeFile) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Veuillez d\'abord charger un fichier binaire dans le Studio Remap.</div>';
-        return;
-      }
-
-      container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Recherche des DTCs dans la cartographie...</div>';
-
-      try {
-        const formData = new FormData();
-        formData.append('file', activeFile);
-        const res = await fetch('/api/v1/tuning/preview-dtc', { method: 'POST', body: formData });
-        const data = await res.json();
-
-        if (data.dtcs && data.dtcs.length > 0) {
-          let html = '<table class="dtc-preview-table"><thead><tr><th>Code Défaut</th><th>Description</th><th>Statut</th><th>Action</th></tr></thead><tbody>';
-          data.dtcs.forEach(d => {
-            html += `<tr>
-              <td style="font-weight:800; color:var(--primary);">${d.code}</td>
-              <td>${d.desc || 'Code défaut moteur standard'}</td>
-              <td><span style="color:#34d399; font-weight:700;">ON (Actif)</span></td>
-              <td><button type="button" onclick="addDtcCode('${d.code}')" style="background:#0f172a; border:1px solid var(--primary); color:var(--primary); padding:4px 8px; border-radius:4px; cursor:pointer; font-size:11px;">+ Supprimer</button></td>
-            </tr>`;
-          });
-          html += '</tbody></table>';
-          container.innerHTML = html;
-        } else {
-          container.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-muted);">Table DTC analysée : Aucun code d\'erreur rémanent bloquant détecté. Vous pouvez saisir manuellement vos codes OBD dans le champ dédié.</div>';
-        }
-      } catch (err) {
-        container.innerHTML = '<div style="color:#ef4444; padding:20px;">Erreur lors de l\'analyse DTC : ' + err.message + '</div>';
-      }
-    }
-
-    function addDtcCode(code) {
-      const input = document.getElementById('customDtcInput');
-      const current = input.value.trim();
-      if (!current.includes(code)) {
-        input.value = current ? current + ', ' + code : code;
-        onDtcInputChange();
-        toast("Code " + code + " ajouté à la liste des suppressions.", "info");
-      }
-    }
-
-    // 9. Process Tuning File & Download
-    async function processTuningFile() {
-      if (!activeFile) {
-        toast("Veuillez d'abord glisser-déposer un fichier binaire.", "warning");
-        return;
-      }
-      if (selectedOptions.size === 0) {
-        toast("Veuillez sélectionner au moins une solution (DPF, EGR, DTC...) à appliquer.", "warning");
-        return;
-      }
-
-      if (currentUser && currentUser.tokens < 1) {
-        toast("Solde de crédits insuffisant. Veuillez recharger votre compte.", "danger");
-        switchTab('credits');
-        return;
-      }
-
-      const btn = document.getElementById('btnProcess');
-      btn.disabled = true;
-      btn.innerText = '⚡ Traitement en cours...';
-
-      const formData = new FormData();
-      formData.append('file', activeFile);
-      formData.append('options', Array.from(selectedOptions).join(','));
-      formData.append('custom_dtcs', document.getElementById('customDtcInput').value.trim());
-      if (activeAnalysis && activeAnalysis.brand) formData.append('brand', activeAnalysis.brand);
-      if (activeAnalysis && activeAnalysis.ecu_id) formData.append('ecu_id', activeAnalysis.ecu_id);
-
-      try {
-        const res = await fetch('/api/v1/tuning/process', {
-          method: 'POST',
-          body: formData
-        });
-        const data = await res.json();
-
-        if (data.status === 'success' || data.task_id) {
-          toast("Fichier patché avec succès !", "success");
-          document.getElementById('processResultBox').style.display = 'block';
-          const downloadUrl = '/api/v1/tuning/download/' + data.task_id;
-          document.getElementById('btnDownloadMod').href = downloadUrl;
-
-          // Deduct token locally and update display
-          if (currentUser) {
-            currentUser.tokens = Math.max(0, currentUser.tokens - 1);
-            renderUserProfile();
-          }
-        } else {
-          toast(data.detail || data.message || "Erreur lors du traitement.", "danger");
-        }
-      } catch (err) {
-        toast("Erreur serveur : " + err.message, "danger");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = '⚡ Patcher & Générer (.MOD)';
-      }
-    }
-
-    // 10. Expert Tools: Delphi DCM1.2 Radiator Fan Temp Patcher
-    function handleExpertFileSelect(evt) {
-      if (evt.target.files.length > 0) {
-        expertFile = evt.target.files[0];
-        document.getElementById('expertStatus').innerHTML = '<span style="color:var(--primary);">Fichier sélectionné : ' + expertFile.name + ' (' + expertFile.size + ' octets). Prêt pour le patch.</span>';
-        document.getElementById('btnApplyExpert').style.display = 'block';
-      }
-    }
-
-    async function applyExpertOperation() {
-      if (!expertFile) return;
-      const targetTemp = document.getElementById('fanTargetTemp').value;
-      const btn = document.getElementById('btnApplyExpert');
-      btn.disabled = true;
-      btn.innerText = 'Traitement DCM1.2 en cours...';
-
-      const formData = new FormData();
-      formData.append('file', expertFile);
-      formData.append('operation', 'fan_temp');
-      formData.append('param_value', targetTemp);
-
-      try {
-        const res = await fetch('/api/v1/expert/apply', {
-          method: 'POST',
-          body: formData
+        fileInput.addEventListener('change', () => {
+            if(fileInput.files.length) handleFile(fileInput.files[0]);
         });
 
-        if (res.ok) {
-          const blob = await res.blob();
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = expertFile.name.replace(/\.[^/.]+$/, "") + "_FAN_" + targetTemp + "C.bin";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-          toast("Patch DCM1.2 appliqué et téléchargé avec succès !", "success");
-          if (currentUser) {
-            currentUser.tokens = Math.max(0, currentUser.tokens - 1);
-            renderUserProfile();
-          }
-        } else {
-          const errData = await res.json();
-          toast(errData.detail || "Erreur lors du patch expert.", "danger");
-        }
-      } catch (err) {
-        toast("Erreur serveur : " + err.message, "danger");
-      } finally {
-        btn.disabled = false;
-        btn.innerText = '⚡ Appliquer la Modification & Télécharger (1 Crédit)';
-      }
-    }
-
-    // 11. Catalogue Population
-    let catalogData = [];
-    async function loadCatalogData() {
-      try {
-        const res = await fetch('/api/v1/supported-ecus');
-        const data = await res.json();
-        catalogData = Array.isArray(data) ? data : (data.ecus || []);
-        renderCatalog();
-      } catch (err) {
-        console.error("Catalog load error:", err);
-      }
-    }
-
-    function setCatalogFilter(mode) {
-      catalogFilterMode = mode;
-      document.getElementById('catFilter-all').classList.toggle('active', mode === 'ALL');
-      document.getElementById('catFilter-diesel').classList.toggle('active', mode === 'DIESEL');
-      document.getElementById('catFilter-essence').classList.toggle('active', mode === 'ESSENCE');
-      renderCatalog();
-    }
-
-    function filterCatalog() {
-      renderCatalog();
-    }
-
-    function renderCatalog() {
-      const grid = document.getElementById('catalogGrid');
-      const search = (document.getElementById('catalogSearchInput').value || '').toLowerCase().trim();
-
-      let filtered = catalogData.filter(item => {
-        const matchMode = catalogFilterMode === 'ALL' || (item.fuel_type || '').toUpperCase() === catalogFilterMode;
-        const matchSearch = !search || (item.name || '').toLowerCase().includes(search) || (item.brand || '').toLowerCase().includes(search);
-        return matchMode && matchSearch;
-      });
-
-      if (filtered.length === 0) {
-        grid.innerHTML = '<div style="color:var(--text-muted); padding:20px;">Aucun calculateur ne correspond à votre recherche.</div>';
-        return;
-      }
-
-      let html = '';
-      filtered.forEach(ecu => {
-        const isDiesel = (ecu.fuel_type || '').toUpperCase() === 'DIESEL';
-        const fuelBadge = isDiesel ? '<span class="badge-fuel badge-diesel">Diesel ⛽</span>' : '<span class="badge-fuel badge-essence">Essence ⚡</span>';
-        const solChips = (ecu.solutions || ['DTC OFF', 'Stage 1']).map(s => `<span class="badge-solution">${s}</span>`).join(' ');
-
-        html += `
-          <div class="catalog-item" style="background:#111827; border:1px solid #1e293b; border-radius:10px; padding:16px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
-              <div>
-                <span style="font-size:11px; font-weight:800; color:var(--primary); text-transform:uppercase;">${ecu.brand || 'BOSCH'}</span>
-                <h4 style="margin:2px 0 0 0; color:#fff; font-size:15px; font-weight:800;">${ecu.name}</h4>
-              </div>
-              ${fuelBadge}
-            </div>
-            <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">${ecu.description || 'Calculateur certifié SVEdit v1.1.38.3'}</div>
-            <div style="display:flex; flex-wrap:wrap; gap:4px;">${solChips}</div>
-          </div>
-        `;
-      });
-      grid.innerHTML = html;
-    }
-
-    // 12. History Tab Population
-    async function loadHistoryData() {
-      const tbody = document.getElementById('historyTableBody');
-      try {
-        const res = await fetch('/api/v1/user/history');
-        const data = await res.json();
-        const items = data.history || [];
-
-        if (items.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">Aucun fichier traité pour le moment.</td></tr>';
-          return;
+        let supportedRegistryCache = null;
+        async function loadSupportedRegistry() {
+            if (!supportedRegistryCache) {
+                try {
+                    const res = await fetch('/api/v1/tuning/registry');
+                    if (res.ok) {
+                        const data = await res.json();
+                        supportedRegistryCache = data.registry || {};
+                    }
+                } catch(e) {
+                    console.error("Registry error:", e);
+                }
+            }
+            return supportedRegistryCache;
         }
 
-        let html = '';
-        items.forEach(h => {
-          html += `<tr>
-            <td style="font-weight:700; color:var(--text-muted);">#${h.id || h.task_id}</td>
-            <td>${h.created_at || 'Aujourd\'hui'}</td>
-            <td style="font-weight:800; color:#fff;">${h.ecu_name || 'Binaire'}</td>
-            <td>${(h.solutions || []).join(', ') || 'Optimisation'}</td>
-            <td><a href="/api/v1/tuning/download-ori/${h.task_id}" style="color:var(--primary); text-decoration:none; font-weight:700;">Télécharger ORI</a></td>
-            <td><a href="/api/v1/tuning/download/${h.task_id}" style="color:var(--accent); text-decoration:none; font-weight:800;">Télécharger MOD ⚡</a></td>
-          </tr>`;
-        });
-        tbody.innerHTML = html;
-      } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:#ef4444;">Erreur lors du chargement de l\'historique.</td></tr>';
-      }
-    }
+        async function populateManualBrandSelect() {
+            const registry = await loadSupportedRegistry();
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            brandSel.innerHTML = '<option value="">-- Choisir la marque / constructeur --</option>';
+            ecuSel.innerHTML = '<option value="">-- Choisir le calculateur --</option>';
+            ecuSel.disabled = true;
 
-    // 13. Admin Panel Logic
-    async function loadAdminData() {
-      try {
-        const res = await fetch('/api/v1/admin/overview');
-        const data = await res.json();
-
-        document.getElementById('adminStatUsers').innerText = data.total_users || 0;
-        document.getElementById('adminStatFiles').innerText = data.total_files || 0;
-        document.getElementById('adminStatBans').innerText = (data.banned_ips || []).length;
-
-        // Render Users Table
-        const tbody = document.getElementById('adminUsersTableBody');
-        const users = data.users || [];
-        let html = '';
-        users.forEach(u => {
-          html += `<tr>
-            <td>#${u.id}</td>
-            <td style="font-weight:700; color:#fff;">${u.email}</td>
-            <td><span style="font-size:11px; font-weight:800; padding:2px 8px; border-radius:4px; background:${u.role==='admin'?'#f59e0b':'#334155'}; color:#fff;">${u.role.toUpperCase()}</span></td>
-            <td style="font-weight:800; color:var(--primary);">${u.tokens}</td>
-            <td><span style="color:${u.is_active?'#34d399':'#ef4444'}; font-weight:700;">${u.is_active?'Actif':'Bloqué'}</span></td>
-            <td>
-              <button onclick="adminRechargeUser(${u.id})" style="background:#0f172a; border:1px solid var(--primary); color:var(--primary); padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer; margin-right:4px;">+ Crédits</button>
-              <button onclick="adminToggleUser(${u.id})" style="background:#0f172a; border:1px solid #ef4444; color:#ef4444; padding:3px 8px; border-radius:4px; font-size:11px; cursor:pointer;">${u.is_active?'Bloquer':'Débloquer'}</button>
-            </td>
-          </tr>`;
-        });
-        tbody.innerHTML = html;
-
-        // Render Banned IPs
-        const ipList = document.getElementById('adminBannedIpsList');
-        const bans = data.banned_ips || [];
-        if (bans.length === 0) {
-          ipList.innerText = 'Aucune adresse IP n\'est actuellement bannie.';
-        } else {
-          ipList.innerHTML = bans.map(b => `<div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid #1e293b;">
-            <span>🚫 <strong>${b.ip}</strong> (${b.reason || 'Tentatives excessives'})</span>
-            <button onclick="adminUnbanIp('${b.ip}')" style="background:#0f172a; border:1px solid #34d399; color:#34d399; padding:2px 6px; border-radius:4px; cursor:pointer; font-size:11px;">Débannir</button>
-          </div>`).join('');
+            if (!registry) return;
+            Object.keys(registry).forEach(brand => {
+                const opt = document.createElement('option');
+                opt.value = brand;
+                opt.textContent = brand;
+                brandSel.appendChild(opt);
+            });
         }
-      } catch (err) {
-        console.error("Admin data load error:", err);
-      }
-    }
 
-    async function adminRechargeUser(userId) {
-      const amount = prompt("Nombre de crédits à ajouter :", "10");
-      if (!amount) return;
-      try {
-        const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ amount: parseInt(amount) })
-        });
-        if (res.ok) {
-          toast("Recharge effectuée avec succès !", "success");
-          loadAdminData();
+        async function onManualBrandChange() {
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            const brand = brandSel.value;
+            ecuSel.innerHTML = '<option value="">-- Choisir le calculateur --</option>';
+
+            if (!brand || !supportedRegistryCache || !supportedRegistryCache[brand]) {
+                ecuSel.disabled = true;
+                return;
+            }
+
+            supportedRegistryCache[brand].forEach(ecu => {
+                const opt = document.createElement('option');
+                opt.value = ecu.id;
+                opt.textContent = `${ecu.name} (${ecu.fuel})`;
+                ecuSel.appendChild(opt);
+            });
+            ecuSel.disabled = false;
         }
-      } catch (err) {
-        toast("Erreur lors de la recharge.", "danger");
-      }
-    }
 
-    async function adminToggleUser(userId) {
-      try {
-        const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
-        if (res.ok) {
-          toast("Statut du compte mis à jour.", "info");
-          loadAdminData();
+        async function onManualEcuChange() {
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            const brand = brandSel.value;
+            const ecuId = ecuSel.value;
+            if (!ecuId) return;
+
+            try {
+                const res = await fetch('/api/v1/tuning/manual-select', {
+                    method: 'POST',
+                    headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        file_token: currentFileToken,
+                        brand: brand,
+                        ecu_id: ecuId
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    document.getElementById('unrecognizedBox').style.display = 'none';
+                    displayIdentifiedEcu(data, currentFile ? currentFile.name : 'ECU_File.bin');
+                } else {
+                    alert(data.detail || 'Erreur lors de la sélection du calculateur');
+                }
+            } catch(e) {
+                alert('Erreur : ' + e.message);
+            }
         }
-      } catch (err) {
-        toast("Erreur lors de la modification.", "danger");
-      }
-    }
 
-    async function adminBanIp() {
-      const ip = document.getElementById('inputBanIp').value.trim();
-      const reason = document.getElementById('inputBanReason').value.trim();
-      if (!ip) return;
-      try {
-        const res = await fetch('/api/v1/admin/banned-ips/ban', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ip: ip, reason: reason })
-        });
-        if (res.ok) {
-          toast("IP bannie avec succès.", "success");
-          document.getElementById('inputBanIp').value = '';
-          document.getElementById('inputBanReason').value = '';
-          loadAdminData();
+        function requestManualProcessing() {
+            alert("📩 Votre demande de traitement manuel pour ce fichier a été transmise avec succès à notre équipe d'ingénieurs SCORPION REMAP PRO.\n\nVous serez recontacté sous 15 minutes sur votre téléphone / WhatsApp ou Email.");
         }
-      } catch (err) {
-        toast("Erreur lors du bannissement.", "danger");
-      }
-    }
 
-    async function adminUnbanIp(ip) {
-      try {
-        const res = await fetch('/api/v1/admin/banned-ips/unban', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ip: ip })
-        });
-        if (res.ok) {
-          toast("IP débannie.", "info");
-          loadAdminData();
+        function displayIdentifiedEcu(data, fileName) {
+            currentChecksumInfo = data.checksum_info;
+            dropZone.innerHTML = `<div class="drop-icon">✅</div><div class="drop-title">Fichier sélectionné : ${fileName}</div><div class="drop-subtitle">Cliquez pour changer de fichier</div>`;
+            document.getElementById('brandVal').innerText = data.brand || 'VAG / Auto';
+            document.getElementById('modelVal').innerText = data.model || 'Calculateur Moteur';
+            document.getElementById('ecuVal').innerText = data.ecu_type || 'Bosch ECU';
+            document.getElementById('swVal').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+            
+            const fuelEl = document.getElementById('fuelVal');
+            const isDiesel = (data.fuel || '').toUpperCase() === 'DIESEL';
+            if (fuelEl) {
+                fuelEl.innerHTML = isDiesel ?
+                    '<span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span>' :
+                    '<span class="badge-fuel badge-petrol">Moteur Essence ⚡</span>';
+            }
+
+            document.getElementById('resultsPanel').style.display = 'block';
+
+            // تطبيق التصفية الديناميكية والفصل الصارم بين البنزين والمازوت وإخفاء غير المدعوم
+            applyDynamicSolutionFiltering(data.supported_solutions, data.default_solutions, data.fuel);
+
+            renderDtcPreviewTable(data.dtc_preview, data.dtc_count);
+            renderTechnicalInstructions(data.instructions, data.checksum_info);
         }
-      } catch (err) {
-        toast("Erreur lors du débannissement.", "danger");
-      }
-    }
 
-    // 14. Password Change & Support
-    async function submitPasswordChange() {
-      const newPass = document.getElementById('newPasswordInput').value;
-      if (!newPass || newPass.length < 6) {
-        toast("Le mot de passe doit comporter au moins 6 caractères.", "warning");
-        return;
-      }
-      try {
-        const res = await fetch('/api/v1/user/change-password', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ new_password: newPass })
-        });
-        if (res.ok) {
-          toast("Mot de passe mis à jour avec succès !", "success");
-          closeModal('changePasswordModal');
-        } else {
-          toast("Erreur lors de la mise à jour.", "danger");
+        async function handleFile(file) {
+            currentFile = file;
+            dropZone.innerHTML = `<div class="drop-icon">⏳</div><div class="drop-title">Analyse du fichier ECU : ${file.name}...</div>`;
+            document.getElementById('successBox').style.display = 'none';
+            document.getElementById('unrecognizedBox').style.display = 'none';
+            document.getElementById('resultsPanel').style.display = 'none';
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('/api/v1/tuning/analyze', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData 
+                });
+                if (res.status === 401) {
+                    alert('Session expirée. Veuillez vous reconnecter.');
+                    window.location.href = '/login';
+                    return;
+                }
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    currentFileToken = data.file_token;
+                    
+                    // إذا لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%: الاختيار اليدوي الصارم
+                    if (data.recognized === false) {
+                        document.getElementById('resultsPanel').style.display = 'none';
+                        const unbox = document.getElementById('unrecognizedBox');
+                        unbox.style.display = 'block';
+                        dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title">Fichier téléversé : ${file.name}</div><div class="drop-subtitle">${data.message}</div>`;
+                        await populateManualBrandSelect();
+                        return;
+                    }
+
+                    // تم التعرف على الكمبيوتر تلقائياً
+                    document.getElementById('unrecognizedBox').style.display = 'none';
+                    displayIdentifiedEcu(data, file.name);
+                } else {
+                    dropZone.innerHTML = `<div class="drop-icon">❌</div><div class="drop-title">Erreur d'analyse</div><div class="drop-subtitle">${data.detail || 'Fichier non reconnu ou corrompu'}</div>`;
+                    alert(data.detail || 'Erreur lors de la lecture du fichier');
+                }
+            } catch(e) {
+                dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title">Erreur réseau</div><div class="drop-subtitle">Cliquez pour réessayer</div>`;
+                alert('Erreur de communication : ' + e.message);
+            }
         }
-      } catch (err) {
-        toast("Erreur serveur : " + err.message, "danger");
-      }
-    }
 
-    function contactSupportForCredits(packTokens) {
-      alert("Pour recharger " + packTokens + " crédits sur votre compte (" + (currentUser?currentUser.email:'') + "), veuillez contacter l'administrateur ou le support technique SCORPION REMAP PRO via WhatsApp.");
-    }
+        // Dynamic Solution Filtering (Strict Fuel Isolation & Render ONLY Available Solutions)
+        function applyDynamicSolutionFiltering(supportedSolutions, defaultSolutions, fuelType) {
+            supportedSolutionsList = supportedSolutions || [];
+            selectedSolutions.clear();
+            const currentFuel = (fuelType || 'DIESEL').toUpperCase();
 
-    function requestManualSupport() {
-      alert("Demande de traitement manuel envoyée à nos ingénieurs pour le fichier " + (activeFile?activeFile.name:'') + ". Vous serez notifié dès qu'il sera disponible.");
-    }
+            document.querySelectorAll('.sol-card').forEach(card => {
+                const solKey = card.getAttribute('data-sol');
+                if(!solKey) return;
+                const ku = solKey.toUpperCase();
 
-    function logout() {
-      window.location.href = '/logout';
-    }
+                // 1. الفصل الصارم بين البنزين والمازوت ومنع الخلط (Strict Fuel Type Isolation)
+                if (currentFuel === 'DIESEL') {
+                    // كمبيوترات المازوت: يمنع منعاً باتاً إظهار أو تفعيل حلول البنزين
+                    if (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT') || ku.includes('EVAP')) {
+                        card.style.display = 'none';
+                        return;
+                    }
+                } else if (currentFuel === 'ESSENCE') {
+                    // كمبيوترات البنزين: يمنع منعاً باتاً إظهار أو تفعيل حلول المازوت
+                    if (ku.includes('DPF') || ku.includes('FAP') || ku.includes('ADBLUE') || ku.includes('SCR') || ku.includes('HOT START')) {
+                        card.style.display = 'none';
+                        return;
+                    }
+                }
 
-    // 15. Toast System
-    function toast(message, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = 'toast';
-      const icons = {
-        'info': 'ℹ️',
-        'success': '✅',
-        'warning': '⚠️',
-        'danger': '❌'
-      };
-      t.innerHTML = `<span>${icons[type] || 'ℹ️'}</span> <span>${message}</span>`;
-      container.appendChild(t);
-      setTimeout(() => {
-        t.style.opacity = '0';
-        t.style.transition = 'opacity 0.3s ease';
-        setTimeout(() => t.remove(), 300);
-      }, 4000);
-    }
+                // 2. التحقق من دعم السيرفر الفعلي للحل
+                const isSupported = supportedSolutionsList.some(s => {
+                    const su = s.toUpperCase();
+                    if (su === ku || ku.includes(su) || su.includes(ku)) return true;
+                    if ((su.includes('VSA') || su.includes('SWIRL')) && (ku.includes('VSA') || ku.includes('SWIRL'))) return true;
+                    if ((su.includes('CAT') || su.includes('LAMBDA') || su.includes('DECAT')) && (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT'))) return true;
+                    if (su.includes('TVA') && ku.includes('TVA')) return true;
+                    if (su.includes('IMMO') && ku.includes('IMMO')) return true;
+                    if (su.includes('EVAP') && ku.includes('EVAP')) return true;
+                    if ((su.includes('ADBLUE') || su.includes('SCR')) && (ku.includes('ADBLUE') || ku.includes('SCR'))) return true;
+                    return false;
+                });
 
-    // Execute Initialization on Page Load
-    document.addEventListener('DOMContentLoaded', () => {
-      initPlatform();
-      const savedLang = localStorage.getItem("scorpion_lang") || 'fr';
-      setAppLanguage(savedLang);
-    });
-  </script>
+                const chk = card.querySelector('.chk');
+
+                // 3. إظهار الحلول المتوفرة فقط وإخفاء الباقي تماماً (بدون أزرار رمادية)
+                if (isSupported) {
+                    card.style.display = 'flex';
+                    card.classList.remove('disabled');
+                    card.classList.remove('selected');
+                    card.style.opacity = '1';
+                    card.style.pointerEvents = 'auto';
+                    card.style.cursor = 'pointer';
+                    card.style.filter = 'none';
+                    if (chk) chk.innerText = '+';
+                } else {
+                    card.style.display = 'none'; // إخفاء كامل بدون أزرار رمادية
+                    card.classList.remove('selected');
+                    if (chk) chk.innerText = '✕';
+                }
+            });
+
+            // إخفاء العناوين الفرعية للأقسام التي لا تحتوي على أي بطاقة ظاهرة
+            document.querySelectorAll('.sol-category-title').forEach(titleEl => {
+                const nextGrid = titleEl.nextElementSibling;
+                if (nextGrid && nextGrid.classList.contains('sol-grid')) {
+                    const visibleCards = Array.from(nextGrid.querySelectorAll('.sol-card')).filter(c => c.style.display !== 'none');
+                    titleEl.style.display = (visibleCards.length > 0) ? 'block' : 'none';
+                    nextGrid.style.display = (visibleCards.length > 0) ? 'grid' : 'none';
+                }
+            });
+        }
+
+        function toggleSol(card, name) {
+            if(card.style.display === 'none' || card.classList.contains('disabled')) return;
+
+            const chk = card.querySelector('.chk');
+            if(selectedSolutions.has(name)) {
+                selectedSolutions.delete(name);
+                card.classList.remove('selected');
+                if(chk) chk.innerText = '+';
+            } else {
+                selectedSolutions.add(name);
+                card.classList.add('selected');
+                if(chk) chk.innerText = '✔';
+            }
+            updateDtcPreview();
+        }
+
+        // Live DTC Table Preview & Workshop Instructions Update
+        async function updateDtcPreview() {
+            if(!currentFileToken) return;
+            try {
+                const res = await fetch('/api/v1/tuning/preview-dtc', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        file_token: currentFileToken,
+                        selected_solutions: Array.from(selectedSolutions),
+                        custom_dtcs: Array.from(selectedDtcs)
+                    })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    renderDtcPreviewTable(data.items, data.total_codes);
+                    renderTechnicalInstructions(data.instructions, currentChecksumInfo);
+                }
+            } catch(e) {
+                console.error('Erreur preview DTC', e);
+            }
+        }
+
+        function renderTechnicalInstructions(instructions, checksumInfo) {
+            const card = document.getElementById('instructionsCard');
+            if(!card) return;
+
+            if(checksumInfo) {
+                const pill = document.getElementById('checksumStatusPill');
+                if(pill) {
+                    pill.innerText = `Correction Checksum: ${checksumInfo.status}`;
+                    if(checksumInfo.is_auto) {
+                        pill.style.background = 'rgba(16,185,129,0.15)';
+                        pill.style.color = '#10b981';
+                        pill.style.borderColor = '#10b981';
+                    } else {
+                        pill.style.background = 'rgba(245,158,11,0.15)';
+                        pill.style.color = '#f59e0b';
+                        pill.style.borderColor = '#f59e0b';
+                    }
+                }
+            }
+
+            const list = document.getElementById('instructionsList');
+            if(!list) return;
+            list.innerHTML = '';
+
+            if(!instructions || instructions.length === 0) {
+                card.style.display = 'none';
+                return;
+            }
+
+            card.style.display = 'block';
+            instructions.forEach(ins => {
+                const item = document.createElement('div');
+                const borderColor = ins.type === 'critical' ? '#ef4444' : (ins.type === 'warning' ? '#f59e0b' : '#38bdf8');
+                const bgColor = ins.type === 'critical' ? 'rgba(239,68,68,0.08)' : (ins.type === 'warning' ? 'rgba(245,158,11,0.08)' : 'rgba(56,189,248,0.08)');
+
+                item.style.cssText = `background:${bgColor}; border:1px solid ${borderColor}; border-radius:10px; padding:12px 14px;`;
+                item.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+                        <span style="background:${borderColor}; color:#000; font-size:10px; font-weight:800; padding:2px 6px; border-radius:4px;">${ins.badge}</span>
+                        <strong style="color:#fff; font-size:13px;">${ins.title}</strong>
+                    </div>
+                    <p style="font-size:12px; color:#cbd5e1; line-height:1.4;">${ins.desc}</p>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderDtcPreviewTable(items, totalCount) {
+            const badge = document.getElementById('dtcCountBadge');
+            if(badge) {
+                badge.innerText = `🔥 ${totalCount} code(s) DTC seront supprimés de la gestion moteur`;
+            }
+            const tbody = document.getElementById('dtcPreviewBody');
+            if(!tbody) return;
+
+            if(!items || items.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">
+                            Aucun code DTC ne sera supprimé. Sélectionnez une solution ci-dessus ou ajoutez un code manuellement.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            items.forEach(item => {
+                const isManual = item.source === 'Manuel (Client)';
+                const sourceBadge = isManual 
+                    ? `<span style="background:rgba(239,68,68,0.2); color:#f87171; border:1px solid #ef4444; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">${item.source}</span>`
+                    : `<span style="background:rgba(2,132,199,0.2); color:#38bdf8; border:1px solid #0284c7; padding:2px 8px; border-radius:6px; font-weight:700; font-size:11px;">⚡ Pack ${item.source}</span>`;
+
+                const actionBtn = isManual
+                    ? `<button onclick="removeDtcCode('${item.code}')" style="background:none; border:1px solid #ef4444; color:#ef4444; border-radius:4px; padding:2px 6px; cursor:pointer; font-weight:700; font-size:11px;">✕ Retirer</button>`
+                    : `<span style="color:#64748b; font-size:11px;">🔒 Inclus</span>`;
+
+                const tr = document.createElement('tr');
+                tr.style.cssText = 'border-bottom:1px solid #131d35; transition:0.15s;';
+                tr.onmouseenter = () => tr.style.background = 'rgba(56,189,248,0.04)';
+                tr.onmouseleave = () => tr.style.background = 'transparent';
+
+                tr.innerHTML = `
+                    <td style="padding:10px 14px;"><strong style="color:#f87171; font-family:monospace; font-size:13px; font-weight:800;">${item.code}</strong></td>
+                    <td style="padding:10px 14px; color:#cbd5e1; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${item.description}">${item.description}</td>
+                    <td style="padding:10px 14px;"><code style="background:#04070d; border:1px solid #1e293b; padding:3px 8px; border-radius:4px; color:#38bdf8; font-weight:700; font-family:monospace;">${item.offset}</code></td>
+                    <td style="padding:10px 14px;"><span style="color:#fbbf24; font-weight:700;">${item.val_ori}</span> <span style="color:#64748b;">➔</span> <strong style="color:#34d399; font-weight:800;">${item.val_mod} (OFF)</strong></td>
+                    <td style="padding:10px 14px;">${sourceBadge}</td>
+                    <td style="padding:10px 14px; text-align:center;">${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // DTC Add / Remove Handlers
+        function addDtcCode(code) {
+            selectedDtcs.add(code.trim().toUpperCase());
+            document.getElementById('dtcSearchInput').value = '';
+            document.getElementById('dtcSearchResults').style.display = 'none';
+            updateDtcPreview();
+        }
+        function removeDtcCode(code) {
+            selectedDtcs.delete(code.trim().toUpperCase());
+            updateDtcPreview();
+        }
+        function addCustomDtc() {
+            const val = document.getElementById('dtcSearchInput').value.trim().toUpperCase();
+            if(val) {
+                val.split(/[,;\s]+/).forEach(p => { if(p) selectedDtcs.add(p); });
+                document.getElementById('dtcSearchInput').value = '';
+                document.getElementById('dtcSearchResults').style.display = 'none';
+                updateDtcPreview();
+            }
+        }
+
+        let dtcTimer = null;
+        function onDtcSearch(val) {
+            clearTimeout(dtcTimer);
+            const box = document.getElementById('dtcSearchResults');
+            if(!val.trim()) { box.style.display = 'none'; return; }
+            dtcTimer = setTimeout(async () => {
+                const resp = await fetch(`/api/v1/dtc/search?q=${encodeURIComponent(val)}`);
+                const items = await resp.json();
+                if(items.length) {
+                    box.innerHTML = '';
+                    items.forEach(it => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'padding:8px 12px; border-bottom:1px solid #1e293b; cursor:pointer; font-size:12px; display:flex; justify-content:space-between; align-items:center;';
+                        row.onmouseenter = () => row.style.background = '#1e293b';
+                        row.onmouseleave = () => row.style.background = 'transparent';
+                        row.innerHTML = `<strong style="color:#38bdf8; font-family:monospace;">${it.code}</strong> <span style="color:#94a3b8; font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">${it.desc}</span>`;
+                        row.onclick = () => addDtcCode(it.code);
+                        box.appendChild(row);
+                    });
+                    box.style.display = 'block';
+                } else { box.style.display = 'none'; }
+            }, 200);
+        }
+
+        // Final modification & download (Credit only deducted here)
+        async function processAndDownload() {
+            if(!currentFile && !currentFileToken) return;
+            const btn = document.getElementById('btnProcess');
+            btn.disabled = true;
+            btn.innerText = '⚙️ Application des modifications sur le serveur...';
+
+            const formData = new FormData();
+            if(currentFileToken) formData.append('file_token', currentFileToken);
+            if(currentFile) formData.append('file', currentFile);
+            formData.append('solutions', JSON.stringify(Array.from(selectedSolutions)));
+            formData.append('dtcs', JSON.stringify(Array.from(selectedDtcs)));
+            
+            const brandSel = document.getElementById('manualBrandSelect');
+            const ecuSel = document.getElementById('manualEcuSelect');
+            if (brandSel && brandSel.value) formData.append('manual_brand', brandSel.value);
+            if (ecuSel && ecuSel.value) formData.append('manual_ecu_id', ecuSel.value);
+
+            try {
+                const res = await fetch('/api/v1/tuning/process', { 
+                    method: 'POST', 
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData 
+                });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    btn.innerText = '✅ Modification Terminée avec Succès!';
+                    document.getElementById('downloadLink').href = `/api/v1/tuning/download/${data.task_id}`;
+                    document.getElementById('successBox').style.display = 'block';
+                    window.location.href = `/api/v1/tuning/download/${data.task_id}`;
+                    setTimeout(() => { btn.disabled = false; btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)'; }, 2500);
+                } else {
+                    alert(data.detail || 'Erreur lors du traitement');
+                    btn.disabled = false;
+                    btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+                }
+            } catch(e) {
+                alert('Erreur serveur : ' + e.message);
+                btn.disabled = false;
+                btn.innerText = '⚡ APPLIQUER LES SOLUTIONS ET TÉLÉCHARGER LE FICHIER MOD (1 Crédit)';
+            }
+        }
+
+        // =========================================================================
+        // EVO Fan Modifier Logic (Matching Screenshot & 16 Protocols)
+        // =========================================================================
+        let evoCurrentFile = null;
+        let evoPreviewToken = null;
+
+        function addEvoLog(type, msg) {
+            const box = document.getElementById('evoConsoleLog');
+            if (!box) return;
+            const now = new Date();
+            const timeStr = `[${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}]`;
+            let typeClass = 'evo-log-info';
+            let prefix = '[i] INFO:';
+            if (type === 'ok') { typeClass = 'evo-log-ok'; prefix = '[OK] SUCCESS:'; }
+            else if (type === 'warn') { typeClass = 'evo-log-warn'; prefix = '[!] WARNING:'; }
+            else if (type === 'err') { typeClass = 'evo-log-err'; prefix = '[ERR] ERROR:'; }
+
+            const line = document.createElement('div');
+            line.innerHTML = `${timeStr} <span class="${typeClass}">${prefix} ${msg}</span>`;
+            box.appendChild(line);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        let evoTempDebounceTimer = null;
+        function syncEvoTemp(val) {
+            val = parseInt(val, 10);
+            if (isNaN(val)) val = 90;
+            if (val < 70) val = 70;
+            if (val > 110) val = 110;
+            document.getElementById('evoSlider').value = val;
+            document.getElementById('evoNumberBox').value = val;
+            document.getElementById('evoTargetVal').textContent = `${val} °C`;
+            addEvoLog('info', `Consigne de température cible ajustée à ${val}°C`);
+
+            if (evoCurrentFile) {
+                clearTimeout(evoTempDebounceTimer);
+                evoTempDebounceTimer = setTimeout(() => {
+                    processEvoFileAnalysis(evoCurrentFile);
+                }, 250);
+            }
+        }
+
+        function onEvoProtocolChange() {
+            const proto = document.getElementById('evoEcuSelect').value || 'Auto-Détection';
+            addEvoLog('info', `Protocole sélectionné : [${proto}]`);
+            if (evoCurrentFile) {
+                processEvoFileAnalysis(evoCurrentFile);
+            }
+        }
+
+        async function handleEvoFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            evoCurrentFile = file;
+
+            document.getElementById('evoFileName').textContent = file.name;
+            document.getElementById('evoFileSize').textContent = `${(file.size / 1024).toFixed(1)} KB (${file.size} octets)`;
+            document.getElementById('evoFileStatus').textContent = "Analyse et identification en cours...";
+            document.getElementById('evoFileInfo').style.display = 'block';
+
+            addEvoLog('info', `Fichier chargé : ${file.name} (${file.size} octets)`);
+            await processEvoFileAnalysis(file);
+        }
+
+        async function processEvoFileAnalysis(file) {
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+
+            addEvoLog('info', `Analyse des cartographies ventilateur (GMV) [${proto || 'Auto-Détection'}]...`);
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('tool', 'renault_fan_temp');
+            formData.append('param', targetTemp);
+            formData.append('protocol', proto);
+
+            try {
+                const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    document.getElementById('evoCurrentVal').textContent = '-- °C';
+                    document.getElementById('evoFileStatus').textContent = "⚠️ Incompatible avec ce protocole";
+                    document.getElementById('evoFileStatus').style.color = "#ef4444";
+                    addEvoLog('err', data.detail || "Échec de détection de la cartographie ventilateur.");
+                    return;
+                }
+
+                if (data.protocol_detected) {
+                    const sel = document.getElementById('evoEcuSelect');
+                    if (sel && sel.value !== data.protocol_detected) {
+                        sel.value = data.protocol_detected;
+                    }
+                }
+
+                evoPreviewToken = data.preview_token;
+                const curTemp = data.current_temp !== undefined ? `${data.current_temp} °C` : "-- °C";
+                document.getElementById('evoCurrentVal').textContent = curTemp;
+                document.getElementById('evoFileStatus').textContent = `✅ Binaire Valide (${data.protocol_name || data.ecu_type || proto})`;
+                document.getElementById('evoFileStatus').style.color = "#34d399";
+
+                addEvoLog('ok', `Calculateur identifié : [${data.protocol_name || data.protocol_detected || data.ecu_type}]`);
+                addEvoLog('ok', `Température d'origine réelle détectée (Stock GMV) : ${curTemp}`);
+                addEvoLog('ok', `Calibration prête : ${data.bytes_modified} octet(s) calibrés vers consigne ${targetTemp}°C`);
+            } catch (err) {
+                addEvoLog('err', "Erreur de communication : " + err.message);
+            }
+        }
+
+        async function applyEvoFanPatch() {
+            if (!evoCurrentFile) {
+                alert("Veuillez d'abord attacher un fichier Flash (.bin) !");
+                addEvoLog('warn', "No file attached. Please attach a Flash file first.");
+                return;
+            }
+            if (!evoPreviewToken) {
+                addEvoLog('warn', "Veuillez attendre la validation du fichier.");
+                await processEvoFileAnalysis(evoCurrentFile);
+                if (!evoPreviewToken) return;
+            }
+
+            const proto = document.getElementById('evoEcuSelect').value;
+            const targetTemp = document.getElementById('evoSlider').value;
+            const btn = document.getElementById('btnEvoApply');
+
+            btn.disabled = true;
+            btn.innerHTML = `<span>⏳</span> PATCHING BINARY & CHECKSUM IN PROGRESS...`;
+            addEvoLog('info', `Executing temperature patch to ${targetTemp}°C for [${proto}]...`);
+
+            try {
+                const formData = new FormData();
+                formData.append('preview_token', evoPreviewToken);
+
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    addEvoLog('err', data.detail || "Échec de l'application du patch.");
+                    alert("Erreur : " + (data.detail || "Échec"));
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                    return;
+                }
+
+                addEvoLog('ok', `GMV Trigger successfully lowered to ${targetTemp}°C!`);
+                addEvoLog('ok', `Checksum RSA / CRC recalculated successfully.`);
+                addEvoLog('ok', `Remaining user tokens: ${data.credits_remaining}`);
+                document.getElementById('userCredits').textContent = `${data.credits_remaining}`;
+
+                addEvoLog('ok', `Exporting modified file: ${data.filename}...`);
+
+                // Trigger direct download
+                const a = document.createElement('a');
+                a.href = data.download_url;
+                a.download = data.filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                evoPreviewToken = null;
+                btn.disabled = false;
+                btn.innerHTML = `<span>✅</span> PATCH APPLIED & EXPORTED (1 CRÉDIT)`;
+                setTimeout(() => {
+                    btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+                }, 3000);
+            } catch (err) {
+                addEvoLog('err', "Erreur critique : " + err.message);
+                btn.disabled = false;
+                btn.innerHTML = `<span>💾</span> APPLY TEMPERATURE PATCH & EXPORT`;
+            }
+        }
+
+        // =========================================================================
+        // Admin Panel Management
+        // =========================================================================
+        async function loadAdminData() {
+            try {
+                const res = await fetch('/api/v1/admin/overview');
+                if (!res.ok) return;
+                const data = await res.json();
+
+                document.getElementById('adminStatUsers').textContent = data.total_users;
+                document.getElementById('adminStatCredits').textContent = `${data.total_credits} 🪙`;
+                document.getElementById('adminStatFiles').textContent = data.total_files;
+
+                const tbody = document.getElementById('adminUsersBody');
+                tbody.innerHTML = '';
+
+                if (!data.users || data.users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">Aucun utilisateur inscrit.</td></tr>';
+                    return;
+                }
+
+                data.users.forEach(u => {
+                    const tr = document.createElement('tr');
+                    const statusBadge = u.is_active ?
+                        '<span style="background:rgba(16,185,129,0.2); color:#34d399; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Actif</span>' :
+                        '<span style="background:rgba(239,68,68,0.2); color:#f87171; padding:3px 8px; border-radius:6px; font-weight:700; font-size:11px;">Suspendu</span>';
+
+                    tr.innerHTML = `
+                        <td><strong>#${u.id}</strong></td>
+                        <td>
+                            <div style="font-weight:700; color:#fff;">${u.full_name || u.username}</div>
+                            <div style="font-size:11px; color:#94a3b8;">${u.workshop_name || 'Atelier Particulier'}</div>
+                        </td>
+                        <td>
+                            <div>${u.email}</div>
+                            <div style="font-size:11px; color:#38bdf8;">${u.phone || '--'}</div>
+                        </td>
+                        <td>${u.wilaya_country || '--'}</td>
+                        <td><strong style="color:#38bdf8; font-size:15px;">${u.tokens !== undefined ? u.tokens : u.credits} 🪙</strong></td>
+                        <td>${statusBadge}</td>
+                        <td><code style="font-size:11px; color:#94a3b8;">${u.ip_address || '127.0.0.1'}</code></td>
+                        <td>
+                            <button class="chip" style="background:#0284c7; color:#fff; border:none; margin-right:4px;" onclick="adminRechargeUser(${u.id}, '${u.full_name || u.email}')">+ Crédits</button>
+                            <button class="chip" style="background:${u.is_active ? '#ef4444' : '#10b981'}; color:#fff; border:none;" onclick="adminToggleUser(${u.id})">${u.is_active ? 'Bloquer' : 'Débloquer'}</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+
+                // Load Banned IPs
+                await loadBannedIps();
+            } catch (e) {
+                console.error("Admin load error:", e);
+            }
+        }
+
+        async function loadBannedIps() {
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips');
+                if (!res.ok) return;
+                const data = await res.json();
+                const tbody = document.getElementById('adminBannedIpsBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+
+                if (!data.banned_ips || data.banned_ips.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:16px; color:#34d399;">Aucune adresse IP bloquée pour le moment. Système sécurisé ✅</td></tr>';
+                    return;
+                }
+
+                data.banned_ips.forEach(b => {
+                    const tr = document.createElement('tr');
+                    const isActive = b.is_active === 1;
+                    tr.innerHTML = `
+                        <td><code style="color:#ef4444; font-weight:700;">${b.ip_address}</code></td>
+                        <td><strong>${b.attempts}</strong></td>
+                        <td style="font-size:12px; color:#cbd5e1;">${b.reason}</td>
+                        <td style="font-size:11px; color:#94a3b8;">${b.banned_until}</td>
+                        <td><span style="background:${isActive ? 'rgba(239,68,68,0.2)' : 'rgba(100,116,139,0.2)'}; color:${isActive ? '#f87171' : '#94a3b8'}; padding:3px 8px; border-radius:6px; font-size:11px; font-weight:700;">${isActive ? '⛔ Bloqué' : 'Expiré'}</span></td>
+                        <td>
+                            <button class="chip" style="background:#10b981; color:#fff; border:none;" onclick="adminUnbanIp('${b.ip_address}')">Débloquer (Unban)</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error("Error loading banned IPs:", e);
+            }
+        }
+
+        async function adminUnbanIp(ip) {
+            if (!confirm(`Voulez-vous débloquer l'adresse IP ${ip} ?`)) return;
+            try {
+                const res = await fetch('/api/v1/admin/banned-ips/unban', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadBannedIps();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
+            }
+        }
+
+        async function adminRechargeUser(userId, name) {
+            const amountStr = prompt(`Combien de crédits souhaitez-vous ajouter à ${name} ?`, "10");
+            if (!amountStr) return;
+            const amount = parseInt(amountStr, 10);
+            if (isNaN(amount) || amount === 0) return;
+
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/recharge`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadAdminData();
+                } else {
+                    alert(data.detail || "Erreur de recharge");
+                }
+            } catch (e) {
+                alert("Erreur de communication : " + e.message);
+            }
+        }
+
+        async function adminToggleUser(userId) {
+            if (!confirm("Êtes-vous sûr de vouloir modifier le statut de ce compte ?")) return;
+            try {
+                const res = await fetch(`/api/v1/admin/users/${userId}/toggle`, { method: 'POST' });
+                const data = await res.json();
+                if (data.success) {
+                    loadAdminData();
+                }
+            } catch (e) {
+                alert("Erreur : " + e.message);
+            }
+        }
+
+        // =========================================================================
+        // Outils Expert (Renault Tools & Specialized Patcher)
+        // =========================================================================
+        let currentExpertPreviewToken = null;
+
+        function triggerExpertTool(toolKey, title) {
+            currentExpertTool = toolKey;
+            const inp = document.getElementById('expertFileInput');
+            if(!inp) {
+                alert("Erreur: Champ de fichier introuvable");
+                return;
+            }
+            inp.value = '';
+            inp.onchange = async () => {
+                if(!inp.files.length) return;
+                const file = inp.files[0];
+                const param = (toolKey === 'renault_fan_temp') ? (document.getElementById('fanTempParam')?.value || '92') : '';
+                const protocol = (toolKey === 'renault_fan_temp') ? (document.getElementById('fanEcuProtocol')?.value || '') : '';
+
+                // Indicateur de chargement
+                const buttons = document.querySelectorAll('.expert-btn');
+                buttons.forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('tool', toolKey);
+                formData.append('param', param);
+                formData.append('protocol', protocol);
+
+                try {
+                    const res = await fetch('/api/v1/expert/preview', { method: 'POST', body: formData });
+                    const data = await res.json();
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+
+                    if(!res.ok || !data.success) {
+                        alert(data.detail || 'Erreur lors de la validation de sécurité du fichier.');
+                        inp.value = '';
+                        return;
+                    }
+
+                    // Remplissage du Modal de confirmation
+                    currentExpertPreviewToken = data.preview_token;
+                    document.getElementById('modalEcuType').innerText = data.ecu_type || 'Calculateur Renault';
+                    document.getElementById('modalSwVersion').innerText = (data.sw_version || 'Identifié') + (data.hw_version ? ` / ${data.hw_version}` : '');
+                    document.getElementById('modalBytesMod').innerText = `${data.bytes_modified} octets calibrés`;
+                    document.getElementById('modalChecksum').innerText = data.checksum_status || 'Automatique & Supporté ✅';
+                    document.getElementById('modalDesc').innerText = data.description || '';
+
+                    // Affichage des températures Fan si disponible
+                    const tempRow = document.getElementById('modalTempRow');
+                    if(data.current_temp !== undefined && data.current_temp !== null) {
+                        tempRow.style.display = 'block';
+                        document.getElementById('modalCurrentTemp').innerText = `${data.current_temp}°C`;
+                        document.getElementById('modalTargetTemp').innerText = `${param || 92}°C`;
+                    } else {
+                        tempRow.style.display = 'none';
+                    }
+
+                    const modal = document.getElementById('expertConfirmModal');
+                    if(modal) modal.style.display = 'flex';
+                } catch(e) {
+                    buttons.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
+                    alert('Erreur de connexion au serveur : ' + e.message);
+                    inp.value = '';
+                }
+            };
+            inp.click();
+        }
+
+        function closeExpertModal() {
+            const modal = document.getElementById('expertConfirmModal');
+            if(modal) modal.style.display = 'none';
+            currentExpertPreviewToken = null;
+            const inp = document.getElementById('expertFileInput');
+            if(inp) inp.value = '';
+            const btn = document.getElementById('modalConfirmBtn');
+            if(btn) {
+                btn.disabled = false;
+                btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+            }
+        }
+
+        async function confirmAndDownloadExpert() {
+            if(!currentExpertPreviewToken) return;
+            const btn = document.getElementById('modalConfirmBtn');
+            if(btn) {
+                btn.disabled = true;
+                btn.innerText = '⚙️ Application du patch & Sauvegarde...';
+            }
+
+            const formData = new FormData();
+            formData.append('preview_token', currentExpertPreviewToken);
+
+            try {
+                const res = await fetch('/api/v1/expert/apply', { method: 'POST', body: formData });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    window.location.href = data.download_url;
+                    closeExpertModal();
+                    alert(`✅ Opération réussie !\n\n${data.description}\nLe fichier a été téléchargé avec succès.`);
+                    initPortal();
+        loadCatalogue(); // Pré-charger le catalogue immédiatement // Actualiser le solde
+                } else {
+                    alert(data.detail || 'Erreur lors du traitement du fichier.');
+                    if(btn) {
+                        btn.disabled = false;
+                        btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+                    }
+                }
+            } catch(e) {
+                alert('Erreur serveur : ' + e.message);
+                if(btn) {
+                    btn.disabled = false;
+                    btn.innerText = 'CONFIRMER & TÉLÉCHARGER (1 Crédit) ⚡';
+                }
+            }
+        }
+
+        // =========================================================================
+        // Catalogue Calculateurs & Search & Filtering
+        // =========================================================================
+        async function loadCatalogue() {
+            try {
+                const res = await fetch('/api/v1/supported-ecus');
+                if(!res.ok) return;
+                catalogueData = await res.json();
+                const numEl = document.getElementById('catTotalNum');
+                if(numEl) numEl.innerText = catalogueData.length;
+                renderCatalogue(catalogueData);
+            } catch (e) {
+                console.error("Error loading catalogue:", e);
+            }
+        }
+
+        function renderCatalogue(list) {
+            const grid = document.getElementById('catGrid');
+            if(!grid) return;
+            grid.innerHTML = '';
+            if(!list || list.length === 0) {
+                grid.innerHTML = '<div style="color:var(--text-muted); padding:30px; text-align:center; grid-column:1/-1;">Aucun calculateur trouvé pour ce critère.</div>';
+                return;
+            }
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'cat-card';
+
+                const fuelClass = item.fuel === 'Essence' ? 'fuel-essence' : 'fuel-diesel';
+                let badges = '';
+                (item.solutions || []).forEach(s => {
+                    badges += `<span style="background:rgba(255,255,255,0.05); border:1px solid #334155; color:#cbd5e1; font-size:10px; font-weight:700; padding:2px 6px; border-radius:4px; margin-right:4px; margin-bottom:4px; display:inline-block;">✔ ${s}</span>`;
+                });
+
+                card.innerHTML = `
+                    <div>
+                        <div style="font-size:11px; font-weight:800; color:#94a3b8; margin-bottom:4px;">
+                            ${item.brand}
+                            <span class="fuel-badge ${fuelClass}">⛽ ${item.fuel || 'DIESEL'}</span>
+                        </div>
+                        <div style="font-size:16px; font-weight:800; color:#fff; margin-bottom:4px;">${item.ecu}</div>
+                        <div style="font-size:12px; color:#38bdf8; margin-bottom:12px;">${item.engine}</div>
+                    </div>
+                    <div>${badges}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function setBrandFilter(b, btn) {
+            currentBrandFilter = b;
+            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            filterCatalogue();
+        }
+
+        function setFuelFilter(f, btn) {
+            currentFuelFilter = f;
+            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            if(btn) btn.classList.add('active');
+            filterCatalogue();
+        }
+
+        function filterCatalogue() {
+            const searchInput = document.getElementById('catSearch');
+            const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
+            let res = catalogueData;
+            if(currentBrandFilter !== 'Tous') {
+                res = res.filter(i => (i.brand || '').toLowerCase().includes(currentBrandFilter.toLowerCase()) || (i.ecu || '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
+            }
+            if(currentFuelFilter !== 'Tous') {
+                res = res.filter(i => (i.fuel || 'Diesel').toLowerCase() === currentFuelFilter.toLowerCase());
+            }
+            if(q) {
+                res = res.filter(i => 
+                    (i.brand || '').toLowerCase().includes(q) || 
+                    (i.ecu || '').toLowerCase().includes(q) || 
+                    (i.engine || '').toLowerCase().includes(q) || 
+                    (i.solutions || []).some(s => s.toLowerCase().includes(q))
+                );
+            }
+            renderCatalogue(res);
+        }
+
+        // =========================================================================
+        // Historique Utilisateur
+        // =========================================================================
+        async function loadUserHistory() {
+            try {
+                const res = await fetch('/api/v1/user/history');
+                if(!res.ok) return;
+                const data = await res.json();
+                const tb = document.getElementById('historyBody');
+                if(!tb) return;
+                tb.innerHTML = '';
+                if(!data.files || !data.files.length) {
+                    tb.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">Aucun fichier traité dans votre historique.</td></tr>';
+                    return;
+                }
+                data.files.forEach(f => {
+                    tb.innerHTML += `
+                        <tr>
+                            <td><strong>${f.original_name}</strong></td>
+                            <td>${f.brand} / ${f.ecu_type}</td>
+                            <td><span style="background:rgba(56,189,248,0.15); color:#38bdf8; padding:3px 8px; border-radius:4px; font-size:11px;">${f.solutions}</span></td>
+                            <td>${f.created_at}</td>
+                            <td><a href="/api/v1/tuning/download/${f.id}" style="color:#10b981; font-weight:700; text-decoration:none;">Télécharger 📥</a></td>
+                        </tr>
+                    `;
+                });
+            } catch(e) {
+                console.error("Error loading user history:", e);
+            }
+        }
+
+
+        initPortal();
+        loadCatalogue(); // Pré-charger le catalogue immédiatement
+
+        // Actualisation automatique du panneau d'administration toutes les 10 secondes
+        setInterval(() => {
+            const tab = document.getElementById('tabAdmin');
+            if (tab && tab.classList.contains('active')) {
+                loadAdminData();
+            }
+        }, 10000);
+    </script>
 </body>
 </html>
