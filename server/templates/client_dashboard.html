@@ -980,21 +980,40 @@
                 <p style="font-size:12px; color:var(--text-muted); margin-top:4px;">Référentiel officiel SCORPION REMAP PRO v3.2.0 — 45 marques & calculateurs avec solutions actives</p>
             </div>
 
-            <!-- Chips Filter -->
-            <div class="cat-filter-chips">
-                <span style="font-size:12px; font-weight:700; color:var(--text-muted); display:flex; align-items:center; margin-right:6px;">Filtres rapides :</span>
-                <button class="chip active" onclick="setBrandFilter('Tous', this)">Tous</button>
-                <button class="chip" onclick="setFuelFilter('Essence', this)">⛽ Essence</button>
-                <button class="chip" onclick="setFuelFilter('Diesel', this)">⛽ Diesel</button>
-                <button class="chip" onclick="setBrandFilter('VAG', this)">VAG / VW</button>
-                <button class="chip" onclick="setBrandFilter('RENAULT', this)">Renault / Dacia</button>
-                <button class="chip" onclick="setBrandFilter('PSA', this)">PSA / Peugeot</button>
-                <button class="chip" onclick="setBrandFilter('BMW', this)">BMW</button>
-                <button class="chip" onclick="setBrandFilter('MERCEDES', this)">Mercedes</button>
-                <button class="chip" onclick="setBrandFilter('HYUNDAI', this)">Hyundai / Kia</button>
-                <button class="chip" onclick="setBrandFilter('TOYOTA', this)">Toyota</button>
-                <button class="chip" onclick="setBrandFilter('FORD', this)">Ford</button>
-                <button class="chip" onclick="setBrandFilter('FIAT', this)">Fiat / Abarth</button>
+            <!-- Filters Container: Séparation Stricte Carburant / Marques (Zero الاختلاط) -->
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid #1e293b; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px;">
+                
+                <!-- ROW 1: Fuel Type Filter (نوع المحرك / Carburant) -->
+                <div id="fuelFilters" style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; min-width: 105px; display: flex; align-items: center; gap: 4px;">
+                        <span>⛽</span> Carburant :
+                    </span>
+                    <button id="chipFuelAll" class="chip active" onclick="setFuelFilter('Tous', this)" style="border-radius: 6px;">✨ Tous Carburants</button>
+                    <button class="chip" onclick="setFuelFilter('Diesel', this)" style="color: #60a5fa; border-color: rgba(59, 130, 246, 0.3); border-radius: 6px;">⛽ Moteurs Diesel</button>
+                    <button class="chip" onclick="setFuelFilter('Essence', this)" style="color: #f87171; border-color: rgba(239, 68, 68, 0.3); border-radius: 6px;">⚡ Moteurs Essence</button>
+                </div>
+
+                <div style="height: 1px; background: rgba(51, 65, 85, 0.4); width: 100%;"></div>
+
+                <!-- ROW 2: Brand Filter (الشركة المصنعة / Marques) -->
+                <div id="brandFilters" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px;">
+                    <span style="font-size: 11px; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; min-width: 105px; display: flex; align-items: center; gap: 4px;">
+                        <span>🚗</span> Marque :
+                    </span>
+                    <button id="chipBrandAll" class="chip active" onclick="setBrandFilter('Tous', this)">Toutes les marques</button>
+                    <button class="chip" onclick="setBrandFilter('VAG', this)">VAG (VW/Audi/Seat/Skoda)</button>
+                    <button class="chip" onclick="setBrandFilter('BMW', this)">BMW</button>
+                    <button class="chip" onclick="setBrandFilter('MERCEDES', this)">Mercedes-Benz</button>
+                    <button class="chip" onclick="setBrandFilter('RENAULT', this)">Renault / Dacia</button>
+                    <button class="chip" onclick="setBrandFilter('PSA', this)">PSA (Peugeot / Citroën)</button>
+                    <button class="chip" onclick="setBrandFilter('HYUNDAI', this)">Hyundai / Kia</button>
+                    <button class="chip" onclick="setBrandFilter('TOYOTA', this)">Toyota / Lexus</button>
+                    <button class="chip" onclick="setBrandFilter('FORD', this)">Ford</button>
+                    <button class="chip" onclick="setBrandFilter('FCA', this)">Fiat / Alfa / FCA</button>
+                    <button class="chip" onclick="setBrandFilter('HONDA', this)">Honda</button>
+                    <button class="chip" onclick="setBrandFilter('MAZDA', this)">Mazda / Mitsubishi / Subaru</button>
+                    <button class="chip" onclick="resetAllFilters()" style="margin-left: auto; background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.4); color: #fca5a5;">🔄 Réinitialiser</button>
+                </div>
             </div>
 
             <!-- Search input -->
@@ -2188,15 +2207,29 @@
 
         function setBrandFilter(b, btn) {
             currentBrandFilter = b;
-            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#brandFilters .chip').forEach(c => c.classList.remove('active'));
             if(btn) btn.classList.add('active');
             filterCatalogue();
         }
 
         function setFuelFilter(f, btn) {
             currentFuelFilter = f;
-            document.querySelectorAll('.cat-filter-chips .chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#fuelFilters .chip').forEach(c => c.classList.remove('active'));
             if(btn) btn.classList.add('active');
+            filterCatalogue();
+        }
+
+        function resetAllFilters() {
+            currentBrandFilter = 'Tous';
+            currentFuelFilter = 'Tous';
+            const searchInput = document.getElementById('catSearch');
+            if(searchInput) searchInput.value = '';
+            document.querySelectorAll('#brandFilters .chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('#fuelFilters .chip').forEach(c => c.classList.remove('active'));
+            const bAll = document.getElementById('chipBrandAll');
+            if(bAll) bAll.classList.add('active');
+            const fAll = document.getElementById('chipFuelAll');
+            if(fAll) fAll.classList.add('active');
             filterCatalogue();
         }
 
@@ -2204,20 +2237,46 @@
             const searchInput = document.getElementById('catSearch');
             const q = searchInput ? searchInput.value.toLowerCase().trim() : '';
             let res = catalogueData;
+
+            // Brand Filter
             if(currentBrandFilter !== 'Tous') {
-                res = res.filter(i => (i.brand || '').toLowerCase().includes(currentBrandFilter.toLowerCase()) || (i.ecu || '').toLowerCase().includes(currentBrandFilter.toLowerCase()));
+                const bf = currentBrandFilter.toLowerCase();
+                res = res.filter(i => {
+                    const b = (i.brand || '').toLowerCase();
+                    const e = (i.ecu || '').toLowerCase();
+                    if(bf === 'fca' || bf === 'fiat') return b.includes('fca') || b.includes('fiat') || b.includes('alfa') || b.includes('iveco');
+                    if(bf === 'mazda') return b.includes('mazda') || b.includes('mitsubishi') || b.includes('subaru');
+                    return b.includes(bf) || e.includes(bf);
+                });
             }
+
+            // Fuel Filter
             if(currentFuelFilter !== 'Tous') {
-                res = res.filter(i => (i.fuel || 'Diesel').toLowerCase() === currentFuelFilter.toLowerCase());
+                const ff = currentFuelFilter.toLowerCase();
+                res = res.filter(i => (i.fuel || i.fuel_type || 'Diesel').toLowerCase() === ff);
             }
+
+            // Search Keyword Filter
             if(q) {
                 res = res.filter(i => 
                     (i.brand || '').toLowerCase().includes(q) || 
                     (i.ecu || '').toLowerCase().includes(q) || 
+                    (i.name || '').toLowerCase().includes(q) || 
                     (i.engine || '').toLowerCase().includes(q) || 
                     (i.solutions || []).some(s => s.toLowerCase().includes(q))
                 );
             }
+
+            // Update counter in UI
+            const numEl = document.getElementById('catTotalNum');
+            if(numEl) {
+                if(res.length === catalogueData.length) {
+                    numEl.innerText = `${catalogueData.length}`;
+                } else {
+                    numEl.innerText = `${res.length} / ${catalogueData.length}`;
+                }
+            }
+
             renderCatalogue(res);
         }
 
