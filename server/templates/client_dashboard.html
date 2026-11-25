@@ -464,7 +464,7 @@
         <!-- Navbar Tabs -->
         <nav class="navbar-tabs">
             <button class="nav-tab active" onclick="switchTab('tabRemap', this)">🛠 Studio Remap</button>
-            <button class="nav-tab" onclick="switchTab('tabEvoFan', this)" style="border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; font-weight:800;">⚡ EVO Fan Modifier</button>
+            <button class="nav-tab" onclick="switchTab('tabEvoFan', this)" style="border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; font-weight:800;">⚡ FAN MOD</button>
             <button class="nav-tab" onclick="switchTab('tabExpert', this)">🧰 Outils Expert</button>
             <button class="nav-tab" onclick="switchTab('tabCatalogue', this)">📚 Catalogue</button>
             <button class="nav-tab" onclick="switchTab('tabHistory', this)">📜 Historique</button>
@@ -806,7 +806,7 @@
         <section id="tabEvoFan" class="tab-panel">
             <div class="evo-window">
                 <div class="evo-window-titlebar">
-                    <span>EVO Fan Temperature Patcher - Professional Edition</span>
+                    <span>Fan Temperature Patcher - Professional Edition</span>
                     <span style="display:flex; gap:6px;">
                         <span style="width:10px; height:10px; border-radius:50%; background:#eab308; display:inline-block;"></span>
                         <span style="width:10px; height:10px; border-radius:50%; background:#10b981; display:inline-block;"></span>
@@ -817,7 +817,7 @@
                     <!-- Left Sidebar -->
                     <div class="evo-sidebar">
                         <div class="evo-logo-box">
-                            <div class="evo-title">⚡ EVO FAN MODIFIER</div>
+                            <div class="evo-title">⚡ FAN MODIFIER</div>
                             <div class="evo-subtitle">FAN TEMP PATCHER</div>
                         </div>
 
@@ -939,10 +939,10 @@
                     <div>
                         <div class="expert-card-header">
                             <span class="expert-icon">🌀</span>
-                            <div class="expert-title">Renault Fan Temp Mod (16 Calculateurs EVO)</div>
+                            <div class="expert-title">Renault Fan Temp Mod (16 Calculateurs)</div>
                         </div>
                         <div class="expert-desc">
-                            Algorithme officiel EVO Fan Temperature Patcher. Abaisse le seuil de déclenchement GMV pour protéger le moteur contre la surchauffe. 100% compatible avec les 16 familles matérielles Renault.
+                            Algorithme officiel Fan Temperature Patcher. Abaisse le seuil de déclenchement GMV pour protéger le moteur contre la surchauffe. 100% compatible avec les 16 familles matérielles Renault.
                         </div>
                         <div style="margin-bottom:12px;">
                             <label style="font-size:11px; font-weight:700; color:var(--text-muted); display:block; margin-bottom:4px;">Protocole Matériel (Calculateur ECU) :</label>
@@ -969,7 +969,7 @@
                         <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
                             <label style="font-size:11px; font-weight:700; color:var(--text-muted);">Consigne Cible :</label>
                             <select id="fanTempParam" style="background:#060a12; border:1px solid #334155; color:#fff; padding:6px 10px; border-radius:6px; font-size:12px; outline:none; cursor:pointer; flex:1;">
-                                <option value="90">90°C (Optimisé - EVO Standard)</option>
+                                <option value="90">90°C (Optimisé - FAN MOD Standard)</option>
                                 <option value="92" selected>92°C (Recommandé Climat Chaud)</option>
                                 <option value="88">88°C (Performance / Piste)</option>
                                 <option value="95">95°C (Stock Fiabilisé)</option>
@@ -1066,7 +1066,7 @@
                                 <strong id="modalChecksum" style="color:#10b981;">Automatique & Supporté ✅</strong>
                             </div>
                             <div id="modalTempRow" style="display:none; grid-column:span 2; background:rgba(37,99,235,0.15); border:1px solid rgba(37,99,235,0.3); border-radius:8px; padding:10px 14px; margin-top:6px;">
-                                <span style="color:#94a3b8; font-size:11px; font-weight:700;">Calibration Température Ventilateur (EVO Fan Patcher) :</span>
+                                <span style="color:#94a3b8; font-size:11px; font-weight:700;">Calibration Température Ventilateur (FAN MOD) :</span>
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
                                     <span style="color:#cbd5e1; font-size:13px;">Stock Valeur : <strong id="modalCurrentTemp" style="color:#f87171; font-size:15px;">--</strong></span>
                                     <span style="color:#fff; font-size:16px; font-weight:800;">➔</span>
@@ -3578,7 +3578,7 @@
             const navMap = {
                 fr: {
                     remap: "🛠 Studio Remap",
-                    evo: "⚡ EVO Fan Modifier",
+                    evo: "⚡ FAN MOD",
                     expert: "🧰 Outils Expert",
                     catalog: "📚 Catalogue",
                     history: "📜 Historique",
@@ -3592,7 +3592,7 @@
                 },
                 en: {
                     remap: "🛠 Studio Remap",
-                    evo: "⚡ EVO Fan Modifier",
+                    evo: "⚡ FAN MOD",
                     expert: "🧰 Expert Tools",
                     catalog: "📚 ECU Catalog",
                     history: "📜 History",
@@ -3606,7 +3606,7 @@
                 },
                 ar: {
                     remap: "🛠 استوديو البرمجة (Remap)",
-                    evo: "⚡ معدل حرارة المراوح EVO",
+                    evo: "⚡ تعديل المراوح (FAN MOD)",
                     expert: "🧰 أدوات الورشة المتقدمة",
                     catalog: "📚 كتالوج العقول والحلول",
                     history: "📜 سجل العمليات والملفات",
