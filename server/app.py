@@ -194,12 +194,18 @@ async def api_get_supported_ecus():
     ecus_list = []
     for brand, ecus in SUPPORTED_REGISTRY.items():
         for ecu in ecus:
+            name = ecu.get("name", ecu.get("id"))
+            fuel = ecu.get("fuel_type", "DIESEL")
+            sols = ecu.get("supported_solutions", ["DTC OFF", "Stage 1"])
             ecus_list.append({
                 "brand": brand,
-                "name": ecu.get("name", ecu.get("id")),
-                "fuel_type": ecu.get("fuel_type", "DIESEL"),
-                "solutions": ecu.get("supported_solutions", ["DTC OFF", "Stage 1"]),
-                "description": f"Calculateur officiel SVEdit v1.1.38.3 - {ecu.get('name')}"
+                "name": name,
+                "ecu": name,
+                "engine": f"Architecture {brand} (SVEdit)",
+                "fuel": fuel,
+                "fuel_type": fuel,
+                "solutions": sols,
+                "description": f"Calculateur officiel SVEdit v1.1.38.3 - {name}"
             })
     return ecus_list
 
