@@ -1365,6 +1365,20 @@
                     window.location.href = '/login';
                     return;
                 }
+                if (!res.ok) {
+                    const errText = await res.text();
+                    let errMsg = 'Erreur serveur (' + res.status + ') lors de l\'analyse.';
+                    try {
+                        const errJson = JSON.parse(errText);
+                        errMsg = errJson.detail || errJson.message || errMsg;
+                    } catch(e) {
+                        if (errText && errText.length < 200) errMsg = errText;
+                    }
+                    alert('Erreur : ' + errMsg);
+                    const dz = document.getElementById('dropZone');
+                    if(dz) dz.innerHTML = `<span class="drop-icon">📁</span><div class="drop-title">Glissez-déposez votre fichier binaire (.bin, .ori)</div><div class="drop-subtitle">Ou cliquez pour parcourir vos fichiers</div><input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,*" style="display:none;">`;
+                    return;
+                }
                 const data = await res.json();
                 if(res.ok && data.success) {
                     currentFileToken = data.file_token;
