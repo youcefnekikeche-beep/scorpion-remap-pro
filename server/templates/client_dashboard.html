@@ -420,6 +420,8 @@
         .evo-log-warn { color: #facc15; font-weight: 600; }
         .evo-log-err { color: #f87171; font-weight: 600; }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <script src="/static/js/translations.js"></script>
 </head>
 <body>
     <div class="container">
@@ -432,9 +434,9 @@
 
             <div class="header-right">
                 <div class="lang-switch">
-                    <button class="lang-btn active">FR</button>
-                    <button class="lang-btn">EN</button>
-                    <button class="lang-btn">AR</button>
+                    <button type="button" class="lang-btn active" id="btnLangFr" onclick="setLanguage('fr')">FR</button>
+                    <button type="button" class="lang-btn" id="btnLangEn" onclick="setLanguage('en')">EN</button>
+                    <button type="button" class="lang-btn" id="btnLangAr" onclick="setLanguage('ar')">AR</button>
                 </div>
                 <div class="credits-pill" id="userCreditsPill">🪙 <span id="userCredits">{{ user.tokens if user.tokens is defined else user.credits }}</span> Crédits</div>
                 <button type="button" onclick="switchTab('tabSupport')" style="background: rgba(225, 29, 72, 0.2); border: 1.5px solid #e11d48; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 10px rgba(225,29,72,0.3); transition: all 0.2s;" onmouseover="this.style.background='#e11d48'; this.style.transform='scale(1.03)';" onmouseout="this.style.background='rgba(225, 29, 72, 0.2)'; this.style.transform='scale(1)';">
@@ -956,6 +958,33 @@
                         </div>
                     </div>
                     <button class="expert-btn" onclick="triggerExpertTool('renault_cold_start', 'Choisir Flash Renault (.bin)')">Choisir Flash Renault (.bin)</button>
+                </div>
+                <!-- Tool 5: VAG TDI Hot Start Fix -->
+                <div class="expert-card" style="border: 1px solid rgba(225, 29, 72, 0.4); background: linear-gradient(180deg, rgba(225, 29, 72, 0.05), rgba(11, 19, 36, 0.9));">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🔥</span>
+                            <div class="expert-title">VAG TDI Hot Start Fix (Démarrage à chaud)</div>
+                        </div>
+                        <div class="expert-desc">
+                            Résolution définitive du problème de démarrage difficile à chaud sur moteurs VAG 1.9 TDI & 2.0 TDI (Golf, Passat, A3, A4, Leon, Octavia — Bosch EDC15 / EDC16 / EDC17). Restaure l'injection dès 100 tr/min à température élevée (>70°C).
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('vag_hot_start_fix', 'Choisir Flash VAG TDI (.bin)')">Choisir Flash VAG TDI (.bin)</button>
+                </div>
+
+                <!-- Tool 6: BMW VMAX Speed Limiter Removal -->
+                <div class="expert-card" style="border: 1px solid rgba(16, 185, 129, 0.4); background: linear-gradient(180deg, rgba(16, 185, 129, 0.05), rgba(11, 19, 36, 0.9));">
+                    <div>
+                        <div class="expert-card-header">
+                            <span class="expert-icon">🚀</span>
+                            <div class="expert-title">BMW VMAX OFF (Débridage Vitesse Max)</div>
+                        </div>
+                        <div class="expert-desc">
+                            Suppression intégrale du limiteur électronique d'usine de vitesse maximale (250 km/h) sur calculateurs BMW (Bosch EDC16, EDC17, ME9, MSD80, MSV70/80). Débridage à 350 km/h sans restriction.
+                        </div>
+                    </div>
+                    <button class="expert-btn" onclick="triggerExpertTool('bmw_vmax_off', 'Choisir Flash BMW (.bin)')">Choisir Flash BMW (.bin)</button>
                 </div>
             </div>
             <input type="file" id="expertFileInput" style="display:none;">
@@ -3466,6 +3495,124 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+    
+
+        // ================= MULTI-LANGUAGE SYSTEM (FR / EN / AR) =================
+        function setLanguage(lang) {
+            if(!['fr', 'en', 'ar'].includes(lang)) lang = 'fr';
+            localStorage.setItem('preferred_lang', lang);
+
+            // Update active buttons
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('btnLang' + lang.charAt(0).toUpperCase() + lang.slice(1));
+            if(activeBtn) activeBtn.classList.add('active');
+
+            // Set direction & font
+            if(lang === 'ar') {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.setAttribute('lang', 'ar');
+                document.body.style.fontFamily = "'Cairo', 'Segoe UI', Tahoma, sans-serif";
+            } else {
+                document.documentElement.setAttribute('dir', 'ltr');
+                document.documentElement.setAttribute('lang', lang);
+                document.body.style.fontFamily = "'Inter', -apple-system, BlinkMacSystemFont, sans-serif";
+            }
+
+            const navMap = {
+                fr: {
+                    remap: "🛠 Studio Remap",
+                    evo: "⚡ EVO Fan Modifier",
+                    expert: "🧰 Outils Expert",
+                    catalog: "📚 Catalogue",
+                    history: "📜 Historique",
+                    credits: "💳 Forfaits Crédits",
+                    compare: "⚖️ Comparateur ECU",
+                    support: "💬 Support & Fichiers",
+                    admin: "🛡️ Administration",
+                    logout: "🚪 Déconnexion",
+                    dropTitle: "Glissez-déposez votre fichier binaire ECU (.bin, .ori)",
+                    dropSub: "Ou cliquez pour parcourir vos fichiers (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)"
+                },
+                en: {
+                    remap: "🛠 Studio Remap",
+                    evo: "⚡ EVO Fan Modifier",
+                    expert: "🧰 Expert Tools",
+                    catalog: "📚 ECU Catalog",
+                    history: "📜 History",
+                    credits: "💳 Credit Packages",
+                    compare: "⚖️ ECU Comparator",
+                    support: "💬 Support & Files",
+                    admin: "🛡️ Administration",
+                    logout: "🚪 Logout",
+                    dropTitle: "Drag & drop your ECU binary file (.bin, .ori)",
+                    dropSub: "Or click to browse your files (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)"
+                },
+                ar: {
+                    remap: "🛠 استوديو البرمجة (Remap)",
+                    evo: "⚡ معدل حرارة المراوح EVO",
+                    expert: "🧰 أدوات الورشة المتقدمة",
+                    catalog: "📚 كتالوج العقول والحلول",
+                    history: "📜 سجل العمليات والملفات",
+                    credits: "💳 باقات وشحن الرصيد",
+                    compare: "⚖️ مقارن ملفات الـ ECU",
+                    support: "💬 الدعم الفني وتبادل الملفات",
+                    admin: "🛡️ لوحة الإدارة العليا",
+                    logout: "🚪 تسجيل الخروج",
+                    dropTitle: "اسحب وأفلت ملف فلاش السيارة هنا (.bin, .ori)",
+                    dropSub: "أو انقر لاختيار الملف من جهازك (Bosch EDC16 / EDC17 / MD1, Continental SID, Delphi, Denso, Valeo...)"
+                }
+            };
+
+            const cur = navMap[lang] || navMap.fr;
+            const tabRemapBtn = document.querySelector('[onclick*="tabRemap"]');
+            if(tabRemapBtn) tabRemapBtn.innerHTML = cur.remap;
+
+            const tabEvoBtn = document.querySelector('[onclick*="tabEvoFan"]');
+            if(tabEvoBtn) tabEvoBtn.innerHTML = cur.evo;
+
+            const tabExpertBtn = document.querySelector('[onclick*="tabExpert"]');
+            if(tabExpertBtn) tabExpertBtn.innerHTML = cur.expert;
+
+            const tabCatBtn = document.querySelector('[onclick*="tabCatalogue"]');
+            if(tabCatBtn) tabCatBtn.innerHTML = cur.catalog;
+
+            const tabHistBtn = document.querySelector('[onclick*="tabHistory"]');
+            if(tabHistBtn) tabHistBtn.innerHTML = cur.history;
+
+            const tabCredBtn = document.querySelector('[onclick*="tabCredits"]');
+            if(tabCredBtn) tabCredBtn.innerHTML = cur.credits;
+
+            const tabCompBtn = document.querySelector('[onclick*="tabCompare"]');
+            if(tabCompBtn) tabCompBtn.innerHTML = cur.compare;
+
+            const tabSuppBtn = document.getElementById('btnNavSupport');
+            if(tabSuppBtn) {
+                const badge = document.getElementById('userSupportBadge');
+                tabSuppBtn.innerHTML = cur.support + ' ' + (badge ? badge.outerHTML : '');
+            }
+
+            const headerSuppBtn = document.querySelector('button[onclick*="tabSupport"][type="button"]');
+            if(headerSuppBtn) {
+                const hBadge = document.getElementById('headerSupportBadge');
+                headerSuppBtn.innerHTML = cur.support + ' ' + (hBadge ? hBadge.outerHTML : '');
+            }
+
+            const logoutBtn = document.querySelector('.btn-logout');
+            if(logoutBtn) logoutBtn.innerHTML = cur.logout;
+
+            const dropTitle = document.querySelector('.drop-title');
+            if(dropTitle) dropTitle.innerText = cur.dropTitle;
+
+            const dropSub = document.querySelector('.drop-subtitle');
+            if(dropSub) dropSub.innerText = cur.dropSub;
+        }
+
+        // Apply saved language on page initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('preferred_lang') || 'fr';
+            setLanguage(savedLang);
+        });
+
     </script>
 </body>
 </html>

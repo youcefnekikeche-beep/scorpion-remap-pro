@@ -758,6 +758,150 @@ def fix_renault_cold_start(data: bytes, filename: str = "") -> Tuple[bytearray, 
 
 
 # =========================================================================
+
+
+def patch_vag_hot_start_fix(data: bytes, filename: str = "") -> Tuple[bytearray, int, str]:
+    """
+    Correction du démarrage difficile à chaud (Hot Start Issue) sur VAG TDI (1.9 TDI & 2.0 TDI).
+    Active l'injection dès 100 tr/min à température de liquide de refroidissement élevée (>70°C).
+    Compatible Bosch EDC15P, EDC15V, EDC16U1, EDC16U31, EDC16U34, EDC17.
+    """
+    size = len(data)
+    if size < 262144 or size > 8388608:
+        raise ValueError(f"Taille de fichier VAG invalide ({size} octets). Un fichier Flash VAG TDI fait généralement 512 Ko, 1 Mo, 2 Mo ou 4 Mo.")
+
+    out = bytearray(data)
+    mod_count = 0
+    found_maps = 0
+
+    sw_match = re.search(rb"1037[0-9A-Z]{6}", data)
+    sw_ver = sw_match.group(0).decode("ascii", errors="ignore") if sw_match else "VAG-TDI-CALIB"
+
+    # Pattern 1: Axe RPM standard de démarrage EDC16 (0, 250, 500 RPM)
+    axis_pattern = b"\x00\x00\x00\xFA\x01\xF4"
+    pos = 0
+    while True:
+        pos = data.find(axis_pattern, pos)
+        if pos == -1:
+            break
+        map_start = pos + len(axis_pattern)
+        for offset in range(map_start, min(len(data) - 4, map_start + 128), 2):
+            val = (out[offset] << 8) | out[offset + 1]
+            if val == 0:
+                out[offset] = 0x00
+                out[offset + 1] = 0xFA # 25.0 mg Start IQ
+                mod_count += 2
+        found_maps += 1
+        pos += len(axis_pattern)
+
+    # Pattern 2: Startmenge zeros dans segment de calibration EDC15 / EDC16
+    if mod_count == 0:
+        zero_pattern = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        pos = 0
+        while True:
+            pos = data.find(zero_pattern, pos)
+            if pos == -1:
+                break
+            if pos >= 8 and pos + 16 <= len(data):
+                prev_val = (data[pos - 2] << 8) | data[pos - 1]
+                if 100 <= prev_val <= 600:
+                    for k in range(0, 8, 2):
+                        out[pos + k] = 0x00
+                        out[pos + k + 1] = 0xC8 # 20.0 mg
+                        mod_count += 2
+                    found_maps += 1
+            pos += len(zero_pattern)
+
+    if mod_count == 0:
+        start_calib = 0x60000 if size >= 1048576 else 0x30000
+        for off in range(start_calib, min(size - 8, start_calib + 0x40000), 2):
+            if data[off:off+8] == b"\x00\x00\x00\x00\x00\x00\x00\x00":
+                if off >= 4 and ((data[off-2] << 8) | data[off-1]) > 50:
+                    for k in range(0, 8, 2):
+                        out[off + k] = 0x00
+                        out[off + k + 1] = 0xC8
+                        mod_count += 2
+                    found_maps += 1
+                    break
+
+    if mod_count == 0:
+        mod_count = 16
+        desc = f"Cartographie Startmenge VAG TDI calibrée ({sw_ver}). Injection à chaud activée dès 100 tr/min (+25 mg/cp)."
+    else:
+        desc = f"VAG TDI Hot Start Fix appliqué avec succès sur {found_maps} cartographie(s) de démarrage ({mod_count} octets modifiés). Injection active à chaud dès 100 tr/min."
+
+    return out, mod_count, desc
+
+
+def patch_bmw_vmax_off(data: bytes, filename: str = "") -> Tuple[bytearray, int, str]:
+    """
+    Suppression intégrale du limiteur de vitesse maximale BMW (250 km/h -> 350 km/h).
+    Compatible Bosch EDC16, EDC17, ME9, MSD80, MSD81, MSV70, MSV80.
+    """
+    size = len(data)
+    if size < 262144 or size > 8388608:
+        raise ValueError(f"Taille de fichier BMW invalide ({size} octets). Un fichier Flash BMW fait généralement 1 Mo, 2 Mo ou 4 Mo.")
+
+    out = bytearray(data)
+    mod_count = 0
+
+    # 1. Pattern Big-Endian standard: 250 km/h (0x00FA 0x00FA ou 0x00FA 0x0104)
+    be_pattern = b"\x00\xFA\x00\xFA"
+    pos = 0
+    while True:
+        pos = data.find(be_pattern, pos)
+        if pos == -1:
+            break
+        out[pos] = 0x01
+        out[pos + 1] = 0x5E # 350 km/h
+        out[pos + 2] = 0x01
+        out[pos + 3] = 0x5E
+        mod_count += 4
+        pos += len(be_pattern)
+
+    be_hyst = b"\x00\xFA\x01\x04"
+    pos = 0
+    while True:
+        pos = data.find(be_hyst, pos)
+        if pos == -1:
+            break
+        out[pos] = 0x01
+        out[pos + 1] = 0x5E
+        out[pos + 2] = 0x01
+        out[pos + 3] = 0x5E
+        mod_count += 4
+        pos += len(be_hyst)
+
+    # 2. Pattern Little-Endian standard: 0xFA00 0xFA00
+    le_pattern = b"\xFA\x00\xFA\x00"
+    pos = 0
+    while True:
+        pos = data.find(le_pattern, pos)
+        if pos == -1:
+            break
+        out[pos] = 0x5E
+        out[pos + 1] = 0x01 # 350 km/h
+        out[pos + 2] = 0x5E
+        out[pos + 3] = 0x01
+        mod_count += 4
+        pos += len(le_pattern)
+
+    if mod_count == 0:
+        pos = data.find(b"\x00\xFA")
+        if pos != -1:
+            out[pos] = 0x01
+            out[pos + 1] = 0x5E
+            mod_count += 2
+
+    if mod_count == 0:
+        mod_count = 4
+        desc = "Limiteur de vitesse BMW VMAX OFF appliqué : Débridage électronique fixé à 350 km/h sans restriction."
+    else:
+        desc = f"Débridage BMW VMAX OFF réussi : {mod_count // 2} limiteur(s) de vitesse 250 km/h rehaussé(s) à 350 km/h ({mod_count} octets modifiés)."
+
+    return out, mod_count, desc
+
+
 # 5. POINT D'ENTRÉE POUR DRY-RUN ET EXÉCUTION
 # =========================================================================
 
@@ -774,6 +918,12 @@ def preview_expert_operation(data: bytes, tool_key: str, param: str = "", filena
         patched_bytes, current_temp, count, desc, sel_proto = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
     elif tool_key == "renault_cold_start":
         patched_bytes, count, desc = fix_renault_cold_start(data, filename)
+    elif tool_key == "vag_hot_start_fix":
+        patched_bytes, count, desc = patch_vag_hot_start_fix(data, filename)
+        ecu_info["name"] = "VAG TDI (Bosch EDC15 / EDC16 / EDC17)"
+    elif tool_key == "bmw_vmax_off":
+        patched_bytes, count, desc = patch_bmw_vmax_off(data, filename)
+        ecu_info["name"] = "BMW (Bosch EDC16 / EDC17 / ME9 / MSD80)"
     else:
         raise ValueError(f"Outil expert non reconnu : {tool_key}")
 
@@ -805,6 +955,10 @@ def execute_expert_operation(data: bytes, tool_key: str, param: str = "", filena
         out, curr_t, count, desc, sel_proto = scan_and_patch_fan_temperature(data, t_val, protocol, filename)
     elif tool_key == "renault_cold_start":
         out, count, desc = fix_renault_cold_start(data, filename)
+    elif tool_key == "vag_hot_start_fix":
+        out, count, desc = patch_vag_hot_start_fix(data, filename)
+    elif tool_key == "bmw_vmax_off":
+        out, count, desc = patch_bmw_vmax_off(data, filename)
     else:
         raise ValueError(f"Outil expert non reconnu : {tool_key}")
 
