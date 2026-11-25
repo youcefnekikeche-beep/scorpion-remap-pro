@@ -455,28 +455,45 @@
                 <input type="file" id="fileInput" accept=".bin,.ori,.hex,.mpc,.fls,.all,.mod,.BIN,.ORI,.HEX,.MPC,.FLS,.ALL,.MOD,*" style="display:none;">
             </div>
 
-            <!-- Unrecognized File Strict Manual Selector (قاعدة بيانات الكمبيوترات المبرمجة فعلياً فقط) -->
-            <div id="unrecognizedBox" style="display:none; background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-                    <span style="font-size: 26px;">⚠️</span>
+            <!-- Manual Selection Mode Bar (خاصية التحديد والتعرف اليدوي الدقيق) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top: -10px; margin-bottom: 22px; padding: 12px 18px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:18px;">⚙️</span>
                     <div>
-                        <h3 style="font-size: 16.5px; color: #fca5a5; margin: 0; font-weight: 800;">Calculateur non reconnu automatiquement</h3>
-                        <p style="font-size: 13px; color: #cbd5e1; margin-top: 4px; margin-bottom: 0;">
-                            Veuillez sélectionner votre véhicule et calculateur dans notre base de données :
-                        </p>
+                        <div style="font-size:13px; font-weight:700; color:#fff;">Vous préférez sélectionner votre calculateur manuellement ?</div>
+                        <div style="font-size:11.5px; color:#94a3b8;">Pour forcer un modèle ou en cas de doute sur la détection automatique (149 calculateurs certifiés)</div>
                     </div>
+                </div>
+                <button type="button" onclick="toggleManualSelector()" style="background: linear-gradient(135deg, rgba(2,132,199,0.2), rgba(37,99,235,0.25)); border: 1px solid #38bdf8; color: #38bdf8; padding: 8px 16px; border-radius: 8px; font-size: 12.5px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: 0.2s;">
+                    <span>🔧</span> Mode Sélection Manuelle (تحديد يدوي)
+                </button>
+            </div>
+
+            <!-- Manual Selector Box (Sélection Manuelle Certifiée) -->
+            <div id="unrecognizedBox" style="display:none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 16px; padding: 22px; margin-bottom: 24px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);">
+                <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 26px;">🔧</span>
+                        <div>
+                            <h3 id="manualBoxTitle" style="font-size: 16.5px; color: #38bdf8; margin: 0; font-weight: 800;">Sélection Manuelle du Calculateur (149 calculateurs officiels)</h3>
+                            <p id="manualBoxSubtitle" style="font-size: 13px; color: #cbd5e1; margin-top: 4px; margin-bottom: 0;">
+                                Sélectionnez la marque de votre véhicule et votre calculateur pour charger directement ses solutions certifiées :
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('unrecognizedBox').style.display='none'" style="background: transparent; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; padding: 4px 8px;">✕</button>
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 16px; margin-bottom: 18px;">
                     <div>
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">1. Marque / Constructeur :</label>
-                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                        <select id="manualBrandSelect" onchange="onManualBrandChange()" style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
                             <option value="">-- Choisir la marque / constructeur --</option>
                         </select>
                     </div>
                     <div>
                         <label style="display: block; font-size: 12px; font-weight: 700; color: #94a3b8; margin-bottom: 6px;">2. Calculateur / ECU :</label>
-                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
+                        <select id="manualEcuSelect" onchange="onManualEcuChange()" disabled style="width: 100%; padding: 11px 14px; background: #0b1324; border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; color: #fff; font-size: 13.5px; font-weight: 600;">
                             <option value="">-- Choisir le calculateur --</option>
                         </select>
                     </div>
@@ -492,7 +509,15 @@
 
             <!-- Analysis & Tuning Panel -->
             <div id="resultsPanel" style="display:none; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:24px; margin-bottom:24px;">
-                <h3 style="font-size:17px; margin-bottom:14px; color:#fff;">Calculateur Identifié avec Succès ✅</h3>
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+                    <h3 style="font-size:17px; margin:0; color:#fff; display:flex; align-items:center; gap:8px;">
+                        <span>Calculateur Sélectionné</span>
+                        <span id="detectedModeBadge" style="font-size:11px; padding:3px 8px; border-radius:6px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4);">Automatique ✅</span>
+                    </h3>
+                    <button type="button" onclick="toggleManualSelector(true)" style="background:rgba(56, 189, 248, 0.15); border:1px solid rgba(56, 189, 248, 0.4); color:#38bdf8; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                        <span>✏️</span> Corriger / Choisir un autre calculateur manuellement
+                    </button>
+                </div>
                 
                 <div class="specs-grid">
                     <div class="spec-item">
@@ -1305,6 +1330,18 @@
             ecuSel.disabled = false;
         }
 
+        async function toggleManualSelector(forceOpen) {
+            const box = document.getElementById('unrecognizedBox');
+            if (!box) return;
+            if (forceOpen === true || box.style.display === 'none') {
+                box.style.display = 'block';
+                box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                await populateManualBrandSelect();
+            } else {
+                box.style.display = 'none';
+            }
+        }
+
         async function onManualEcuChange() {
             const brandSel = document.getElementById('manualBrandSelect');
             const ecuSel = document.getElementById('manualEcuSelect');
@@ -1318,7 +1355,7 @@
                     headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
                     credentials: 'include',
                     body: JSON.stringify({
-                        file_token: currentFileToken,
+                        file_token: currentFileToken || '',
                         brand: brand,
                         ecu_id: ecuId
                     })
@@ -1326,7 +1363,14 @@
                 const data = await res.json();
                 if (res.ok && data.success) {
                     document.getElementById('unrecognizedBox').style.display = 'none';
-                    displayIdentifiedEcu(data, currentFile ? currentFile.name : 'ECU_File.bin');
+                    const badge = document.getElementById('detectedModeBadge');
+                    if (badge) {
+                        badge.innerText = 'Sélection Manuelle ⚙️';
+                        badge.style.background = 'rgba(56, 189, 248, 0.2)';
+                        badge.style.color = '#38bdf8';
+                        badge.style.borderColor = 'rgba(56, 189, 248, 0.4)';
+                    }
+                    displayIdentifiedEcu(data, currentFile ? currentFile.name : (data.ecu_type || 'Calculateur_Sélectionné.bin'));
                 } else {
                     alert(data.detail || 'Erreur lors de la sélection du calculateur');
                 }
@@ -1353,6 +1397,14 @@
                 fuelEl.innerHTML = isDiesel ?
                     '<span class="badge-fuel badge-diesel">Moteur Diesel ⛽</span>' :
                     '<span class="badge-fuel badge-petrol">Moteur Essence ⚡</span>';
+            }
+
+            const badge = document.getElementById('detectedModeBadge');
+            if (badge && !data.manual_selection) {
+                badge.innerText = 'Automatique ✅';
+                badge.style.background = 'rgba(16,185,129,0.2)';
+                badge.style.color = '#34d399';
+                badge.style.borderColor = 'rgba(16,185,129,0.4)';
             }
 
             document.getElementById('resultsPanel').style.display = 'block';

@@ -80,24 +80,28 @@ for info in _all_registries_combined:
 
 
 def get_registry_ecu(brand: str, ecu_id: str) -> Optional[Dict[str, Any]]:
-    """استرجاع معلومات الكمبيوتر من السجل المدعوم حصرياً"""
+    """استرجاع معلومات الكمبيوتر من السجل المدعوم حصرياً مع دعم الاختيار اليدوي الكامل"""
     if ecu_id in FLAT_ECU_REGISTRY:
         info = FLAT_ECU_REGISTRY[ecu_id]
+        fuel = info.get("fuel_type") or info.get("fuel") or "DIESEL"
+        solutions = info.get("solutions") or info.get("supported_solutions") or ["DTC OFF"]
         return {
-            "id": info["id"],
-            "name": info["name"],
-            "brand": info["brand"],
-            "fuel": info["fuel_type"],
-            "supported_solutions": info["solutions"],
+            "id": info.get("id", ecu_id),
+            "name": info.get("name", ecu_id),
+            "brand": info.get("brand", brand),
+            "fuel": fuel,
+            "fuel_type": fuel,
+            "supported_solutions": solutions,
+            "solutions": solutions,
             "checksum_info": {
                 "status": "Supporté & Automatique ✅",
                 "is_auto": True,
-                "algorithm": "SVEdit v1.1.38 Certified Engine"
+                "algorithm": info.get("source", "SVEdit / DaVinci Certified Engine")
             }
         }
     if brand in SUPPORTED_REGISTRY:
         for ecu in SUPPORTED_REGISTRY[brand]:
-            if ecu["id"] == ecu_id:
+            if ecu.get("id") == ecu_id:
                 return ecu
     return None
 
