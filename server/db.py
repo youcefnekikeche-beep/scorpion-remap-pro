@@ -64,6 +64,14 @@ def init_db():
         # Super admin users are automatically verified
         cursor.execute("UPDATE users SET whatsapp_verified = 1, is_active = 1 WHERE role = 'admin'")
 
+        # جدول إعدادات النظام وربط بوابات WhatsApp
+        cursor.execute("""
+        CREATE TABLE IF NOT EXISTS system_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT
+        )
+        """)
+
         # 2. جدول معاملات التوكنز والعمليات
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS token_transactions (
@@ -648,3 +656,38 @@ def get_user_for_verification(user_id: Optional[int] = None, phone: Optional[str
             return None
         row = cursor.fetchone()
         return dict(row) if row else None
+
+
+# =========================================================================
+# System Settings & WhatsApp Gateway Configuration
+# =========================================================================
+
+def get_setting(key: str, default: str = "") -> str:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT value FROM system_settings WHERE key = ?", (key,))
+        row = cursor.fetchone()
+        return row["value"] if row else default
+
+def set_setting(key: str, value: str):
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+        INSERT INTO system_settings (key, value) VALUES (?, ?)
+        ON CONFLICT(key) DO UPDATE SET value = excluded.value
+        """, (key, str(value)))
+        conn.commit()
+
+def get_whatsapp_config() -> Dict[str, str]:
+    return {
+        "provider": get_setting("whatsapp_provider", "ultramsg"),
+        "instance_id": get_setting("whatsapp_instance_id", ""),
+        "api_token": get_setting("whatsapp_api_token", ""),
+        "admin_phone": get_setting("whatsapp_admin_phone", "213799999002")
+    }
+
+def save_whatsapp_config(provider: str, instance_id: str, api_token: str, admin_phone: str):
+    set_setting("whatsapp_provider", provider.strip().lower())
+    set_setting("whatsapp_instance_id", instance_id.strip())
+    set_setting("whatsapp_api_token", api_token.strip())
+    set_setting("whatsapp_admin_phone", admin_phone.strip())

@@ -17,7 +17,9 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 sys.path.append(PROJECT_ROOT)
 
+from server.whatsapp_service import send_real_whatsapp_otp, clean_phone_number
 from server.db import (
+    get_whatsapp_config, save_whatsapp_config,
     get_db, init_db, hash_password, verify_password,
     register_user, authenticate_user, get_user_by_id,
     deduct_user_tokens, add_user_tokens, get_all_users,
@@ -533,7 +535,16 @@ async def api_register(payload: dict, request: Request, response: Response):
             "user": new_user
         }
 
-    # Mandatory WhatsApp Verification for clients
+    # Real WhatsApp Verification: Send OTP directly to user's WhatsApp
+    wa_config = get_whatsapp_config()
+    code = new_user.get("whatsapp_code", "")
+    sent_ok, send_msg = send_real_whatsapp_otp(
+        phone=new_user["phone"],
+        code=code,
+        client_name=new_user["full_name"],
+        config=wa_config
+    )
+
     return {
         "success": True,
         "requires_whatsapp_verification": True,
@@ -541,9 +552,9 @@ async def api_register(payload: dict, request: Request, response: Response):
         "full_name": new_user["full_name"],
         "workshop_name": new_user["workshop_name"],
         "phone": new_user["phone"],
-        "whatsapp_code": new_user.get("whatsapp_code"),
-        "admin_whatsapp": "213799999002",
-        "detail": "Compte créé avec succès ! Veuillez confirmer votre numéro WhatsApp pour activer vos 10 crédits offerts."
+        "whatsapp_sent": sent_ok,
+        "admin_whatsapp": wa_config.get("admin_phone", "213799999002"),
+        "detail": f"Un code de confirmation a été envoyé à votre WhatsApp ({new_user['phone']})." if sent_ok else "Veuillez saisir le code reçu sur WhatsApp ou contacter le support."
     }
 
 @app.get("/api/v1/user/me")
@@ -1309,3 +1320,73 @@ async def api_admin_verify_user_whatsapp(user_id: int, admin: dict = Depends(req
     if not ok:
         raise HTTPException(status_code=400, detail="Impossible de valider cet utilisateur.")
     return {"success": True, "detail": "Utilisateur validé et activé via WhatsApp avec succès !"}
+
+
+@app.post("/api/v1/auth/resend-whatsapp-otp")
+async def api_resend_whatsapp_otp(payload: dict):
+    user_id = payload.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=400, detail="ID utilisateur manquant.")
+
+    user = get_user_by_id(int(user_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    if user.get("whatsapp_verified"):
+        return {"success": True, "detail": "Compte déjà vérifié."}
+
+    wa_config = get_whatsapp_config()
+    sent_ok, send_msg = send_real_whatsapp_otp(
+        phone=user["phone"],
+        code=user.get("whatsapp_code", ""),
+        client_name=user["full_name"],
+        config=wa_config
+    )
+    return {
+        "success": sent_ok,
+        "detail": send_msg if sent_ok else "Impossible d'envoyer le message. Vérifiez la passerelle WhatsApp."
+    }
+
+
+@app.get("/api/v1/admin/settings/whatsapp")
+async def api_admin_get_whatsapp_config(admin: dict = Depends(require_admin)):
+    config = get_whatsapp_config()
+    # Mask API token slightly for security
+    token = config.get("api_token", "")
+    masked_token = token[:4] + "••••••••" + token[-4:] if len(token) > 8 else token
+    return {
+        "provider": config.get("provider", "ultramsg"),
+        "instance_id": config.get("instance_id", ""),
+        "api_token": config.get("api_token", ""),
+        "masked_token": masked_token,
+        "admin_phone": config.get("admin_phone", "213799999002")
+    }
+
+
+@app.post("/api/v1/admin/settings/whatsapp")
+async def api_admin_save_whatsapp_config(payload: dict, admin: dict = Depends(require_admin)):
+    provider = payload.get("provider", "ultramsg").strip()
+    instance_id = payload.get("instance_id", "").strip()
+    api_token = payload.get("api_token", "").strip()
+    admin_phone = payload.get("admin_phone", "213799999002").strip()
+
+    save_whatsapp_config(provider, instance_id, api_token, admin_phone)
+    return {"success": True, "detail": "Configuration WhatsApp enregistrée avec succès !"}
+
+
+@app.post("/api/v1/admin/settings/whatsapp/test")
+async def api_admin_test_whatsapp(payload: dict, admin: dict = Depends(require_admin)):
+    target_phone = payload.get("test_phone", "").strip() or admin.get("phone", "")
+    if not target_phone:
+        raise HTTPException(status_code=400, detail="Veuillez indiquer un numéro WhatsApp de test.")
+
+    config = get_whatsapp_config()
+    sent_ok, msg = send_real_whatsapp_otp(
+        phone=target_phone,
+        code="TEST-2026",
+        client_name=admin.get("full_name", "Admin"),
+        config=config
+    )
+    if not sent_ok:
+        raise HTTPException(status_code=400, detail=msg)
+    return {"success": True, "detail": f"Message de test envoyé avec succès sur le WhatsApp de {target_phone} !"}

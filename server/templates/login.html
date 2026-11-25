@@ -305,48 +305,42 @@
     </form>
 
     <!-- View 3: WhatsApp Mandatory Verification Box -->
-    <div id="whatsappVerifyBox" style="display:none; text-align:center; padding:10px 0;">
-        <div style="width:68px; height:68px; margin:0 auto 16px; background:radial-gradient(circle, #22c55e 0%, #15803d 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 25px rgba(34,197,94,0.5);">
-            <span style="font-size:36px;">📲</span>
+    <div id="whatsappVerifyBox" style="display:none; text-align:center; padding:15px 0;">
+        <div style="width:72px; height:72px; margin:0 auto 16px; background:radial-gradient(circle, #22c55e 0%, #15803d 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(34,197,94,0.6); animation:pulse 2s infinite;">
+            <span style="font-size:38px;">💬</span>
         </div>
 
-        <h3 id="txtVerifyTitle" style="font-size:18px; font-weight:800; color:#fff; margin-bottom:6px;">
-            تأكيد رقم الواتساب وتفعيل الحساب
+        <h3 id="txtVerifyTitle" style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">
+            تم إرسال رمز التحقق إلى واتساب
         </h3>
-        <p id="txtVerifySubtitle" style="font-size:12.5px; color:#9ca3af; line-height:1.5; margin-bottom:16px;">
-            لحماية أمان حسابك وتفادي التسجيلات الوهمية، يجب تأكيد رقمك عبر تطبيق WhatsApp لتفعيل الحساب واستلام <strong>10 توكنز مجاناً</strong>.
+        <p id="txtVerifySubtitle" style="font-size:13px; color:#9ca3af; line-height:1.6; margin-bottom:18px;">
+            يرجى تفقد رسائل تطبيق <strong>WhatsApp</strong> على هاتفك، لقد أرسلنا لك رمز التأكيد المكون من 6 أرقام لتفعيل حسابك واستلام <strong>10 توكنز مجاناً</strong>.
         </p>
 
-        <div style="background:#0a0a0f; border:1px solid #1f2937; border-radius:12px; padding:16px; margin-bottom:18px;">
-            <div style="font-size:11.5px; color:#9ca3af; margin-bottom:4px;" id="lblVerifyPhone">Numéro WhatsApp enregistré :</div>
-            <div id="verifyUserPhone" style="font-size:16px; font-weight:800; color:#22c55e; font-family:monospace; margin-bottom:12px;">+213 ...</div>
+        <div style="background:#08080d; border:1px solid #1e293b; border-radius:14px; padding:18px; margin-bottom:20px;">
+            <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;" id="lblVerifyPhone">الرقم المستلم على واتساب :</div>
+            <div id="verifyUserPhone" style="font-size:18px; font-weight:800; color:#22c55e; font-family:monospace; letter-spacing:1px; margin-bottom:14px;">+213 ...</div>
 
-            <div style="font-size:11.5px; color:#9ca3af; margin-bottom:6px;" id="lblVerifyCode">Votre Code d'activation unique :</div>
-            <div id="verifyDisplayCode" style="font-size:26px; font-weight:900; color:#fbbf24; font-family:monospace; letter-spacing:6px; background:#180f14; border:1.5px dashed #e11d48; border-radius:10px; padding:8px 16px; display:inline-block; margin-bottom:8px;">000000</div>
-            <div style="font-size:11px; color:#6b7280;" id="txtVerifyHint">Transmettez ce code à l'administrateur ou saisissez-le ci-dessous.</div>
-        </div>
-
-        <!-- Option A: WhatsApp Direct Button -->
-        <a id="btnOpenWhatsApp" target="_blank" href="#" style="background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; font-weight:800; font-size:13.5px; padding:12px 18px; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:0 4px 15px rgba(34,197,94,0.3); transition:all 0.2s; margin-bottom:16px;">
-            <span id="txtBtnWa">💬 Ouvrir WhatsApp et envoyer le code ➔</span>
-        </a>
-
-        <!-- Option B: Enter OTP to instantly unlock -->
-        <div style="border-top:1px solid #1f2937; padding-top:16px; margin-top:8px;">
-            <label id="lblInputOtp" style="font-size:12px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
-                Ou entrez le code de confirmation reçu :
+            <label id="lblInputOtp" style="font-size:12.5px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
+                أدخل رمز التأكيد (6 أرقام) :
             </label>
-            <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px;">
-                <input type="text" id="verifyInputCode" maxlength="6" placeholder="000000" style="width:160px; text-align:center; font-size:18px; font-weight:800; letter-spacing:4px; padding:8px 12px; background:#050508; border:1.5px solid #e11d48; border-radius:8px; color:#fff; outline:none;">
-                <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer;">
-                    Activer ⚡
+            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+                <input type="text" id="verifyInputCode" maxlength="6" placeholder="• • • • • •" style="width:220px; text-align:center; font-size:24px; font-weight:900; letter-spacing:8px; padding:10px 14px; background:#040407; border:2px solid #22c55e; border-radius:10px; color:#fff; outline:none; box-shadow:0 0 15px rgba(34,197,94,0.2);">
+                
+                <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="width:100%; max-width:280px; background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(34,197,94,0.4); transition:all 0.2s;">
+                    تأكيد الرمز وتفعيل الحساب ➔
                 </button>
             </div>
         </div>
 
-        <button type="button" id="btnBackToLogin" onclick="backToLoginFromVerify()" style="background:transparent; border:none; color:#9ca3af; font-size:12px; cursor:pointer; text-decoration:underline; margin-top:8px;">
-            ↩️ Retour à l'écran de connexion
-        </button>
+        <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:12px;">
+            <button type="button" id="btnResendWa" onclick="resendWhatsAppCode()" style="background:transparent; border:none; color:#38bdf8; cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:700;">
+                🔄 لم يصلك الرمز؟ إعادة الإرسال
+            </button>
+            <button type="button" id="btnBackToLogin" onclick="backToLoginFromVerify()" style="background:transparent; border:none; color:#9ca3af; cursor:pointer; text-decoration:underline;">
+                ↩️ العودة وتعديل الرقم
+            </button>
+        </div>
     </div>
 </div>
 
@@ -424,11 +418,9 @@
             document.getElementById('txtVerifyTitle').textContent = t.verifyTitle;
             document.getElementById('txtVerifySubtitle').innerHTML = t.verifySub;
             document.getElementById('lblVerifyPhone').textContent = t.verifyPhone;
-            document.getElementById('lblVerifyCode').textContent = t.verifyCode;
-            document.getElementById('txtVerifyHint').textContent = t.verifyHint;
-            document.getElementById('txtBtnWa').textContent = t.btnWa;
             document.getElementById('lblInputOtp').textContent = t.lblOtp;
             document.getElementById('btnSubmitVerifyOtp').textContent = t.btnAct;
+            document.getElementById('btnResendWa').textContent = t.btnResend;
             document.getElementById('btnBackToLogin').textContent = t.btnBack;
         }
 
@@ -465,6 +457,30 @@
 
     function hideAlert() {
         document.getElementById('alertBox').style.display = 'none';
+    }
+
+    async function resendWhatsAppCode() {
+        if(!currentVerifyUserId) return;
+        const btn = document.getElementById('btnResendWa');
+        btn.disabled = true;
+        btn.innerText = '⏳ جاري إرسال الرمز...';
+
+        try {
+            const res = await fetch('/api/v1/auth/resend-whatsapp-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: currentVerifyUserId })
+            });
+            const data = await res.json();
+            showAlert(data.detail || "Code ré-envoyé !", res.ok);
+        } catch(e) {
+            showAlert("Erreur : " + e.message, false);
+        } finally {
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerText = '🔄 لم يصلك الرمز؟ إعادة الإرسال';
+            }, 3000);
+        }
     }
 
     function showWhatsAppVerification(userId, phone, code, fullName, adminWa) {
