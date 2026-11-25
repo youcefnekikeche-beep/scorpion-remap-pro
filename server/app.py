@@ -5,7 +5,7 @@ import uuid
 import shutil
 import hashlib
 from typing import Optional, List
-from fastapi import FastAPI, Request, Form, File, UploadFile, Depends, HTTPException, status
+from fastapi import FastAPI, Request, Form, File, UploadFile, Depends, HTTPException, status, Body
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -33,6 +33,12 @@ from engine.ecu_analyzer import (
 from engine.renault_expert import preview_expert_operation, execute_expert_operation
 
 app = FastAPI(title="SCORPION REMAP PRO", version="3.2.0")
+
+# Mount Static Files (CSS, JS, Fonts)
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+if not os.path.exists(STATIC_DIR):
+    os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.get("/favicon.ico")
 async def favicon():
@@ -185,13 +191,17 @@ async def supported_ecus_page(request: Request):
 
 @app.get("/api/v1/supported-ecus")
 async def api_get_supported_ecus():
-    if os.path.exists(SUPPORTED_ECUS_PATH):
-        try:
-            with open(SUPPORTED_ECUS_PATH, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except:
-            pass
-    return SUPPORTED_ECUS
+    ecus_list = []
+    for brand, ecus in SUPPORTED_REGISTRY.items():
+        for ecu in ecus:
+            ecus_list.append({
+                "brand": brand,
+                "name": ecu.get("name", ecu.get("id")),
+                "fuel_type": ecu.get("fuel_type", "DIESEL"),
+                "solutions": ecu.get("supported_solutions", ["DTC OFF", "Stage 1"]),
+                "description": f"Calculateur officiel SVEdit v1.1.38.3 - {ecu.get('name')}"
+            })
+    return ecus_list
 
 @app.post("/api/v1/expert/preview")
 async def api_expert_preview(
@@ -485,7 +495,19 @@ async def api_user_history(user: dict = Depends(require_user)):
         cursor = conn.cursor()
         cursor.execute("SELECT id, original_name, brand, model, ecu_type, sw_version, solutions, created_at FROM files WHERE user_id = ? ORDER BY id DESC LIMIT 20", (user["id"],))
         rows = [dict(r) for r in cursor.fetchall()]
-        return {"files": rows}
+        return {"files": rows, "history": rows}
+
+@app.post("/api/v1/user/change-password")
+async def api_change_password(payload: dict = Body(...), user: dict = Depends(require_user)):
+    new_password = payload.get("new_password", "").strip()
+    if not new_password or len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="Le mot de passe doit comporter au moins 6 caractères")
+    new_hash = hash_password(new_password)
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET password = ? WHERE id = ?", (new_hash, user["id"]))
+        conn.commit()
+    return {"status": "success", "message": "Mot de passe modifié avec succès"}
 
 @app.get("/api/v1/dtc/search")
 async def api_search_dtc(q: str = ""):
@@ -679,7 +701,7 @@ async def api_tuning_process(
         file_hash = hashlib.sha256(original_bytes).hexdigest()
 
     # تشغيل محرك التعديل بالحلول المحددة
-    engine_result = run_tuning_task("process", original_save_path, modified_save_path, selected_solutions)
+    engine_result = run_tuning_task("process", original_save_path, modified_save_path, selected_solutions, ecu_type=manual_ecu_id or "")
     if not engine_result.get("success"):
         raise HTTPException(status_code=500, detail="فشل محرك التعديل في معالجة الملف")
 

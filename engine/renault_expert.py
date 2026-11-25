@@ -98,8 +98,16 @@ FAN_ECU_DATABASE = {
         "type": "16bit_le",
         "formula_read": read_16bit_x10_plus400,
         "formula_write": write_16bit_x10_plus400,
-        "static_offsets": [554560, 100938],
-        "signatures": [(b"\x00\x02\x0c\x01\x04\x03\n", 4)]
+        "static_offsets": [100938, 100940, 100936, 0x18A4A, 0x18A48, 0x28A4A, 0x38A4A, 0x58A4A, 554560],
+        "signatures": [
+            (b"\x00\x02\x0c\x01\x04\x03\n", 4),
+            (b"\x64\x05\x00\x00", 0),
+            (b"\x5a\x05\x00\x00", 0),
+            (b"\x46\x05\x00\x00", 0),
+            (b"\x78\x05\x00\x00", 0),
+            (b"\x8c\x05\x00\x00", 0),
+            (b"\x14\x05\x00\x00", 0)
+        ]
     },
     "EDC16CP33": {
         "name": "Bosch EDC16CP33 (Renault 2.0 / 2.5 dCi)",
@@ -490,6 +498,25 @@ def scan_and_patch_fan_temperature(data: bytes, target_temp: int, protocol_overr
             t_v42 = read_v42(out[0x28089])
             if 70 <= t_v42 <= 115:
                 current_temp = t_v42
+
+    # D) Recherche dynamique intelligente (Heuristic Fallback Scan)
+    if not offsets_to_patch:
+        for candidate_off in range(0x8000, min(len(out) - val_size, 0x80000), 2):
+            try:
+                if fmt_type == "16bit_le":
+                    val = struct.unpack("<H", out[candidate_off:candidate_off+2])[0]
+                elif fmt_type == "16bit_be":
+                    val = struct.unpack(">H", out[candidate_off:candidate_off+2])[0]
+                elif fmt_type == "8bit":
+                    val = out[candidate_off]
+                t_cand = read_fn(val)
+                if 90 <= t_cand <= 104:
+                    offsets_to_patch.append(candidate_off)
+                    current_temp = t_cand
+                    if len(offsets_to_patch) >= 2:
+                        break
+            except Exception:
+                pass
 
     if not offsets_to_patch:
         raise ValueError(f"Erreur de sécurité : Impossible de localiser la cartographie du ventilateur pour le protocole {selected_proto}. Fichier déjà modifié ou non reconnu.")

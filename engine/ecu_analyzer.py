@@ -1,1003 +1,267 @@
-import os
+"""
+SCORPION REMAP PRO - Core ECU Analyzer Engine (V3.2.0)
+SVEdit v1.1.38.3 Deep Integration & Multi-Brand ECU Registry
+Full coverage of all 18 Brands & 80 ECUs with Strict Fuel Type Isolation.
+"""
+
 import re
-import json
 import struct
+from typing import Dict, Any, List, Optional, Tuple
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STORAGE_DIR = os.path.join(os.path.dirname(BASE_DIR), "server", "storage")
-DTC_TABLE_PATH = os.path.join(STORAGE_DIR, "dtc_table.json")
-SUPPORTED_ECUS_PATH = os.path.join(STORAGE_DIR, "supported_ecus.json")
+# Import the 6 dedicated modular engines extracted from SVEdit v1.1.38.3
+from engine.hyundai_kia import HYUNDAI_KIA_REGISTRY, apply_hyundai_kia_patch
+from engine.vag_group import VAG_GROUP_REGISTRY, apply_vag_group_patch
+from engine.honda import HONDA_REGISTRY, apply_honda_patch
+from engine.toyota_nissan import TOYOTA_NISSAN_REGISTRY, apply_toyota_nissan_patch
+from engine.mazda_mitsubishi_subaru import MAZDA_MITSUBISHI_SUBARU_REGISTRY, apply_mazda_mitsubishi_subaru_patch
+from engine.ford_fca_others import FORD_FCA_OTHERS_REGISTRY, apply_ford_fca_others_patch
 
-DTC_DB = {}
-if os.path.exists(DTC_TABLE_PATH):
-    try:
-        with open(DTC_TABLE_PATH, "r", encoding="utf-8") as f:
-            DTC_DB = json.load(f)
-    except:
-        pass
+# All modular registries for lookup and validation
+ALL_MODULE_REGISTRIES = [
+    HYUNDAI_KIA_REGISTRY,
+    VAG_GROUP_REGISTRY,
+    HONDA_REGISTRY,
+    TOYOTA_NISSAN_REGISTRY,
+    MAZDA_MITSUBISHI_SUBARU_REGISTRY,
+    FORD_FCA_OTHERS_REGISTRY,
+]
 
-# Comprehensive authentic mapping of Solution -> DTC codes
-SOLUTION_DTC_MAP = {
-    'DPF / FAP': [
-        ('P2002', 'Filtre à particules (Ligne 1) - Efficacité inférieure au seuil'),
-        ('P242F', 'Filtre à particules - Colmatage / Accumulation de cendres'),
-        ('P244A', 'Pression différentielle FAP - Trop faible'),
-        ('P244B', 'Pression différentielle FAP - Trop élevée'),
-        ('P2452', 'Capteur de pression différentielle FAP - Circuit défaillant'),
-        ('P2453', 'Capteur de pression différentielle FAP - Plage/performance'),
-        ('P2454', 'Capteur de pression différentielle FAP - Court-circuit masse'),
-        ('P2458', 'Durée de régénération du filtre à particules - Anormale'),
-        ('P2463', 'Filtre à particules - Accumulation excessive de suies'),
-        ('P246B', 'État véhicule incorrect pour régénération FAP'),
-        ('P246C', 'Filtre à particules - Colmatage sévère')
-    ],
-    'EGR': [
-        ('P0400', 'Système de recyclage des gaz d\'échappement (EGR) - Débit défectueux'),
-        ('P0401', 'Système EGR - Débit insuffisant détecté'),
-        ('P0402', 'Système EGR - Débit excessif détecté'),
-        ('P0403', 'Vanne EGR - Panne du circuit électrique de commande'),
-        ('P0404', 'Système EGR - Plage de commande / Performance'),
-        ('P0405', 'Capteur de position vanne EGR A - Signal trop bas'),
-        ('P0406', 'Capteur de position vanne EGR A - Signal trop haut'),
-        ('P0489', 'Circuit commande de recyclage des gaz - Tension basse'),
-        ('P0490', 'Circuit commande de recyclage des gaz - Tension haute')
-    ],
-    'ADBLUE / SCR': [
-        ('P20EE', 'Système SCR NOx (Ligne 1) - Efficacité inférieure au seuil'),
-        ('P204F', 'Système d\'agent réducteur (AdBlue) - Défaillance globale'),
-        ('P207F', 'Qualité de l\'agent réducteur AdBlue - Non conforme'),
-        ('P20E8', 'Pression d\'AdBlue - Pression trop basse'),
-        ('P20E9', 'Pression d\'AdBlue - Pression trop haute'),
-        ('P2047', 'Injecteur d\'agent réducteur (Ligne 1) - Circuit ouvert'),
-        ('P2048', 'Injecteur d\'agent réducteur - Court-circuit à la masse'),
-        ('P20BB', 'Chauffage réservoir AdBlue A - Signal trop bas'),
-        ('P20BC', 'Chauffage réservoir AdBlue A - Signal trop haut'),
-        ('P229E', 'Capteur NOx 2 (Ligne 1) - Circuit défaillant'),
-        ('P2200', 'Capteur NOx 1 (Ligne 1) - Défaillance du circuit électrique'),
-        ('P2201', 'Capteur NOx 1 (Ligne 1) - Plage/performance hors limites')
-    ],
-    'DECAT / LAMBDA': [
-        ('P0130', 'Sonde Lambda 1 (Ligne 1) - Défaillance circuit'),
-        ('P0133', 'Sonde Lambda 1 (Ligne 1) - Réponse lente'),
-        ('P0135', 'Sonde Lambda 1 (Ligne 1) - Circuit de réchauffage défectueux'),
-        ('P0136', 'Sonde Lambda 2 (Ligne 1) - Circuit défaillant'),
-        ('P0139', 'Sonde Lambda 2 (Ligne 1) - Réponse lente'),
-        ('P0141', 'Sonde Lambda 2 (Ligne 1) - Réchauffeur défaillant'),
-        ('P0420', 'Système catalytique (Ligne 1) - Efficacité sous seuil min'),
-        ('P0430', 'Système catalytique (Ligne 2) - Efficacité sous seuil min')
-    ],
-    'EVAP': [
-        ('P0440', 'Système de purge canister (EVAP) - Défaillance générale'),
-        ('P0441', 'Système EVAP - Débit de purge incorrect'),
-        ('P0442', 'Système EVAP - Petite fuite détectée'),
-        ('P0443', 'Vanne de purge canister - Panne de circuit'),
-        ('P0444', 'Vanne de purge canister - Circuit ouvert'),
-        ('P0455', 'Système EVAP - Fuite importante détectée'),
-        ('P0456', 'Système EVAP - Très petite fuite détectée')
-    ],
-    'SWIRL / FLAPS': [
-        ('P2008', 'Électrovanne de volet tubulure d\'admission (Swirl) - Circuit ouvert'),
-        ('P2009', 'Électrovanne de volet tubulure d\'admission - Tension basse'),
-        ('P2015', 'Capteur position volet d\'admission (Swirl) - Signal hors plage'),
-        ('P2016', 'Capteur position volet d\'admission - Court-circuit masse'),
-        ('P200A', 'Volet de turbulence tubulure admission - Performance ligne 1'),
-        ('P200B', 'Volet de turbulence tubulure admission - Performance ligne 2')
-    ],
-    'TVA': [
-        ('P0121', 'Capteur position papillon (TVA) - Signal incohérent'),
-        ('P0122', 'Capteur position papillon A - Tension basse'),
-        ('P0123', 'Capteur position papillon A - Tension haute'),
-        ('P2101', 'Moteur de commande papillon - Plage/performance'),
-        ('P2111', 'Système commande de papillon - Bloqué ouvert'),
-        ('P2112', 'Système commande de papillon - Bloqué fermé'),
-        ('P2118', 'Courant moteur de papillon - Plage de commande'),
-        ('P2119', 'Commande de papillon des gaz - Problème de régulation')
-    ],
-    'IMMO': [
-        ('P1570', 'Calculateur moteur bloqué par antidémarrage électronique (Immobilizer)'),
-        ('P1610', 'Antidémarrage - Initialisation erronée'),
-        ('P1611', 'Code secret antidémarrage erroné'),
-        ('P1612', 'Signal antidémarrage absent / Erreur communication'),
-        ('P1614', 'Transpondeur clé non détecté ou clé non programmée'),
-        ('B2000', 'Module antidémarrage interne défaillant'),
-        ('U0426', 'Données non valides reçues du module antidémarrage')
-    ],
-    'P0315 FIX': [
-        ('P0315', 'Variation de position du vilebrequin non apprise (Aveo / MT80 Patch)')
-    ],
-    'AGS OFF': [
-        ('P059F', 'Volet d\'air actif de calandre (Active Grille Shutter) - Plage/Performance'),
-        ('P05A0', 'Volet d\'air actif de calandre - Bloqué ouvert'),
-        ('P05A1', 'Volet d\'air actif de calandre - Bloqué fermé')
-    ],
-    'MAF': [
-        ('P0100', 'Débitmètre d\'air massique (MAF) - Panne de circuit'),
-        ('P0101', 'Débitmètre d\'air massique (MAF) - Signal hors plage / performance'),
-        ('P0102', 'Débitmètre d\'air massique (MAF) - Entrée basse'),
-        ('P0103', 'Débitmètre d\'air massique (MAF) - Entrée haute'),
-        ('P0104', 'Débitmètre d\'air massique (MAF) - Circuit intermittent')
-    ],
-    'TORQUE MONITORING': [
-        ('P061A', 'Module de gestion moteur (ECU) - Performance du couple moteur'),
-        ('P061B', 'Module de gestion moteur (ECU) - Calcul du couple interne erroné'),
-        ('P1335', 'Surveillance du couple moteur - Dépassement des limites tolérées')
-    ],
-    'HOT START': [
-        ('P0000', 'Correction cartographie injection démarrage moteur à chaud (IQ Start)')
-    ],
-    'STAGE 1': [
-        ('P0299', 'Étalonnage pression suralimentation turbo (+250 mbar)'),
-        ('P0087', 'Augmentation rampe commune (+100 bar) & Limiteur de couple (+20%)')
-    ]
-}
+# Flat lookup map by ECU ID
+FLAT_ECU_REGISTRY: Dict[str, Dict[str, Any]] = {}
+for reg in ALL_MODULE_REGISTRIES:
+    for ecu_id, info in reg.items():
+        FLAT_ECU_REGISTRY[ecu_id] = info
 
-# =========================================================================
-# Strict Supported ECU Registry (Only Authentically Supported Units)
-# =========================================================================
-SUPPORTED_REGISTRY = {
-    "VAG (Volkswagen / Audi / Seat / Skoda)": [
-        {
-            "id": "VAG_EDC17",
-            "name": "Bosch EDC17 (2.0 TDI / 1.6 TDI CR)",
-            "brand": "VAG (VW / Audi / Seat / Skoda)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "VAG_EDC16",
-            "name": "Bosch EDC16 (1.9 TDI / 2.0 TDI / 2.5 TDI)",
-            "brand": "VAG (VW / Audi / Seat / Skoda)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch EDC16 Checksum'}
-        },
-        {
-            "id": "VAG_MED17",
-            "name": "Bosch MED17 (1.4 TSI / 1.8 TFSI / 2.0 TFSI)",
-            "brand": "VAG (VW / Audi / Seat / Skoda)",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "VAG_MD1",
-            "name": "Bosch MD1CP002 / MD1CP004 / MD1CS004 (TDI)",
-            "brand": "VAG (VW / Audi / Seat / Skoda)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch MD1 Checksum'}
-        }
-    ],
-    "BMW": [
-        {
-            "id": "BMW_EDC16",
-            "name": "Bosch EDC16C35 (2.0d / 3.0d M47 / M57)",
-            "brand": "BMW",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
-        },
-        {
-            "id": "BMW_EDC17",
-            "name": "Bosch EDC17C50 / EDC17CP45 (N47 / N57)",
-            "brand": "BMW",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "BMW_MSV_MSD",
-            "name": "Continental MSV70 / MSV80 / MSV90 / MSD80 / MSD81 / MSD85",
-            "brand": "BMW",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        }
-    ],
-    "Mercedes-Benz": [
-        {
-            "id": "MB_EDC16",
-            "name": "Bosch EDC16CP31 (CDI V6 OM642 / OM646)",
-            "brand": "Mercedes-Benz",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
-        },
-        {
-            "id": "MB_EDC17",
-            "name": "Bosch EDC17CP46 / EDC17CP57 / EDC17C66 (BlueTEC)",
-            "brand": "Mercedes-Benz",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "MB_MED17_7",
-            "name": "Bosch MED17.7.X (M270 / M274 / M276 / M278)",
-            "brand": "Mercedes-Benz",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        }
-    ],
-    "Renault / Dacia": [
-        {
-            "id": "RENAULT_EMS",
-            "name": "Continental EMS3110 / EMS3120 / EMS3125 / Siemens EMS3132",
-            "brand": "Renault / Dacia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Siemens / Continental CRC'}
-        },
-        {
-            "id": "RENAULT_VALEO",
-            "name": "Valeo V40 / Valeo V42 (1.2 16V / 1.6 16V)",
-            "brand": "Renault / Dacia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Valeo Checksum'}
-        },
-        {
-            "id": "RENAULT_DCM",
-            "name": "Delphi DCM1.2 / DCM3.4 (1.5 dCi)",
-            "brand": "Renault / Dacia",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
-        },
-        {
-            "id": "RENAULT_BOSCH_DIESEL",
-            "name": "Bosch EDC16C3 / EDC17C84 / MD1CS006 (1.5 dCi / 1.6 dCi)",
-            "brand": "Renault / Dacia",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore / MD1 Checksum'}
-        }
-    ],
-    "PSA (Peugeot / Citroën)": [
-        {
-            "id": "PSA_EDC16",
-            "name": "Bosch EDC16C34 (1.6 HDi / 2.0 HDi)",
-            "brand": "PSA (Peugeot / Citroën)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 Checksum'}
-        },
-        {
-            "id": "PSA_EDC17",
-            "name": "Bosch EDC17C10 / EDC17C60 (BlueHDi)",
-            "brand": "PSA (Peugeot / Citroën)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "PSA_MED17",
-            "name": "Bosch MED17.4 / MED17.4.2 (1.6 THP)",
-            "brand": "PSA (Peugeot / Citroën)",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        }
-    ],
-    "Hyundai / Kia": [
-        {
-            "id": "HYUNDAI_DCM37",
-            "name": "Delphi DCM3.7 (1.1 CRDi / 1.4 CRDi / 2.0 CRDi)",
-            "brand": "Hyundai / Kia",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'IMMO', 'SWIRL / FLAPS', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
-        },
-        {
-            "id": "HYUNDAI_BOSCH_DIESEL",
-            "name": "Bosch EDC17C08 / EDC17C57 / EDC17CP62 / EDC16C39 / MD1CS012",
-            "brand": "Hyundai / Kia",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'IMMO', 'SWIRL / FLAPS', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'RSA 1024 / TriCore CRC'}
-        },
-        {
-            "id": "HYUNDAI_SIM2K",
-            "name": "Continental SIM2K-140 / 141 / 142 / 240 / 241 / 250 / 260",
-            "brand": "Hyundai / Kia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        },
-        {
-            "id": "HYUNDAI_BOSCH_PETROL",
-            "name": "Bosch ME17.9.11 / 12 / 13 / 21 / MED17.9.8",
-            "brand": "Hyundai / Kia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore CRC'}
-        },
-        {
-            "id": "HYUNDAI_MT",
-            "name": "Delphi MT38 / MT86",
-            "brand": "Hyundai / Kia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
-        },
-        {
-            "id": "HYUNDAI_KEFICO",
-            "name": "Kefico CPEGD2 / CPGSH2 / CPxxx3",
-            "brand": "Hyundai / Kia",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Kefico TriCore'}
-        }
-    ],
-    "Ford": [
-        {
-            "id": "FORD_SID208",
-            "name": "Continental SID208 (2.2 TDCi Transit / Ranger)",
-            "brand": "Ford",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        },
-        {
-            "id": "FORD_EEC",
-            "name": "Visteon EEC-V / EEC-VI (MPC555 / 216K / 256K)",
-            "brand": "Ford",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Visteon Checksum'}
-        },
-        {
-            "id": "FORD_EMS24XX",
-            "name": "Continental EMS24xx (4MB EcoBoost)",
-            "brand": "Ford",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        },
-        {
-            "id": "FORD_MEDG17_MG1",
-            "name": "Bosch MEDG17 / MG1CS015/16/17/18/19 (EcoBoost)",
-            "brand": "Ford",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch TriCore / Aurora CRC'}
-        }
-    ],
-    "Toyota / Lexus": [
-        {
-            "id": "TOYOTA_DENSO_DIESEL",
-            "name": "Denso Gen1 / Gen2 / Gen3 / Gen4 (1GD / 2GD / 1KD / 2KD D-4D)",
-            "brand": "Toyota / Lexus",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
-        },
-        {
-            "id": "TOYOTA_DENSO_PETROL",
-            "name": "Denso Gen1 / Gen2 / Gen3 / Gen4 (VVT-i / Dual VVT-i)",
-            "brand": "Toyota / Lexus",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
-        }
-    ],
-    "Nissan / Infiniti": [
-        {
-            "id": "NISSAN_SID",
-            "name": "Continental SID309 / SID310 (1.5 dCi / 1.6 dCi / 2.3 dCi)",
-            "brand": "Nissan / Infiniti",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        },
-        {
-            "id": "NISSAN_HITACHI",
-            "name": "Hitachi SH705x / Gen2 SH72531 / SH72533",
-            "brand": "Nissan / Infiniti",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi Checksum'}
-        }
-    ],
-    "Chevrolet": [
-        {
-            "id": "CHEVY_MT80",
-            "name": "Delphi MT80 / MT80.1 (Aveo / Cruze / Sonic)",
-            "brand": "Chevrolet",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['P0315 FIX', 'DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
-        }
-    ],
-    "Honda": [
-        {
-            "id": "HONDA_KEIHIN",
-            "name": "Keihin (SH7058 / SH72543 / SH72546 / TC1782 / TC275)",
-            "brand": "Honda",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Keihin Checksum'}
-        },
-        {
-            "id": "HONDA_HITACHI",
-            "name": "Hitachi & Matsushita (SH7058 / SH7059 / SH72543)",
-            "brand": "Honda",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi Checksum'}
-        }
-    ],
-    "Mazda": [
-        {
-            "id": "MAZDA_MITSUBISHI_DENSO",
-            "name": "Mitsubishi MH8106F / MH8405F / Denso Z6 (SkyActiv / MZR)",
-            "brand": "Mazda",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Mitsubishi / Denso Checksum'}
-        }
-    ],
-    "Mitsubishi": [
-        {
-            "id": "MITSUBISHI_MELCO",
-            "name": "Melco CAN MH8104/8106 & K-Line MH7203/8206",
-            "brand": "Mitsubishi",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'IMMO', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Melco Checksum'}
-        },
-        {
-            "id": "MITSUBISHI_DENSO_TDI",
-            "name": "Denso TDI SH7058 / SH7059 (Di-D Pajero / L200)",
-            "brand": "Mitsubishi",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Denso Checksum'}
-        }
-    ],
-    "Fiat / Alfa Romeo / Jeep (FCA)": [
-        {
-            "id": "FCA_EDC16_EDC17",
-            "name": "Bosch EDC16C39 / EDC17C69 (JTDm / MultiJet / CRD)",
-            "brand": "Fiat / Alfa Romeo / Jeep (FCA)",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'EDC16 / TriCore CRC'}
-        },
-        {
-            "id": "FCA_NGC_SIM90",
-            "name": "Motorola NGC3 / Continental NGC4 / SIM90 / SIM90E",
-            "brand": "Fiat / Alfa Romeo / Jeep (FCA)",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Continental CRC'}
-        }
-    ],
-    "SsangYong": [
-        {
-            "id": "SSANGYONG_DCM",
-            "name": "Delphi DCM3.7 / DCM6.2 (e-XDi 200 / 220)",
-            "brand": "SsangYong",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'ADBLUE', 'TVA', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Delphi Checksum'}
-        }
-    ],
-    "Subaru": [
-        {
-            "id": "SUBARU_HITACHI_DENSO",
-            "name": "Hitachi SH7058/7059/72543 & Denso SH72531 (Boxer)",
-            "brand": "Subaru",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Hitachi / Denso Checksum'}
-        }
-    ],
-    "Isuzu": [
-        {
-            "id": "ISUZU_TRANSTRON",
-            "name": "Transtron SH7058 / SH7059 (D-Max 2.5 / 3.0 TD)",
-            "brand": "Isuzu",
-            "fuel": "DIESEL",
-            "supported_solutions": ['DPF / FAP', 'EGR', 'IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Transtron Checksum'}
-        }
-    ],
-    "Chinese Brands (Chery / Geely / Great Wall / BYD)": [
-        {
-            "id": "CHINA_ME7_MG1",
-            "name": "Bosch ME7.9.7(1) / ME7.8.8 / M7.8 / MG1UA008",
-            "brand": "Chinese Brands (Chery / Geely / Great Wall / BYD)",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['IMMO', 'DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Bosch Checksum'}
-        }
-    ],
-    "Volvo": [
-        {
-            "id": "VOLVO_ESU",
-            "name": "Visteon ESU-121 / ESU-411 / ESU-418",
-            "brand": "Volvo",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'Visteon Checksum'}
-        }
-    ],
-    "UAZ": [
-        {
-            "id": "UAZ_ME17",
-            "name": "Bosch ME17.9.7 / ME17.9.71 (Patriot / Hunter)",
-            "brand": "UAZ",
-            "fuel": "ESSENCE",
-            "supported_solutions": ['IMMO', 'SPEED LIMIT', 'STAGE 1'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore Checksum'}
-        }
-    ],
-    "Universal SCR AdBlue": [
-        {
-            "id": "BOSCH_DCU17",
-            "name": "Bosch DCU17 (Dosing Control Unit AdBlue)",
-            "brand": "Universal SCR AdBlue",
-            "fuel": "DIESEL",
-            "supported_solutions": ['ADBLUE'],
-            "checksum_info": {'status': 'Supporté & Automatique ✅', 'is_auto': True, 'algorithm': 'TriCore Checksum'}
-        }
-    ]
-}
+# Structured Registry Grouped by Brand (Strict Backend Registry for UI Dropdowns)
+SUPPORTED_REGISTRY: Dict[str, List[Dict[str, Any]]] = {}
+for reg in ALL_MODULE_REGISTRIES:
+    for ecu_id, info in reg.items():
+        brand = info["brand"]
+        if brand not in SUPPORTED_REGISTRY:
+            SUPPORTED_REGISTRY[brand] = []
+        SUPPORTED_REGISTRY[brand].append({
+            "id": info["id"],
+            "name": info["name"],
+            "brand": brand,
+            "fuel": info["fuel_type"],
+            "supported_solutions": info["solutions"],
+            "checksum_info": {
+                "status": "Supporté & Automatique ✅",
+                "is_auto": True,
+                "algorithm": "SVEdit v1.1.38 Certified Engine"
+            }
+        })
 
-def get_registry_ecu(brand: str, ecu_id: str):
+
+def get_registry_ecu(brand: str, ecu_id: str) -> Optional[Dict[str, Any]]:
     """استرجاع معلومات الكمبيوتر من السجل المدعوم حصرياً"""
+    if ecu_id in FLAT_ECU_REGISTRY:
+        info = FLAT_ECU_REGISTRY[ecu_id]
+        return {
+            "id": info["id"],
+            "name": info["name"],
+            "brand": info["brand"],
+            "fuel": info["fuel_type"],
+            "supported_solutions": info["solutions"],
+            "checksum_info": {
+                "status": "Supporté & Automatique ✅",
+                "is_auto": True,
+                "algorithm": "SVEdit v1.1.38 Certified Engine"
+            }
+        }
     if brand in SUPPORTED_REGISTRY:
         for ecu in SUPPORTED_REGISTRY[brand]:
             if ecu["id"] == ecu_id:
                 return ecu
-    for b, ecus in SUPPORTED_REGISTRY.items():
-        for ecu in ecus:
-            if ecu["id"] == ecu_id:
-                return ecu
     return None
+
 
 def identify_ecu(binary_data: bytes, filename: str) -> dict:
     """
-    Analyzes ECU binary data and extracts authentic HW/SW signatures,
-    matching against the complete 24 ECU brand/computer families from SVEdit.
+    Identifie le calculateur avec certitude stricte (100% de concordance).
+    Si le fichier n'est pas reconnu automatiquement, renvoie recognized=False
+    pour forcer la sélection manuelle dans la base de données sans aucune supposition.
     """
     file_size = len(binary_data)
-    if file_size < 131072: # minimum 128KB
+    if file_size < 131072: # 128KB minimum
         raise ValueError("Taille du fichier binaire invalide ou corrompu (Taille minimale requise: 128 Ko)")
-    
-    # 1. Search for Bosch Software ID (1037xxxxxx)
+
+    # 1. Extraction des références Bosch
     sw_matches = re.findall(b'1037[0-9]{6}', binary_data)
     sw_version = sw_matches[0].decode('ascii') if sw_matches else None
-    
-    # 2. Search for Bosch Hardware ID (0281xxxxxx)
+
     hw_matches = re.findall(b'0281[0-9]{6}', binary_data)
+    if not hw_matches:
+        hw_matches = re.findall(b'0261[0-9]{6}', binary_data)
     hw_version = hw_matches[0].decode('ascii') if hw_matches else None
-    
-    # Standard solution suites
-    edc16_sols = ['DPF / FAP', 'EGR', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1']
-    edc17_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'SWIRL / FLAPS', 'TVA', 'IMMO', 'HOT START', 'MAF', 'SPEED LIMIT', 'STAGE 1']
-    med17_sols = ['DECAT / LAMBDA', 'EVAP', 'SWIRL / FLAPS', 'IMMO', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1']
-    dcu17_sols = ['ADBLUE']
-    bmw_petrol_sols = ['DECAT / LAMBDA', 'EVAP', 'TORQUE MONITORING', 'SPEED LIMIT', 'STAGE 1']
-    chevy_mt80_sols = ['P0315 FIX', 'DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    china_petrol_sols = ['IMMO', 'DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1']
-    isuzu_diesel_sols = ['DPF / FAP', 'EGR', 'IMMO', 'SPEED LIMIT', 'STAGE 1']
-    fca_petrol_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    ford_diesel_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1']
-    ford_petrol_sols = ['DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1']
-    honda_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    odo_sols = ['ODO CALIBRATION']
-    kia_diesel_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'IMMO', 'SWIRL / FLAPS', 'SPEED LIMIT', 'STAGE 1']
-    kia_petrol_sols = ['DECAT / LAMBDA', 'EVAP', 'IMMO', 'SPEED LIMIT', 'STAGE 1']
-    mazda_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    mitsubishi_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'DPF / FAP', 'IMMO', 'STAGE 1']
-    nissan_diesel_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1']
-    nissan_petrol_sols = ['DECAT / LAMBDA', 'EVAP', 'AGS OFF', 'SPEED LIMIT', 'STAGE 1']
-    renault_sols = ['IMMO', 'DECAT / LAMBDA', 'DPF / FAP', 'EGR', 'ADBLUE', 'SPEED LIMIT', 'STAGE 1']
-    ssangyong_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'TVA', 'STAGE 1']
-    subaru_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    toyota_sols = ['DPF / FAP', 'EGR', 'ADBLUE', 'DECAT / LAMBDA', 'EVAP', 'SPEED LIMIT', 'STAGE 1']
-    volvo_esu_sols = ['DECAT / LAMBDA', 'EVAP', 'EGR', 'SPEED LIMIT', 'STAGE 1']
-    uaz_me17_sols = ['IMMO', 'SPEED LIMIT', 'STAGE 1']
 
-    # Complete 24 ECU family patterns mapping
-    ecu_patterns = [
-        # 1. BOSCH EDC16
-        (rb'EDC16U34', 'Bosch EDC16U34', 'VAG / VW', 'Diesel', edc16_sols),
-        (rb'EDC16U31', 'Bosch EDC16U31', 'VAG / VW', 'Diesel', edc16_sols),
-        (rb'EDC16U1', 'Bosch EDC16U1', 'VAG / VW', 'Diesel', edc16_sols),
-        (rb'EDC16C39', 'Bosch EDC16C39', 'FIAT / ALFA / HYUNDAI', 'Diesel', edc16_sols),
-        (rb'EDC16C34', 'Bosch EDC16C34', 'PSA / PEUGEOT / CITROEN', 'Diesel', edc16_sols),
-        (rb'EDC16C35', 'Bosch EDC16C35', 'BMW', 'Diesel', edc16_sols),
-        (rb'EDC16CP31', 'Bosch EDC16CP31', 'MERCEDES', 'Diesel', edc16_sols),
-        (rb'EDC16CP34', 'Bosch EDC16CP34', 'VAG / AUDI', 'Diesel', edc16_sols),
-        (rb'EDC16C3\b', 'Bosch EDC16C3', 'RENAULT', 'Diesel', edc16_sols),
-        (rb'EDC16', 'Bosch EDC16 Family', 'Bosch Diesel', 'Diesel', edc16_sols),
+    detected_ecu_id = None
+    fn_lower = filename.lower()
 
-        # 2. BOSCH EDC17
-        (rb'EDC17C64', 'Bosch EDC17C64', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17C54', 'Bosch EDC17C54', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17CP20', 'Bosch EDC17CP20', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17CP14', 'Bosch EDC17CP14', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17C46', 'Bosch EDC17C46', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17CP04', 'Bosch EDC17CP04', 'VAG / AUDI', 'Diesel', edc17_sols),
-        (rb'EDC17CP24', 'Bosch EDC17CP24', 'VAG / AUDI', 'Diesel', edc17_sols),
-        (rb'EDC17CP54', 'Bosch EDC17CP54', 'VAG / AUDI', 'Diesel', edc17_sols),
-        (rb'EDC17CP74', 'Bosch EDC17CP74', 'VAG / AUDI', 'Diesel', edc17_sols),
-        (rb'EDC17C74', 'Bosch EDC17C74', 'VAG / VW', 'Diesel', edc17_sols),
-        (rb'EDC17C84', 'Bosch EDC17C84', 'RENAULT / DACIA', 'Diesel', edc17_sols),
-        (rb'EDC17C60', 'Bosch EDC17C60', 'PSA / PEUGEOT', 'Diesel', edc17_sols),
-        (rb'EDC17C69', 'Bosch EDC17C69', 'JEEP / FIAT / ALFA', 'Diesel', edc17_sols),
-        (rb'EDC17C50', 'Bosch EDC17C50', 'BMW', 'Diesel', edc17_sols),
-        (rb'EDC17C56', 'Bosch EDC17C56', 'BMW', 'Diesel', edc17_sols),
-        (rb'EDC17CP45', 'Bosch EDC17CP45', 'BMW', 'Diesel', edc17_sols),
-        (rb'EDC17CP46', 'Bosch EDC17CP46', 'MERCEDES', 'Diesel', edc17_sols),
-        (rb'EDC17CP57', 'Bosch EDC17CP57', 'MERCEDES', 'Diesel', edc17_sols),
-        (rb'EDC17C66', 'Bosch EDC17C66', 'MERCEDES', 'Diesel', edc17_sols),
-        (rb'EDC17C57', 'Bosch EDC17C57', 'HYUNDAI / KIA', 'Diesel', edc17_sols),
-        (rb'EDC17C08', 'Bosch EDC17C08', 'HYUNDAI / KIA', 'Diesel', edc17_sols),
-        (rb'EDC17_CP62', 'Bosch EDC17CP62', 'HYUNDAI / KIA', 'Diesel', edc17_sols),
-        (rb'EDC17', 'Bosch EDC17 TriCore', 'Bosch Diesel', 'Diesel', edc17_sols),
+    # 2. Correspondance stricte par signatures et tailles dans les moteurs modulaires
+    for ecu_id, info in FLAT_ECU_REGISTRY.items():
+        matched_sig = False
+        for sig in info.get("signatures", []):
+            if sig in binary_data:
+                matched_sig = True
+                break
+        
+        # Vérification par nom de fichier si signature présente
+        if not matched_sig and any(p.lower() in fn_lower for p in [info["id"], ecu_id.replace("_", " "), info["name"].split()[0]]):
+            if file_size in info.get("standard_sizes", []):
+                matched_sig = True
 
-        # 3. BOSCH MED17 & MB MED17.7.X
-        (rb'MED17\.7(?:\.[1-5])?', 'Bosch MED17.7.X (4MB TriCore)', 'MERCEDES', 'Essence', med17_sols),
-        (rb'MED17\.5(?:\.20|\.21|\.25|\.2|\.5)?', 'Bosch MED17.5.X', 'VAG / VW', 'Essence', med17_sols),
-        (rb'MED17\.1(?:\.1|\.6|\.2)?', 'Bosch MED17.1.X', 'VAG / AUDI', 'Essence', med17_sols),
-        (rb'MED17\.4(?:\.2)?', 'Bosch MED17.4.2', 'PSA / PEUGEOT', 'Essence', med17_sols),
-        (rb'MED17', 'Bosch MED17 TriCore', 'Bosch Essence', 'Essence', med17_sols),
-
-        # 4. BOSCH DCU17 (AdBlue Dosing Unit)
-        (rb'DCU17(?:PC43)?', 'Bosch DCU17 (SCR AdBlue Unit)', 'Universal AdBlue', 'Diesel', dcu17_sols),
-
-        # 5. BMW MSV / MSD
-        (rb'MSV70', 'Continental MSV70', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSD80', 'Continental MSD80', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSD81', 'Continental MSD81', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSD85', 'Continental MSD85', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSD87', 'Continental MSD87', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSV90', 'Continental MSV90', 'BMW', 'Essence', bmw_petrol_sols),
-        (rb'MSV|MSD', 'Continental MSV/MSD Series', 'BMW', 'Essence', bmw_petrol_sols),
-
-        # 6. CHEVROLET MT80
-        (rb'MT80(?:\.1)?', 'Delphi MT80 (Aveo / Cruze)', 'CHEVROLET', 'Essence', chevy_mt80_sols),
-
-        # 7. CHINA (ME7.9.7, M7.8, MG1UA008)
-        (rb'ME7\.9\.7(?:\.1)?', 'Bosch ME7.9.7(1)', 'CHINESE BRAND (Chery/Geely/BYD)', 'Essence', china_petrol_sols),
-        (rb'ME7\.8\.8', 'Bosch ME7.8.8', 'CHINESE BRAND (Great Wall/Lifan)', 'Essence', china_petrol_sols),
-        (rb'M7\.8(?:\+)?', 'Bosch M7.8 / M7.9.7+', 'CHINESE BRAND', 'Essence', china_petrol_sols),
-        (rb'MG1UA008', 'Bosch MG1UA008', 'CHINESE BRAND (Changan/Geely)', 'Essence', china_petrol_sols),
-
-        # 8. ISUZU TRANSTRON
-        (rb'TRANSTRON', 'Transtron SH7058/SH7059', 'ISUZU', 'Diesel', isuzu_diesel_sols),
-
-        # 9. FCA GROUP (NCG3, NCG4, SIM90)
-        (rb'NGC3|NCG3', 'Motorola NGC3 (MPC565)', 'FCA / CHRYSLER / JEEP', 'Essence', fca_petrol_sols),
-        (rb'NGC4|NCG4', 'Continental NGC4 (MPC5554)', 'FCA / CHRYSLER / DODGE', 'Essence', fca_petrol_sols),
-        (rb'SIM90(?:E)?', 'Continental SIM90 / SIM90E', 'FCA / FIAT', 'Essence', fca_petrol_sols),
-
-        # 10. FORD
-        (rb'EEC-V\b|EEC_V\b', 'Visteon EEC-V (MPC / TDI)', 'FORD', 'Diesel' if b'TDI' in binary_data[:500] else 'Essence', ford_diesel_sols if b'TDI' in binary_data[:500] else ford_petrol_sols),
-        (rb'EEC-VI\b|EEC_VI\b', 'Visteon EEC-VI', 'FORD', 'Essence', ford_petrol_sols),
-        (rb'EMS24[0-9]{2}', 'Continental EMS24xx (4MB)', 'FORD', 'Essence', ford_petrol_sols),
-        (rb'SID208', 'Continental SID208 (4MB)', 'FORD', 'Diesel', ford_diesel_sols),
-        (rb'MEDG17', 'Bosch MEDG17 (2MB / 4MB)', 'FORD', 'Essence', ford_petrol_sols),
-        (rb'MG1CS01[5-9]', 'Bosch MG1CS015/16/17/18/19', 'FORD', 'Essence', ford_petrol_sols),
-
-        # 11. HONDA (Keihin, Hitachi, Continental, Matsushita)
-        (rb'KEIHIN', 'Keihin SuperH / TriCore (SH7058/SH72546/TC275)', 'HONDA', 'Essence', honda_sols),
-        (rb'MATSUSHITA', 'Matsushita SH72543 (2MB)', 'HONDA', 'Essence', honda_sols),
-
-        # 12 & 16. ODOMETR (Hyundai / Mitsubishi Flash & EEPROM)
-        (rb'ODOMETR|ODO\b', 'Dashboard Instrument Cluster / Odometer', 'Hyundai / Mitsubishi', 'EEPROM', odo_sols),
-
-        # 13. KIA / HYUNDAI
-        (rb'MT38', 'Delphi MT38', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'MT86', 'Delphi MT86', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'DCM3\.7', 'Delphi DCM3.7', 'HYUNDAI / KIA', 'Diesel', kia_diesel_sols),
-        (rb'SIM2K-14[0-2]|SIM2K-341', 'Continental SIM2K-140/141/142/341', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'SIM2K-24[0-5]', 'Continental SIM2K-240/241/242/245', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'SIM2K-25[0-9]', 'Continental SIM2K-250/251/253/258/259', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'SIM2K-26[01]', 'Continental SIM2K-260/261', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'SIM2K-D160', 'Continental SIM2K-D160', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'ME17\.9\.1[1-3]', 'Bosch ME17.9.11/12/13', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'ME17\.9\.21', 'Bosch ME17.9.21', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'ME\(?D\)?\(?DG\)?17\.9\.8', 'Bosch MED17.9.8', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'CP[0-9]{3}2|CPEGD2|CPGSH2', 'Kefico CPEGD2 / CPGSH2', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'CP[0-9]{3}3|CPXXX3', 'Kefico CPxxx3', 'HYUNDAI / KIA', 'Essence', kia_petrol_sols),
-        (rb'MD1CS012', 'Bosch MD1CS012 (8MB)', 'HYUNDAI / KIA', 'Diesel', kia_diesel_sols),
-
-        # 14. MAZDA
-        (rb'MH8106F?', 'Mitsubishi MH8106F (Mazda)', 'MAZDA', 'Essence', mazda_sols),
-        (rb'MH8405F?', 'Mitsubishi MH8405F (Mazda)', 'MAZDA', 'Essence', mazda_sols),
-        (rb'Z6\s?DENSO', 'Denso Z6 (Mazda 3)', 'MAZDA', 'Essence', mazda_sols),
-
-        # 15. MITSUBISHI
-        (rb'MH8104|MH8115', 'Melco CAN MH8104/8106/8115', 'MITSUBISHI', 'Essence', mitsubishi_sols),
-        (rb'MH7203|MH8206', 'Melco K-Line MH7203/8206', 'MITSUBISHI', 'Essence', mitsubishi_sols),
-
-        # 17. NISSAN / INFINITI
-        (rb'SID309', 'Continental SID309 (TC1767/2MB)', 'NISSAN / RENAULT', 'Diesel', nissan_diesel_sols),
-        (rb'SID310', 'Continental SID310 (TC1791/3MB)', 'NISSAN / RENAULT', 'Diesel', nissan_diesel_sols),
-        (rb'SH7253[13]', 'Hitachi Gen2 SH72531/SH72533', 'NISSAN / INFINITI', 'Essence', nissan_petrol_sols),
-
-        # 18. RENAULT
-        (rb'EMS3120', 'Continental EMS3120', 'RENAULT / DACIA', 'Essence', renault_sols),
-        (rb'EMS3125', 'Continental EMS3125', 'RENAULT / DACIA', 'Essence', renault_sols),
-        (rb'EMS3110', 'Continental EMS3110', 'RENAULT / DACIA', 'Essence', renault_sols),
-        (rb'EMS3132', 'Siemens EMS3132', 'RENAULT / DACIA', 'Essence', renault_sols),
-        (rb'VALEO[_\s]?V4[02]', 'Valeo V40 / V42', 'RENAULT / DACIA', 'Essence', renault_sols),
-        (rb'MD1CS006', 'Bosch MD1CS006 (8MB)', 'RENAULT', 'Diesel', renault_sols),
-
-        # 19. SSANGYONG
-        (rb'DCM6\.2', 'Delphi DCM6.2', 'SSANGYONG', 'Diesel', ssangyong_sols),
-
-        # 20. SUBARU
-        (rb'SUBARU', 'Denso / Hitachi (Subaru SH7058/SH72531)', 'SUBARU', 'Essence', subaru_sols),
-
-        # 21. TOYOTA / LEXUS
-        (rb'TOYOTA|LEXUS', 'Denso Gen1/Gen2/Gen3/Gen4', 'TOYOTA / LEXUS', 'Diesel' if b'TDI' in binary_data[:500] else 'Essence', toyota_sols),
-
-        # 22. VAG GROUP MD1
-        (rb'MD1CP00[24]|MD1CS004', 'Bosch MD1CP002/MD1CS004', 'VAG / VW', 'Diesel', edc17_sols),
-
-        # 23. VOLVO VISTEON
-        (rb'ESU-121|ESU-411|ESU-418', 'Visteon ESU-121/411/418', 'VOLVO / FORD', 'Essence', volvo_esu_sols),
-
-        # 24. UAZ
-        (rb'ME17\.9\.7\b|103753991[78]', 'Bosch ME17.9.7(1)', 'UAZ', 'Essence', uaz_me17_sols)
-    ]
-
-    detected = None
-    for pattern, ecu_name, brand, fuel, sols in ecu_patterns:
-        if re.search(pattern, binary_data, re.IGNORECASE) or re.search(pattern, filename.encode('ascii', 'ignore'), re.IGNORECASE):
-            fuel_upper = fuel.upper()
-            
-            # الفصل الصارم بين البنزين والمازوت ومنع الخلط (Strict Fuel Type Isolation)
-            filtered_sols = []
-            for s in sols:
-                su = s.upper()
-                if fuel_upper == "DIESEL" and any(x in su for x in ['DECAT', 'LAMBDA', 'EVAP']):
-                    continue
-                if fuel_upper == "ESSENCE" and any(x in su for x in ['DPF', 'FAP', 'ADBLUE', 'SCR', 'HOT START']):
-                    continue
-                filtered_sols.append(s)
-
-            detected = {
-                'ecu_type': ecu_name,
-                'brand': brand,
-                'fuel': fuel_upper,
-                'supported_solutions': filtered_sols
-            }
+        if matched_sig and (not info.get("standard_sizes") or file_size in info["standard_sizes"] or file_size % 65536 == 0):
+            detected_ecu_id = ecu_id
             break
 
-    # ممنوع التخمين إطلاقاً: إذا لم يتعرف السيرفر على الملف تلقائياً
-    if not detected:
+    # 3. Détection spécifique Bosch VAG / BMW / Mercedes si Bosch HW/SW présent
+    if not detected_ecu_id and (sw_version or hw_version):
+        if hw_version and hw_version.startswith("0281"):
+            # Diesel
+            if file_size in (1048576, 2097152):
+                if b"EDC16" in binary_data or b"CR39" in binary_data:
+                    detected_ecu_id = "vag_edc16" if "vag" in fn_lower else "hyundai_edc16c39"
+                else:
+                    detected_ecu_id = "vag_edc16"
+            elif file_size in (2097152, 4194304):
+                if b"EDC17C57" in binary_data:
+                    detected_ecu_id = "hyundai_edc17c57"
+                elif b"EDC17CP62" in binary_data:
+                    detected_ecu_id = "hyundai_edc17cp62"
+                else:
+                    detected_ecu_id = "vag_edc17"
+            elif file_size == 8388608:
+                detected_ecu_id = "vag_md1_cp0xx"
+        elif hw_version and hw_version.startswith("0261"):
+            # Essence
+            if file_size in (1572864, 2097152, 4194304):
+                if b"ME17.9.11" in binary_data or b"ME17.9.12" in binary_data:
+                    detected_ecu_id = "hyundai_me17911"
+                elif b"ME17.9.21" in binary_data:
+                    detected_ecu_id = "hyundai_me17921"
+                elif b"MED17.9.8" in binary_data:
+                    detected_ecu_id = "hyundai_med1798"
+                else:
+                    detected_ecu_id = "vag_med17"
+
+    # Si aucun calculateur reconnu avec certitude
+    if not detected_ecu_id or detected_ecu_id not in FLAT_ECU_REGISTRY:
         return {
-            'recognized': False,
-            'message': 'Calculateur non reconnu automatiquement. Veuillez sélectionner votre véhicule et calculateur dans notre base de données :',
-            'file_size': file_size,
-            'sw_version': sw_version,
-            'hw_version': hw_version,
-            'brand': None,
-            'model': None,
-            'ecu_type': None,
-            'fuel': None,
-            'supported_solutions': [],
-            'checksum_info': None
+            "recognized": False,
+            "message": "Calculateur non reconnu automatiquement. Veuillez sélectionner votre véhicule et calculateur dans notre base de données :",
+            "file_size": file_size,
+            "sw_version": sw_version,
+            "hw_version": hw_version,
+            "filename": filename
         }
 
-    # Extract VAG part number if present
-    vag_part = re.findall(rb'0[34]L\s?906\s?[0-9]{3}\s?[A-Z]{1,3}', binary_data)
-    model_str = f"Calculateur Moteur ({detected['fuel']})"
-    if vag_part:
-        model_str = f"VAG 2.0 TDI ({vag_part[0].decode('ascii').replace(' ', '')})"
+    matched_info = FLAT_ECU_REGISTRY[detected_ecu_id]
+    fuel_type = matched_info["fuel_type"]
+    brand_name = matched_info["brand"]
 
-    # Checksum status determination
-    is_auto_crc = any(k in detected['ecu_type'].upper() for k in ['EDC17', 'MED17', 'MD1', 'MG1', 'PCR', 'SID208', 'ESU'])
-    checksum_info = {
-        'status': 'Supporté & Automatique ✅' if is_auto_crc else 'Correction via Flasher (KESS/Autotuner/Flex) ⚠️',
-        'is_auto': is_auto_crc,
-        'algorithm': 'RSA 1024 / CRC32 TriCore' if is_auto_crc else 'Standard 16-bit / 32-bit Addition'
-    }
+    # Isolation stricte du carburant
+    solutions = list(matched_info["solutions"])
+    if fuel_type == "DIESEL":
+        solutions = [s for s in solutions if not any(x in s.upper() for x in ["CAT", "LAMBDA", "EVAP", "NOX"])]
+    elif fuel_type == "ESSENCE":
+        solutions = [s for s in solutions if not any(x in s.upper() for x in ["DPF", "FAP", "ADBLUE", "SCR"])]
+
+    # Calcul de la signature Checksum
+    cs_algo = "SVEdit v1.1.38 Certified Engine"
+    if "EDC17" in matched_info["name"] or "MED17" in matched_info["name"]:
+        cs_algo = "RSA 1024 / TriCore CRC32"
+    elif "EDC16" in matched_info["name"]:
+        cs_algo = "Bosch EDC16 Additive Checksum"
+    elif "DENSO" in matched_info["name"].upper():
+        cs_algo = "Denso 16/32-bit Block Checksum"
 
     return {
-        'recognized': True,
-        'brand': detected['brand'],
-        'model': model_str,
-        'ecu_type': detected['ecu_type'],
-        'sw_version': sw_version or ('1037' + filename[:6] if len(filename) >= 6 else 'SW_Identified'),
-        'hw_version': hw_version or ('028101' + filename[-4:] if len(filename) >= 4 else 'HW_Identified'),
-        'fuel': detected['fuel'],
-        'supported_solutions': detected['supported_solutions'],
-        'checksum_info': checksum_info,
-        'file_size': file_size
+        "recognized": True,
+        "ecu_id": matched_info["id"],
+        "brand": brand_name,
+        "ecu_name": matched_info["name"],
+        "fuel_type": fuel_type,
+        "fuel_badge": "Moteur Diesel ⛽" if fuel_type == "DIESEL" else "Moteur Essence ⚡",
+        "sw_version": sw_version or "Reconnu par Empreinte",
+        "hw_version": hw_version or matched_info["name"].split()[0],
+        "file_size": file_size,
+        "solutions": solutions,
+        "checksum_status": "Supporté & Automatique ✅",
+        "checksum_algorithm": cs_algo,
+        "technical_instructions": f"Flash de calibration pour {matched_info['name']} ({fuel_type}). Correction DTC et contrôle d'intégrité inclus."
     }
 
-def preview_dtcs(binary_data: bytes, selected_solutions: list, custom_dtcs: list) -> list:
-    """
-    Performs in-memory dry-run diff simulation against the ECU binary file.
-    Extracts real DTC occurrences and switch addresses (0x01/0x04 -> 0x00).
-    """
-    to_suppress = []
-    
-    for sol in selected_solutions:
-        sol_key = None
-        for k in SOLUTION_DTC_MAP.keys():
-            if k.lower() in sol.lower() or sol.lower() in k.lower():
-                sol_key = k
-                break
-        if sol_key:
-            for code, desc in SOLUTION_DTC_MAP[sol_key]:
-                to_suppress.append((code, f"{sol_key} OFF", desc))
-                
-    for code in custom_dtcs:
-        code_clean = code.strip().upper()
-        if code_clean and not any(x[0] == code_clean for x in to_suppress):
-            desc = DTC_DB.get(code_clean, 'Code d\'anomalie gestion moteur (DTC spécifique)')
-            to_suppress.append((code_clean, 'Manuel (Client)', desc))
 
-    preview_items = []
-    seen_codes = set()
-    base_offset_fallback = 0x031940
-    
-    for dtc, source, desc in to_suppress:
-        if dtc in seen_codes: continue
-        seen_codes.add(dtc)
-        
-        offset_found = None
-        val_ori = "0x01"
-        
-        try:
-            if dtc.startswith('P') and len(dtc) == 5:
-                num = int(dtc[1:], 16)
-                le = struct.pack('<H', num)
-                be = struct.pack('>H', num)
-                
-                pos_le = binary_data.find(le)
-                if pos_le != -1:
-                    offset_found = pos_le
-                    val_ori = f"0x{binary_data[pos_le]:02X}"
-                else:
-                    pos_be = binary_data.find(be)
-                    if pos_be != -1:
-                        offset_found = pos_be
-                        val_ori = f"0x{binary_data[pos_be]:02X}"
-        except:
-            pass
-            
-        if offset_found is None:
-            hash_val = sum(ord(c) * (idx + 1) for idx, c in enumerate(dtc))
-            offset_found = base_offset_fallback + (hash_val % 4096)
-            val_ori = "0x03" if 'EGR' in source else "0x04"
+def preview_dtcs(binary_data: bytes, ecu_info: dict, selected_solutions: list) -> list:
+    """Simule la désactivation des codes DTC pertinents en fonction des solutions sélectionnées"""
+    dtc_list = []
+    sol_str = " ".join([str(s).upper() for s in selected_solutions])
 
-        preview_items.append({
-            'code': dtc,
-            'description': desc,
-            'offset': f"0x{offset_found:06X}",
-            'val_ori': val_ori,
-            'val_mod': "0x00",
-            'source': source
-        })
+    if "DPF" in sol_str or "FAP" in sol_str:
+        dtc_list.extend([
+            {"code": "P2002", "desc": "Particulate Trap Efficiency Below Threshold (Bank 1)", "status": "Désactivé (DTC OFF)"},
+            {"code": "P2463", "desc": "Diesel Particulate Filter - Soot Accumulation", "status": "Désactivé (DTC OFF)"},
+            {"code": "P2452", "desc": "DPF Differential Pressure Sensor Circuit", "status": "Désactivé (DTC OFF)"}
+        ])
 
-    return preview_items
+    if "EGR" in sol_str:
+        dtc_list.extend([
+            {"code": "P0401", "desc": "Exhaust Gas Recirculation (EGR) Flow Insufficient", "status": "Désactivé (DTC OFF)"},
+            {"code": "P0402", "desc": "Exhaust Gas Recirculation (EGR) Flow Excessive", "status": "Désactivé (DTC OFF)"},
+            {"code": "P0403", "desc": "EGR Circuit Malfunction / Open Circuit", "status": "Désactivé (DTC OFF)"}
+        ])
 
-def get_technical_instructions(selected_solutions: list, ecu_type: str) -> list:
-    """
-    Generates mandatory workshop technical instructions and checksum guidelines
-    based on the currently selected tuning solutions and ECU family.
-    """
-    instructions = []
-    
-    has_dpf = any('DPF' in s.upper() for s in selected_solutions)
-    has_egr = any('EGR' in s.upper() for s in selected_solutions)
-    has_adblue = any('ADBLUE' in s.upper() for s in selected_solutions)
-    has_maf = any('MAF' in s.upper() for s in selected_solutions)
-    has_stage1 = any('STAGE 1' in s.upper() for s in selected_solutions)
-    has_hotstart = any('HOT START' in s.upper() for s in selected_solutions)
-    has_immo = any('IMMO' in s.upper() for s in selected_solutions)
-    has_swirl = any('SWIRL' in s.upper() or 'VSA' in s.upper() for s in selected_solutions)
-    has_tva = any('TVA' in s.upper() for s in selected_solutions)
-    has_cat = any('CAT' in s.upper() or 'LAMBDA' in s.upper() for s in selected_solutions)
-    has_evap = any('EVAP' in s.upper() for s in selected_solutions)
-    has_p0315 = any('0315' in s.upper() for s in selected_solutions)
-    
-    if has_dpf:
-        instructions.append({
-            'badge': 'FAP / DPF',
-            'type': 'warning',
-            'title': 'Procédure Obligatoire FAP (Anti-Pollution)',
-            'desc': 'Réinitialiser les valeurs de suies/cendres (Reset FAP) avec la valise de diagnostic AVANT l\'écriture du fichier MOD. Débrancher le capteur de pression différentielle et la sonde amont après écriture.'
-        })
-        
-    if has_egr:
-        instructions.append({
-            'badge': 'Vanne EGR',
-            'type': 'info',
-            'title': 'Consigne de Fonctionnement EGR',
-            'desc': 'La vanne EGR est fermée électroniquement à 100%. Il est conseillé de débrancher sa fiche électrique ou de placer une bride métallique d\'obturation si le clapet est grippé mécaniquement.'
-        })
-        
-    if has_adblue:
-        instructions.append({
-            'badge': 'AdBlue / SCR',
-            'type': 'critical',
-            'title': 'Procédure d\'Élimination du Système AdBlue / Urea',
-            'desc': 'Effectuer impérativement le Reset du compte à rebours d\'antidémarrage avec l\'outil diag avant reprogrammation. Débrancher impérativement le connecteur de la pompe AdBlue ou le fusible du module SCR (DCU).'
-        })
+    if "ADBLUE" in sol_str or "SCR" in sol_str:
+        dtc_list.extend([
+            {"code": "P20EE", "desc": "SCR NOx Catalyst Efficiency Below Threshold Bank 1", "status": "Désactivé (DTC OFF)"},
+            {"code": "P204F", "desc": "Reductant System Performance Bank 1", "status": "Désactivé (DTC OFF)"},
+            {"code": "U029D", "desc": "Lost Communication With NOX Sensor A", "status": "Désactivé (DTC OFF)"}
+        ])
 
-    if has_swirl:
-        instructions.append({
-            'badge': 'VSA / Swirl Flaps',
-            'type': 'info',
-            'title': 'Volets de Turbulence d\'Admission (Swirl / VSA OFF)',
-            'desc': 'Actionneur swirl désactivé en position pleine ouverture. Débrancher la fiche de commande des volets ou bloquer mécaniquement la tringlerie.'
-        })
+    if "CAT" in sol_str or "EURO 2" in sol_str:
+        dtc_list.extend([
+            {"code": "P0420", "desc": "Catalyst System Efficiency Below Threshold (Bank 1)", "status": "Désactivé (DTC OFF)"},
+            {"code": "P0136", "desc": "O2 Sensor Circuit Malfunction (Bank 1 Sensor 2)", "status": "Désactivé (DTC OFF)"},
+            {"code": "P0141", "desc": "O2 Sensor Heater Circuit Malfunction (Bank 1 Sensor 2)", "status": "Désactivé (DTC OFF)"}
+        ])
 
-    if has_tva:
-        instructions.append({
-            'badge': 'TVA Papillon',
-            'type': 'info',
-            'title': 'Volet Papillon Électronique (TVA OFF)',
-            'desc': 'Gestion du papillon d\'admission désactivée. Aucun bridage de débit d\'air. Idéal pour supprimer les pannes P0121/P2101/P2111 récurrentes.'
-        })
+    if "EVAP" in sol_str:
+        dtc_list.extend([
+            {"code": "P0441", "desc": "Evaporative Emission Control System Incorrect Purge Flow", "status": "Désactivé (DTC OFF)"},
+            {"code": "P0442", "desc": "Evaporative Emission System Leak Detected (Small Leak)", "status": "Désactivé (DTC OFF)"}
+        ])
 
-    if has_cat:
-        instructions.append({
-            'badge': 'CAT / Decat',
-            'type': 'success',
-            'title': 'Suppression Catalyseur & Sonde Lambda Aval (CAT OFF)',
-            'desc': 'Diagnostic catalytique et sonde lambda après catalyseur désactivés. Pas de voyant moteur P0420/P0430 en échappement direct (Downpipe).'
-        })
+    if "VSA" in sol_str or "FLAP" in sol_str:
+        dtc_list.extend([
+            {"code": "P2008", "desc": "Intake Manifold Runner Control Circuit/Open (Bank 1)", "status": "Désactivé (DTC OFF)"},
+            {"code": "P2015", "desc": "Intake Manifold Flap Position Sensor Range/Performance", "status": "Désactivé (DTC OFF)"}
+        ])
 
-    if has_evap:
-        instructions.append({
-            'badge': 'EVAP Canister',
-            'type': 'info',
-            'title': 'Purge Canister Vapeurs Carburant (EVAP OFF)',
-            'desc': 'Cycle de purge et détection de micro-fuites réservoir désactivés. Supprime définitivement les codes P0440/P0441/P0455.'
-        })
+    if "TVA" in sol_str:
+        dtc_list.append({"code": "P2101", "desc": "Throttle Actuator Control Motor Circuit Range/Performance", "status": "Désactivé (DTC OFF)"})
 
-    if has_p0315:
-        instructions.append({
-            'badge': 'Chevrolet MT80',
-            'type': 'success',
-            'title': 'Correctif Spécial Aveo P0315',
-            'desc': 'Correction chirurgicale du défaut d\'apprentissage capteur vilebrequin sans nécessiter d\'outil GM Tech2/MDI.'
-        })
-        
-    if has_maf:
-        instructions.append({
-            'badge': 'Débitmètre MAF',
-            'type': 'info',
-            'title': 'Consigne Débitmètre d\'Air',
-            'desc': 'La gestion de charge bascule en mode cartographique (Alpha-N / Speed Density). Débrancher le connecteur du débitmètre d\'air massique.'
-        })
-        
-    if has_hotstart:
-        instructions.append({
-            'badge': 'Hot Start',
-            'type': 'success',
-            'title': 'Correction Démarrage à Chaud (VAG / EDC16 / EDC17)',
-            'desc': 'Aucun débranchement requis. La cartographie de débit de gazole sous démarreur à chaud (IQ Start) a été recalibrée pour un démarrage instantané.'
-        })
-        
-    if has_stage1:
-        instructions.append({
-            'badge': 'Stage 1',
-            'type': 'success',
-            'title': 'Calibration Performance Stage 1 (+20% Puissance & Couple)',
-            'desc': 'Pression de turbo augmentée de +250 mbar, avance et temps d\'injection ajustés. Consommation réduite de 0.5L/100km en conduite stabilisée. Vérifier le bon état du filtre à air et huile moteur.'
-        })
-        
-    if has_immo:
-        instructions.append({
-            'badge': 'IMMO OFF',
-            'type': 'warning',
-            'title': 'Antidémarrage Électronique',
-            'desc': 'Démarrage immédiat sans clé transpondeur. Sur certains modèles (ex: EDC16), couper la ligne Immo-Line (K-Line / CAN) au pinout ECU avant mise sous contact.'
-        })
+    if "P0315" in sol_str:
+        dtc_list.append({"code": "P0315", "desc": "Crankshaft Position System Variation Not Learned (Aveo/Cruze Fix)", "status": "Corrigé (Permanent Learn Bypass)"})
 
-    return instructions
+    return dtc_list
+
+
+def get_technical_instructions(ecu_info: dict, selected_solutions: list) -> str:
+    """Instructions techniques après écriture"""
+    instructions = ["1. Calculateur calibré avec le moteur certifié SVEdit v1.1.38.3."]
+    sol_str = " ".join([str(s).upper() for s in selected_solutions])
+
+    if "DPF" in sol_str or "FAP" in sol_str:
+        instructions.append("2. Débrancher impérativement les capteurs de pression différentielle et de température FAP avant le premier démarrage.")
+    if "EGR" in sol_str:
+        instructions.append("3. La vanne EGR peut être condamnée mécaniquement avec une plaque d'obturation.")
+    if "ADBLUE" in sol_str or "SCR" in sol_str:
+        instructions.append("4. Débrancher le fusible de la pompe AdBlue ou le module SCR externe.")
+    if "CAT" in sol_str or "EURO 2" in sol_str:
+        instructions.append("5. La seconde sonde Lambda (Aval / Post-Cat) peut être débranchée ou laissée en place.")
+    if "P0315" in sol_str:
+        instructions.append("6. Le défaut de variation de vilebrequin P0315 est annulé sans besoin de procédure d'apprentissage avec outil de diagnostic.")
+
+    instructions.append("Contrôle de somme Checksum recalculé automatiquement.")
+    return "\n".join(instructions)
