@@ -4,6 +4,7 @@ import json
 import uuid
 import shutil
 import hashlib
+import struct
 from typing import Optional, List
 from fastapi import FastAPI, Request, Form, File, UploadFile, Depends, HTTPException, status, Body
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, RedirectResponse, Response
@@ -681,8 +682,101 @@ async def api_tuning_preview_dtc(payload: dict, user: dict = Depends(require_use
     with open(target_path, "rb") as f:
         binary_data = f.read()
         
-    preview_items = preview_dtcs(binary_data, selected_solutions, custom_dtcs)
-    instructions = get_technical_instructions(selected_solutions, target_path)
+    ident = identify_ecu(binary_data, os.path.basename(target_path))
+
+    # خريطة أكواد الـ DTC المرتبطة بكل حل
+    SOLUTION_DTC_MAP = {
+        "DPF": ["P2002", "P2463", "P2452", "P2458", "P244A", "P2453"],
+        "FAP": ["P2002", "P2463", "P2452"],
+        "EGR": ["P0401", "P0402", "P0403", "P0404", "P0405"],
+        "ADBLUE": ["P20EE", "P204F", "U029D", "P207F", "P20BD"],
+        "SCR": ["P20EE", "P204F", "U029D"],
+        "LAMBDA": ["P0136", "P0141", "P0420"],
+        "CAT": ["P0420", "P0430", "P0136"],
+        "DECAT": ["P0420", "P0430", "P0136"],
+        "SWIRL": ["P2008", "P2015"],
+        "FLAP": ["P2008", "P2015"],
+        "VSA": ["P2008", "P2015"],
+        "TVA": ["P2101", "P2102"],
+        "START-STOP": ["U0167"],
+        "EVAP": ["P0441", "P0442"],
+        "MAF": ["P0100", "P0101", "P0102"]
+    }
+
+    active_codes = []
+    for sol in selected_solutions:
+        sol_upper = sol.upper()
+        matched_any = False
+        for key, codes in SOLUTION_DTC_MAP.items():
+            if key in sol_upper:
+                matched_any = True
+                for c in codes:
+                    if c not in [item[0] for item in active_codes]:
+                        active_codes.append((c, sol))
+        if not matched_any and ("STAGE" not in sol_upper and "HOT" not in sol_upper):
+            pass
+
+    for c in custom_dtcs:
+        c = c.strip().upper()
+        if c and c not in [item[0] for item in active_codes]:
+            active_codes.append((c, "Manuel (Client)"))
+
+    preview_items = []
+    for code, source in active_codes:
+        code_num = None
+        try:
+            if code.startswith("P") and len(code) == 5:
+                code_num = int(code[1:], 16)
+        except:
+            pass
+
+        offset_str = "0x000000"
+        val_ori = "0x01"
+        if code_num is not None:
+            le_bytes = struct.pack("<H", code_num)
+            be_bytes = struct.pack(">H", code_num)
+            pos = binary_data.find(le_bytes)
+            if pos != -1:
+                offset_str = f"0x{pos:06X}"
+                val_ori = f"0x{binary_data[pos]:02X}"
+            else:
+                pos = binary_data.find(be_bytes)
+                if pos != -1:
+                    offset_str = f"0x{pos:06X}"
+                    val_ori = f"0x{binary_data[pos]:02X}"
+
+        preview_items.append({
+            "code": code,
+            "description": DTC_TABLE.get(code, "Code Défaut OBD-II / DTC Gestion Moteur"),
+            "offset": offset_str,
+            "val_ori": val_ori,
+            "val_mod": "0x00",
+            "source": source
+        })
+
+    # معالجة تعليمات ورشة العمل
+    raw_instructions = get_technical_instructions(ident, selected_solutions)
+    lines = [l.strip() for l in raw_instructions.split("\n") if l.strip()]
+    instructions = []
+    for line in lines:
+        badge = "INFO"
+        type_ = "info"
+        if "Débrancher" in line or "impérativement" in line:
+            badge = "IMPORTANT"
+            type_ = "critical"
+        elif "condamnée" in line or "mécaniquement" in line:
+            badge = "ATELIER"
+            type_ = "warning"
+        elif "Checksum" in line:
+            badge = "CHECKSUM"
+            type_ = "info"
+        instructions.append({
+            "badge": badge,
+            "title": line.split(".")[1].strip() if "." in line[:5] else line[:40],
+            "desc": line,
+            "type": type_
+        })
+
     return {
         "success": True,
         "total_codes": len(preview_items),
