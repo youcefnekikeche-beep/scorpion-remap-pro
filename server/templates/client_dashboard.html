@@ -437,6 +437,9 @@
                     <button class="lang-btn">AR</button>
                 </div>
                 <div class="credits-pill" id="userCreditsPill">🪙 <span id="userCredits">{{ user.tokens if user.tokens is defined else user.credits }}</span> Crédits</div>
+                <button type="button" onclick="switchTab('tabSupport', document.getElementById('btnNavSupport'))" style="background: rgba(225, 29, 72, 0.2); border: 1.5px solid #e11d48; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 800; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 10px rgba(225,29,72,0.3); transition: all 0.2s;" onmouseover="this.style.background='#e11d48'; this.style.transform='scale(1.03)';" onmouseout="this.style.background='rgba(225, 29, 72, 0.2)'; this.style.transform='scale(1)';">
+                    💬 Support & Fichiers <span id="headerSupportBadge" style="display:none; background:#e11d48; color:#fff; font-size:10px; padding:1px 6px; border-radius:10px;">0</span>
+                </button>
                 <div class="user-pill" id="userName">👤 {{ user.full_name or user.username }} <small style="opacity:0.75; font-size:11px;">({{ user.workshop_name or 'Atelier' }})</small></div>
                 <a href="/logout" class="btn-logout">🚪 Déconnexion</a>
             </div>
@@ -451,7 +454,7 @@
             <button class="nav-tab" onclick="switchTab('tabHistory', this)">📜 Historique</button>
             <button class="nav-tab" onclick="switchTab('tabCredits', this)">💳 Forfaits Crédits</button>
             <button class="nav-tab" onclick="switchTab('tabCompare', this)" style="border: 1px solid rgba(16,185,129,0.4); color:#34d399; font-weight:800;">⚖️ Comparateur ECU</button>
-            <button class="nav-tab" onclick="switchTab('tabSupport', this)" style="border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; font-weight:800;">
+            <button class="nav-tab" id="btnNavSupport" onclick="switchTab('tabSupport', this)" style="border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; font-weight:800;">
                 💬 Support & Fichiers <span id="userSupportBadge" style="display:none; background:#e11d48; color:#fff; font-size:10px; padding:1px 6px; border-radius:10px; margin-left:4px;">0</span>
             </button>
 {% if user.role == 'admin' or user.is_admin %}
@@ -1227,6 +1230,8 @@
                 </div>
             </div>
         </section>
+
+        {% if user.role == 'admin' or user.is_admin %}
         <section id="tabAdmin" class="tab-panel">
             <div style="margin-bottom:24px;">
                 <h2 style="font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -2624,6 +2629,7 @@
                 
                 // تحديث شارة الردود الجديدة
                 const userBadge = document.getElementById('userSupportBadge');
+                const headerBadge = document.getElementById('headerSupportBadge');
                 const answeredCount = tickets.filter(t => t.status === 'answered').length;
                 if(userBadge) {
                     if(answeredCount > 0) {
@@ -2632,6 +2638,15 @@
                     } else {
                         userBadge.style.display = 'none';
                     }
+                }
+                if(headerBadge) {
+                    if(answeredCount > 0) {
+                        headerBadge.style.display = 'inline-block';
+                        headerBadge.innerText = `${answeredCount} Répondu`;
+                    } else {
+                        headerBadge.style.display = 'none';
+                    }
+                }
                 }
 
                 if(tickets.length === 0) {
