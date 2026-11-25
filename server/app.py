@@ -26,7 +26,8 @@ from server.db import (
     get_banned_ips, unban_ip, manual_ban_ip,
     save_session_db, get_session_user_db, delete_session_db,
     create_support_ticket, add_ticket_message, get_user_tickets,
-    get_all_support_tickets, get_ticket_details, get_ticket_attachment
+    get_all_support_tickets, get_ticket_details, get_ticket_attachment,
+    verify_user_whatsapp, admin_verify_user_whatsapp, get_user_for_verification
 )
 from engine.tuning_bridge import run_tuning_task
 from engine.ecu_analyzer import (
@@ -436,6 +437,24 @@ async def api_login(payload: dict, request: Request, response: Response):
         user = authenticate_user(identifier, password)
     except PermissionError as pe:
         raise HTTPException(status_code=403, detail=str(pe))
+    except ValueError as ve:
+        err_msg = str(ve)
+        if err_msg.startswith("WHATSAPP_UNVERIFIED:"):
+            parts = err_msg.split(":")
+            # parts: ["WHATSAPP_UNVERIFIED", user_id, phone, whatsapp_code, full_name]
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "detail": "Compte non activé. Veuillez confirmer votre numéro WhatsApp.",
+                    "requires_whatsapp_verification": True,
+                    "user_id": int(parts[1]),
+                    "phone": parts[2],
+                    "whatsapp_code": parts[3],
+                    "full_name": parts[4] if len(parts) > 4 else "Client",
+                    "admin_whatsapp": "213799999002"
+                }
+            )
+        raise HTTPException(status_code=400, detail=err_msg)
 
     if not user:
         raise HTTPException(
@@ -496,21 +515,35 @@ async def api_register(payload: dict, request: Request, response: Response):
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
 
-    # Auto-login after registration
-    token = str(uuid.uuid4())
-    SESSIONS[token] = new_user["id"]
-    save_session_db(token, new_user["id"])
-    response.set_cookie(key="ecu_token", value=token, httponly=True, max_age=86400*30, samesite="lax")
-
     new_user["credits"] = new_user.get("tokens", 0)
     new_user["username"] = new_user.get("email", "")
     new_user["is_admin"] = (new_user.get("role") == "admin")
 
+    # If new user is an admin, auto-login
+    if new_user.get("role") == "admin":
+        token = str(uuid.uuid4())
+        SESSIONS[token] = new_user["id"]
+        save_session_db(token, new_user["id"])
+        response.set_cookie(key="access_token", value=token, max_age=86400*30, samesite="lax")
+        return {
+            "success": True,
+            "requires_whatsapp_verification": False,
+            "access_token": token,
+            "redirect": "/admin",
+            "user": new_user
+        }
+
+    # Mandatory WhatsApp Verification for clients
     return {
         "success": True,
-        "bonus_granted": new_user.get("bonus_granted", True),
-        "access_token": token,
-        "user": new_user
+        "requires_whatsapp_verification": True,
+        "user_id": new_user["id"],
+        "full_name": new_user["full_name"],
+        "workshop_name": new_user["workshop_name"],
+        "phone": new_user["phone"],
+        "whatsapp_code": new_user.get("whatsapp_code"),
+        "admin_whatsapp": "213799999002",
+        "detail": "Compte créé avec succès ! Veuillez confirmer votre numéro WhatsApp pour activer vos 10 crédits offerts."
     }
 
 @app.get("/api/v1/user/me")
@@ -1238,3 +1271,41 @@ if __name__ == "__main__":
     init_db()
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
+
+
+@app.post("/api/v1/auth/verify-whatsapp")
+async def api_verify_whatsapp(payload: dict, response: Response):
+    user_id = payload.get("user_id")
+    code = str(payload.get("code", "")).strip()
+
+    if not user_id or not code:
+        raise HTTPException(status_code=400, detail="Veuillez renseigner le code d'activation.")
+
+    success, msg = verify_user_whatsapp(int(user_id), code)
+    if not success:
+        raise HTTPException(status_code=400, detail=msg)
+
+    user = get_user_by_id(int(user_id))
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
+
+    token = str(uuid.uuid4())
+    SESSIONS[token] = user["id"]
+    save_session_db(token, user["id"])
+    response.set_cookie(key="access_token", value=token, max_age=86400*30, samesite="lax")
+    response.set_cookie(key="ecu_token", value=token, httponly=True, max_age=86400*30, samesite="lax")
+
+    return {
+        "success": True,
+        "access_token": token,
+        "redirect": "/portal",
+        "detail": "Compte WhatsApp validé avec succès ! 10 Crédits offerts débloqués."
+    }
+
+
+@app.post("/api/v1/admin/users/{user_id}/verify-whatsapp")
+async def api_admin_verify_user_whatsapp(user_id: int, admin: dict = Depends(require_admin)):
+    ok = admin_verify_user_whatsapp(user_id)
+    if not ok:
+        raise HTTPException(status_code=400, detail="Impossible de valider cet utilisateur.")
+    return {"success": True, "detail": "Utilisateur validé et activé via WhatsApp avec succès !"}

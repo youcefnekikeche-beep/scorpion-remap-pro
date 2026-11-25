@@ -303,6 +303,51 @@
 
         <button type="submit" id="btnSubmitRegister" class="btn-submit">Créer mon compte & Réclamer 10 Crédits ➔</button>
     </form>
+
+    <!-- View 3: WhatsApp Mandatory Verification Box -->
+    <div id="whatsappVerifyBox" style="display:none; text-align:center; padding:10px 0;">
+        <div style="width:68px; height:68px; margin:0 auto 16px; background:radial-gradient(circle, #22c55e 0%, #15803d 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 25px rgba(34,197,94,0.5);">
+            <span style="font-size:36px;">📲</span>
+        </div>
+
+        <h3 id="txtVerifyTitle" style="font-size:18px; font-weight:800; color:#fff; margin-bottom:6px;">
+            تأكيد رقم الواتساب وتفعيل الحساب
+        </h3>
+        <p id="txtVerifySubtitle" style="font-size:12.5px; color:#9ca3af; line-height:1.5; margin-bottom:16px;">
+            لحماية أمان حسابك وتفادي التسجيلات الوهمية، يجب تأكيد رقمك عبر تطبيق WhatsApp لتفعيل الحساب واستلام <strong>10 توكنز مجاناً</strong>.
+        </p>
+
+        <div style="background:#0a0a0f; border:1px solid #1f2937; border-radius:12px; padding:16px; margin-bottom:18px;">
+            <div style="font-size:11.5px; color:#9ca3af; margin-bottom:4px;" id="lblVerifyPhone">Numéro WhatsApp enregistré :</div>
+            <div id="verifyUserPhone" style="font-size:16px; font-weight:800; color:#22c55e; font-family:monospace; margin-bottom:12px;">+213 ...</div>
+
+            <div style="font-size:11.5px; color:#9ca3af; margin-bottom:6px;" id="lblVerifyCode">Votre Code d'activation unique :</div>
+            <div id="verifyDisplayCode" style="font-size:26px; font-weight:900; color:#fbbf24; font-family:monospace; letter-spacing:6px; background:#180f14; border:1.5px dashed #e11d48; border-radius:10px; padding:8px 16px; display:inline-block; margin-bottom:8px;">000000</div>
+            <div style="font-size:11px; color:#6b7280;" id="txtVerifyHint">Transmettez ce code à l'administrateur ou saisissez-le ci-dessous.</div>
+        </div>
+
+        <!-- Option A: WhatsApp Direct Button -->
+        <a id="btnOpenWhatsApp" target="_blank" href="#" style="background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; font-weight:800; font-size:13.5px; padding:12px 18px; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:0 4px 15px rgba(34,197,94,0.3); transition:all 0.2s; margin-bottom:16px;">
+            <span id="txtBtnWa">💬 Ouvrir WhatsApp et envoyer le code ➔</span>
+        </a>
+
+        <!-- Option B: Enter OTP to instantly unlock -->
+        <div style="border-top:1px solid #1f2937; padding-top:16px; margin-top:8px;">
+            <label id="lblInputOtp" style="font-size:12px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
+                Ou entrez le code de confirmation reçu :
+            </label>
+            <div style="display:flex; gap:8px; justify-content:center; margin-bottom:12px;">
+                <input type="text" id="verifyInputCode" maxlength="6" placeholder="000000" style="width:160px; text-align:center; font-size:18px; font-weight:800; letter-spacing:4px; padding:8px 12px; background:#050508; border:1.5px solid #e11d48; border-radius:8px; color:#fff; outline:none;">
+                <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:8px 16px; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer;">
+                    Activer ⚡
+                </button>
+            </div>
+        </div>
+
+        <button type="button" id="btnBackToLogin" onclick="backToLoginFromVerify()" style="background:transparent; border:none; color:#9ca3af; font-size:12px; cursor:pointer; text-decoration:underline; margin-top:8px;">
+            ↩️ Retour à l'écran de connexion
+        </button>
+    </div>
 </div>
 
 <script>
@@ -375,6 +420,18 @@
         document.getElementById('lblRegEmail').textContent = t.lblEmail;
         document.getElementById('lblRegPassConfirm').textContent = t.lblPassConf;
 
+        if (document.getElementById('txtVerifyTitle')) {
+            document.getElementById('txtVerifyTitle').textContent = t.verifyTitle;
+            document.getElementById('txtVerifySubtitle').innerHTML = t.verifySub;
+            document.getElementById('lblVerifyPhone').textContent = t.verifyPhone;
+            document.getElementById('lblVerifyCode').textContent = t.verifyCode;
+            document.getElementById('txtVerifyHint').textContent = t.verifyHint;
+            document.getElementById('txtBtnWa').textContent = t.btnWa;
+            document.getElementById('lblInputOtp').textContent = t.lblOtp;
+            document.getElementById('btnSubmitVerifyOtp').textContent = t.btnAct;
+            document.getElementById('btnBackToLogin').textContent = t.btnBack;
+        }
+
         if (lang === 'ar') {
             document.documentElement.setAttribute('dir', 'rtl');
             document.querySelectorAll('.form-group').forEach(el => el.style.textAlign = 'right');
@@ -410,6 +467,36 @@
         document.getElementById('alertBox').style.display = 'none';
     }
 
+    function showWhatsAppVerification(userId, phone, code, fullName, adminWa) {
+        currentVerifyUserId = userId;
+        currentVerifyPhone = phone;
+        currentVerifyCode = code;
+        currentVerifyName = fullName || "Client";
+
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'none';
+        document.querySelector('.auth-tabs').style.display = 'none';
+
+        const verifyBox = document.getElementById('whatsappVerifyBox');
+        verifyBox.style.display = 'block';
+
+        document.getElementById('verifyUserPhone').innerText = phone;
+        document.getElementById('verifyDisplayCode').innerText = code;
+
+        const targetAdminWa = adminWa || "213799999002";
+        const messageText = `Bonjour SCORPION REMAP PRO, je souhaite activer mon compte.
+Nom: ${currentVerifyName}
+Téléphone: ${phone}
+Code d'activation: ${code}`;
+        document.getElementById('btnOpenWhatsApp').href = `https://wa.me/${targetAdminWa}?text=${encodeURIComponent(messageText)}`;
+    }
+
+    function backToLoginFromVerify() {
+        document.getElementById('whatsappVerifyBox').style.display = 'none';
+        document.querySelector('.auth-tabs').style.display = 'flex';
+        switchAuthTab('login');
+    }
+
     async function handleLogin(e) {
         e.preventDefault();
         hideAlert();
@@ -423,13 +510,20 @@
                 body: JSON.stringify({ username, password })
             });
             const data = await res.json();
+
             if (!res.ok) {
+                if (data.requires_whatsapp_verification) {
+                    showAlert(data.detail || "Veuillez valider votre compte via WhatsApp.", false);
+                    showWhatsAppVerification(data.user_id, data.phone, data.whatsapp_code, data.full_name, data.admin_whatsapp);
+                    return;
+                }
                 showAlert(data.detail || "Erreur de connexion.");
                 return;
             }
 
             if (data.access_token) {
                 localStorage.setItem('ecu_token', data.access_token);
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
             }
 
             showAlert("Connexion réussie ! Redirection...", true);
@@ -478,20 +572,62 @@
                 return;
             }
 
-            if (data.access_token) {
-                localStorage.setItem('ecu_token', data.access_token);
+            if (data.requires_whatsapp_verification) {
+                showAlert("🎉 Inscription réussie ! Veuillez confirmer votre compte sur WhatsApp.", true);
+                showWhatsAppVerification(data.user_id, data.phone, data.whatsapp_code, data.full_name, data.admin_whatsapp);
+                return;
             }
 
-            const welcomeMsg = data.bonus_granted ?
-                `🎉 Bienvenue ${data.user.full_name} ! 10 Crédits ont été ajoutés à votre compte.` :
-                `Compte créé. (Bonus de bienvenue déjà accordé sur cet appareil).`;
+            if (data.access_token) {
+                localStorage.setItem('ecu_token', data.access_token);
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+            }
 
-            showAlert(welcomeMsg, true);
+            showAlert("Bienvenue ! Redirection en cours...", true);
             setTimeout(() => {
-                window.location.href = '/portal';
-            }, 1200);
+                window.location.href = data.redirect || '/portal';
+            }, 1000);
         } catch (err) {
             showAlert("Erreur réseau : " + err.message);
+        }
+    }
+
+    async function submitWhatsAppCode() {
+        const codeInput = document.getElementById('verifyInputCode');
+        const code = codeInput.value.trim();
+
+        if (!code || code.length < 4) {
+            alert(currentLang === 'ar' ? "يرجى إدخال رمز التأكيد المكون من 6 أرقام." : "Veuillez saisir le code à 6 chiffres.");
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/v1/auth/verify-whatsapp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: currentVerifyUserId,
+                    code: code
+                })
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                showAlert(data.detail || "Code WhatsApp invalide.");
+                return;
+            }
+
+            if (data.access_token) {
+                localStorage.setItem('ecu_token', data.access_token);
+                document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+            }
+
+            showAlert("🎉 " + (data.detail || "Compte activé avec succès !"), true);
+            setTimeout(() => {
+                window.location.href = data.redirect || '/portal';
+            }, 800);
+        } catch (err) {
+            showAlert("Erreur lors de la validation : " + err.message);
         }
     }
 </script>

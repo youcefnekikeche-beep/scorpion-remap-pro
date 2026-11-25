@@ -1,3 +1,4 @@
+import random
 import sqlite3
 import os
 import hashlib
@@ -49,6 +50,20 @@ def init_db():
         )
         """)
         
+        # Auto-migration for WhatsApp verification columns
+        for col_def in [
+            ("whatsapp_verified", "INTEGER DEFAULT 0"),
+            ("whatsapp_code", "TEXT"),
+            ("whatsapp_verified_at", "TIMESTAMP")
+        ]:
+            try:
+                cursor.execute(f"ALTER TABLE users ADD COLUMN {col_def[0]} {col_def[1]}")
+            except Exception:
+                pass
+
+        # Super admin users are automatically verified
+        cursor.execute("UPDATE users SET whatsapp_verified = 1, is_active = 1 WHERE role = 'admin'")
+
         # 2. جدول معاملات التوكنز والعمليات
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS token_transactions (
@@ -223,9 +238,14 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
         user_role = "admin" if user_is_super else "user"
         initial_tokens = 9999 if user_is_super else (10 if bonus_granted else 0)
 
+        # Generate 6-digit WhatsApp verification code
+        whatsapp_code = str(random.randint(100000, 999999)) if not user_is_super else "000000"
+        whatsapp_verified = 1 if user_is_super else 0
+        is_active_init = 1 if user_is_super else 0
+
         cursor.execute("""
-        INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             full_name,
             workshop_name,
@@ -236,7 +256,9 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             initial_tokens,
             user_role,
             ip,
-            1
+            is_active_init,
+            whatsapp_verified,
+            whatsapp_code
         ))
         new_user_id = cursor.lastrowid
 
@@ -267,7 +289,9 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             "wilaya_country": wilaya_country,
             "tokens": initial_tokens,
             "role": user_role,
-            "bonus_granted": bonus_granted
+            "bonus_granted": bonus_granted,
+            "whatsapp_code": whatsapp_code,
+            "whatsapp_verified": whatsapp_verified
         }
 
 def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str, Any]]:
@@ -285,10 +309,11 @@ def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str
         if not verify_password(password, user["password_hash"]):
             return None
 
-        if user["is_active"] != 1:
-            raise PermissionError("Ce compte est suspendu ou désactivé par l'administrateur.")
-
         user_dict = dict(user)
+        if user_dict.get("is_active") != 1:
+            if user_dict.get("whatsapp_verified") == 0:
+                raise ValueError(f"WHATSAPP_UNVERIFIED:{user_dict['id']}:{user_dict['phone']}:{user_dict.get('whatsapp_code') or ''}:{user_dict['full_name']}")
+            raise PermissionError("Ce compte est suspendu ou désactivé par l'administrateur.")
         # ترقية حساب المدير تلقائياً إذا كان من عناوين المدراء المعتمدة
         if is_super_admin(user_dict.get("email", "")):
             if user_dict.get("role") != "admin":
@@ -386,7 +411,7 @@ def get_all_users() -> List[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-        SELECT id, full_name, workshop_name, phone, email, wilaya_country, tokens, role, ip_address, is_active, created_at
+        SELECT id, full_name, workshop_name, phone, email, wilaya_country, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code, created_at
         FROM users ORDER BY id DESC
         """)
         return [dict(r) for r in cursor.fetchall()]
@@ -575,3 +600,51 @@ def get_ticket_attachment(message_id: int) -> Optional[Tuple[str, bytes]]:
             return row["attachment_name"], row["attachment_data"]
         return None
 
+
+
+# =========================================================================
+# WhatsApp Verification Functions
+# =========================================================================
+
+def verify_user_whatsapp(user_id: int, code: str) -> Tuple[bool, str]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, whatsapp_code, whatsapp_verified, is_active FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return False, "Utilisateur introuvable."
+        if user["whatsapp_verified"] == 1:
+            return True, "Compte déjà vérifié."
+        if str(user["whatsapp_code"]).strip() != str(code).strip():
+            return False, "Code de confirmation WhatsApp incorrect."
+        
+        cursor.execute("""
+            UPDATE users 
+            SET whatsapp_verified = 1, is_active = 1, whatsapp_verified_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (user_id,))
+        conn.commit()
+        return True, "Vérification WhatsApp réussie !"
+
+def admin_verify_user_whatsapp(user_id: int) -> bool:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users 
+            SET whatsapp_verified = 1, is_active = 1, whatsapp_verified_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (user_id,))
+        conn.commit()
+        return True
+
+def get_user_for_verification(user_id: Optional[int] = None, phone: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        if user_id:
+            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        elif phone:
+            cursor.execute("SELECT * FROM users WHERE phone = ?", (phone.strip(),))
+        else:
+            return None
+        row = cursor.fetchone()
+        return dict(row) if row else None
