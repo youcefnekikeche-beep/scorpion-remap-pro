@@ -319,17 +319,24 @@
 
         <div style="background:#08080d; border:1px solid #1e293b; border-radius:14px; padding:18px; margin-bottom:20px;">
             <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;" id="lblVerifyPhone">الرقم المستلم على واتساب :</div>
-            <div id="verifyUserPhone" style="font-size:18px; font-weight:800; color:#22c55e; font-family:monospace; letter-spacing:1px; margin-bottom:14px;">+213 ...</div>
+            <div id="verifyUserPhone" style="font-size:18px; font-weight:800; color:#22c55e; font-family:monospace; letter-spacing:1px; margin-bottom:16px;">+213 ...</div>
 
-            <label id="lblInputOtp" style="font-size:12.5px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
-                أدخل رمز التأكيد (6 أرقام) :
-            </label>
-            <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-                <input type="text" id="verifyInputCode" maxlength="6" placeholder="• • • • • •" style="width:220px; text-align:center; font-size:24px; font-weight:900; letter-spacing:8px; padding:10px 14px; background:#040407; border:2px solid #22c55e; border-radius:10px; color:#fff; outline:none; box-shadow:0 0 15px rgba(34,197,94,0.2);">
-                
-                <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="width:100%; max-width:280px; background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(34,197,94,0.4); transition:all 0.2s;">
-                    تأكيد الرمز وتفعيل الحساب ➔
-                </button>
+            <!-- زر فتح واتساب بنقرة واحدة -->
+            <a id="btnOpenWhatsApp" target="_blank" href="#" style="background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; font-weight:800; font-size:13.5px; padding:12px 18px; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:0 4px 15px rgba(34,197,94,0.3); transition:all 0.2s; margin-bottom:16px;">
+                <span>💬 فتح واتساب لتأكيد الرقم فوراً ➔</span>
+            </a>
+
+            <div style="border-top:1px dashed #223042; padding-top:14px; margin-top:12px;">
+                <label id="lblInputOtp" style="font-size:12.5px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
+                    أو أدخل رمز التأكيد (6 أرقام) :
+                </label>
+                <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+                    <input type="text" id="verifyInputCode" maxlength="6" placeholder="• • • • • •" style="width:220px; text-align:center; font-size:24px; font-weight:900; letter-spacing:8px; padding:10px 14px; background:#040407; border:2px solid #22c55e; border-radius:10px; color:#fff; outline:none; box-shadow:0 0 15px rgba(34,197,94,0.2);">
+                    
+                    <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="width:100%; max-width:280px; background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(225,29,72,0.4); transition:all 0.2s;">
+                        تأكيد الرمز وتفعيل الحساب ➔
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -500,11 +507,11 @@
         // Code is sent to phone via WhatsApp directly (not shown on screen)
 
         const targetAdminWa = adminWa || "213799999002";
-        const messageText = `Bonjour SCORPION REMAP PRO, je souhaite activer mon compte.
-Nom: ${currentVerifyName}
-Téléphone: ${phone}
-Code d'activation: ${code}`;
-        document.getElementById('btnOpenWhatsApp').href = `https://wa.me/${targetAdminWa}?text=${encodeURIComponent(messageText)}`;
+        const messageText = `Bonjour SCORPION REMAP PRO, je souhaite activer mon compte.\nNom: ${currentVerifyName}\nTéléphone: ${phone}\nCode d'activation: ${code}`;
+        const btnWa = document.getElementById('btnOpenWhatsApp');
+        if (btnWa) {
+            btnWa.href = `https://wa.me/${targetAdminWa}?text=${encodeURIComponent(messageText)}`;
+        }
     }
 
     function backToLoginFromVerify() {
