@@ -1464,12 +1464,13 @@
                 if(res.ok && data.success) {
                     currentFileToken = data.file_token;
                     
-                    // إذا لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%: الاختيار اليدوي الصارم
+                    // إذا لم يتعرف السيرفر على الملف تلقائياً بنسبة 100%: فتح الاختيار اليدوي الصارم
                     if (data.recognized === false) {
                         document.getElementById('resultsPanel').style.display = 'none';
                         const unbox = document.getElementById('unrecognizedBox');
                         unbox.style.display = 'block';
-                        dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title">Fichier téléversé : ${file.name}</div><div class="drop-subtitle">${data.message}</div>`;
+                        unbox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        dropZone.innerHTML = `<div class="drop-icon">⚠️</div><div class="drop-title" style="color:#fb7185;">Calculateur non reconnu automatiquement</div><div class="drop-subtitle" style="color:#e2e8f0; font-size:13px; font-weight:600; margin-top:4px;">${data.message}</div>`;
                         await populateManualBrandSelect();
                         return;
                     }
