@@ -24,7 +24,9 @@ from server.db import (
     toggle_user_active_status, get_user_transactions,
     is_ip_banned, record_failed_attempt, clear_failed_attempts,
     get_banned_ips, unban_ip, manual_ban_ip,
-    save_session_db, get_session_user_db, delete_session_db
+    save_session_db, get_session_user_db, delete_session_db,
+    create_support_ticket, add_ticket_message, get_user_tickets,
+    get_all_support_tickets, get_ticket_details, get_ticket_attachment
 )
 from engine.tuning_bridge import run_tuning_task
 from engine.ecu_analyzer import (
@@ -1084,6 +1086,152 @@ async def api_admin_manual_ban_ip(payload: dict, admin: dict = Depends(require_a
         raise HTTPException(status_code=400, detail="Veuillez spécifier l'adresse IP")
     manual_ban_ip(ip, reason, hours)
     return {"success": True, "message": f"L'adresse IP {ip} a été bloquée pour {hours} heures."}
+
+
+# =========================================================================
+# نقاط نهاية نظام المراسلة والتذاكر الداخلي 100% (Support & File Exchange)
+# =========================================================================
+
+ALLOWED_EXTENSIONS = {".bin", ".ori", ".mod", ".zip", ".rar", ".7z", ".jpg", ".jpeg", ".png"}
+MAX_FILE_SIZE = 16 * 1024 * 1024 # 16 MB
+
+def validate_uploaded_attachment(upload_file: Optional[UploadFile]) -> Tuple[Optional[str], Optional[bytes]]:
+    if not upload_file or not upload_file.filename:
+        return None, None
+    filename = upload_file.filename
+    ext = os.path.splitext(filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Format de fichier non autorisé ({ext}). Extensions permises : .bin, .ori, .mod, .zip, .rar, .jpg, .png"
+        )
+    content = upload_file.file.read()
+    if len(content) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=400,
+            detail="La taille du fichier dépasse la limite maximale autorisée (16 Mo)."
+        )
+    return filename, content
+
+
+@app.post("/api/v1/support/tickets")
+async def api_support_create_ticket(
+    subject: str = Form(...),
+    vehicle_ecu: str = Form(...),
+    message: str = Form(...),
+    attachment: Optional[UploadFile] = File(None),
+    user: dict = Depends(require_user)
+):
+    """إنشاء تذكرة دعم فني جديدة من طرف الزبون مع ملف السيارة"""
+    subject = subject.strip()
+    vehicle_ecu = vehicle_ecu.strip()
+    message = message.strip()
+    if not subject or not message:
+        raise HTTPException(status_code=400, detail="Veuillez remplir le sujet et votre message.")
+    
+    att_name, att_bytes = validate_uploaded_attachment(attachment)
+    ticket_id = create_support_ticket(
+        user_id=user["id"],
+        subject=subject,
+        vehicle_ecu=vehicle_ecu or "Non spécifié",
+        message_text=message,
+        attachment_name=att_name,
+        attachment_data=att_bytes
+    )
+    return {
+        "success": True,
+        "ticket_id": ticket_id,
+        "message": f"Votre ticket #{ticket_id} a été transmis avec succès à l'administration SCORPION."
+    }
+
+
+@app.get("/api/v1/support/tickets")
+async def api_support_get_user_tickets(user: dict = Depends(require_user)):
+    """استرجاع تذاكر الزبون المسجل"""
+    return {"tickets": get_user_tickets(user["id"])}
+
+
+@app.get("/api/v1/support/tickets/{ticket_id}")
+async def api_support_get_ticket(ticket_id: int, user: dict = Depends(require_user)):
+    """استرجac محادثة التذكرة بالكامل للزبون أو المدير"""
+    ticket = get_ticket_details(ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket introuvable.")
+    
+    # التحقق من الصلاحيات (المالك أو المدير فقط)
+    is_admin = user.get("role") == "admin" or user.get("is_admin", False)
+    if not is_admin and ticket["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé à ce ticket.")
+    
+    return {"success": True, "ticket": ticket}
+
+
+@app.post("/api/v1/support/tickets/{ticket_id}/reply")
+async def api_support_reply_ticket(
+    ticket_id: int,
+    message: str = Form(...),
+    attachment: Optional[UploadFile] = File(None),
+    deduct_tokens: Optional[int] = Form(0),
+    user: dict = Depends(require_user)
+):
+    """الرد على التذكرة من طرف الزبون أو المدير مع إمكانية إرفاق ملف وخصم اختياري للرصيد"""
+    ticket = get_ticket_details(ticket_id)
+    if not ticket:
+        raise HTTPException(status_code=404, detail="Ticket introuvable.")
+    
+    is_admin = user.get("role") == "admin" or user.get("is_admin", False)
+    if not is_admin and ticket["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Accès non autorisé.")
+    
+    sender_role = "admin" if is_admin else "user"
+    att_name, att_bytes = validate_uploaded_attachment(attachment)
+    
+    # إذا كان الرد من المدير وهناك خصم اختياري للكريديت (0, 1, 2 crédits)
+    if is_admin and deduct_tokens and deduct_tokens > 0:
+        target_client = get_user_by_id(ticket["user_id"])
+        if target_client and target_client.get("tokens", 0) >= deduct_tokens:
+            deduct_user_tokens(
+                ticket["user_id"], 
+                deduct_tokens, 
+                "manual_remap", 
+                f"Traitement sur mesure Ticket #{ticket_id} ({ticket['vehicle_ecu']})"
+            )
+    
+    msg_id = add_ticket_message(
+        ticket_id=ticket_id,
+        sender_role=sender_role,
+        message_text=message.strip(),
+        attachment_name=att_name,
+        attachment_data=att_bytes,
+        new_status="answered" if is_admin else "open"
+    )
+    return {"success": True, "message_id": msg_id, "status": "answered" if is_admin else "open"}
+
+
+@app.get("/api/v1/support/messages/{message_id}/download")
+async def api_support_download_attachment(message_id: int, user: dict = Depends(require_user)):
+    """تحميل الملف المرفق من الرسالة مباشرة من قاعدة البيانات"""
+    att = get_ticket_attachment(message_id)
+    if not att:
+        raise HTTPException(status_code=404, detail="Fichier introuvable ou expiré.")
+    filename, data = att
+    from urllib.parse import quote
+    headers = {
+        "Content-Disposition": f"attachment; filename=\"{filename}\"; filename*=utf-8''{quote(filename)}"
+    }
+    return Response(content=data, media_type="application/octet-stream", headers=headers)
+
+
+@app.get("/api/v1/admin/support/tickets")
+async def api_admin_get_all_tickets(admin: dict = Depends(require_admin)):
+    """استرجاع كافة تذاكر الدعم والملفات في لوحة تحكم المدير"""
+    tickets = get_all_support_tickets()
+    open_count = sum(1 for t in tickets if t.get("status") == "open")
+    return {
+        "tickets": tickets,
+        "open_count": open_count
+    }
+
 
 if __name__ == "__main__":
     import uvicorn

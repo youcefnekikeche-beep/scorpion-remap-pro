@@ -451,9 +451,14 @@
             <button class="nav-tab" onclick="switchTab('tabHistory', this)">📜 Historique</button>
             <button class="nav-tab" onclick="switchTab('tabCredits', this)">💳 Forfaits Crédits</button>
             <button class="nav-tab" onclick="switchTab('tabCompare', this)" style="border: 1px solid rgba(16,185,129,0.4); color:#34d399; font-weight:800;">⚖️ Comparateur ECU</button>
+            <button class="nav-tab" onclick="switchTab('tabSupport', this)" style="border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; font-weight:800;">
+                💬 Support & Fichiers <span id="userSupportBadge" style="display:none; background:#e11d48; color:#fff; font-size:10px; padding:1px 6px; border-radius:10px; margin-left:4px;">0</span>
+            </button>
 {% if user.role == 'admin' or user.is_admin %}
-            <button class="nav-tab" onclick="switchTab('tabAdmin', this)" style="background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; font-weight:800;">🛡️ Administration</button>
-            {% endif %}
+            <button class="nav-tab" onclick="switchTab('tabAdmin', this)" style="background: rgba(220, 38, 38, 0.2); border: 1px solid rgba(239, 68, 68, 0.5); color: #fca5a5; font-weight:800; display:flex; align-items:center; gap:6px;">
+                🛡️ Administration <span id="adminPendingBadge" style="display:none; background:#e11d48; color:#fff; font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:12px; box-shadow:0 0 10px rgba(225,29,72,0.8); animation:pulse 1.5s infinite;">0</span>
+            </button>
+{% endif %}
         </nav>
 
         <!-- TAB 1: STUDIO REMAP -->
@@ -497,9 +502,9 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-top: 14px; border-top: 1px solid rgba(255, 255, 255, 0.08);">
-                    <span style="font-size: 12px; color: var(--text-muted);">Votre calculateur ne figure pas dans la liste officielle ?</span>
-                    <button type="button" onclick="requestManualProcessing()" style="background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.4); color: #fb7185; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                        📩 Calculateur non supporté - Demander un traitement manuel
+                    <span style="font-size: 12px; color: var(--text-muted);">Votre calculateur ne figure pas dans la liste officielle ou nécessite un traitement sur mesure ?</span>
+                    <button type="button" onclick="sendToSupportFromRemap()" style="background: linear-gradient(135deg, #e11d48, #be123c); border: none; color: #fff; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 800; cursor: pointer; box-shadow:0 0 15px rgba(225,29,72,0.4); display:flex; align-items:center; gap:6px;">
+                        <span>📩</span> Envoyer ce fichier au Support Admin
                     </button>
                 </div>
             </div>
@@ -1116,9 +1121,107 @@
             </div>
         </section>
 
-        <!-- TAB ADMIN (ONLY VISIBLE FOR ADMINS) -->
-        <button class=\"nav-tab\" onclick=\"switchTab('tabCompare', this)\" style=\"border: 1px solid rgba(16,185,129,0.4); color:#34d399; font-weight:800;\">⚖️ Comparateur ECU</button>
-{% if user.role == 'admin' or user.is_admin %}
+        <!-- TAB 7: SUPPORT & MESSAGERIE INTERNE (Client & Fichiers) -->
+        <section id="tabSupport" class="tab-panel">
+            <div style="margin-bottom:24px;">
+                <h2 style="font-size:22px; font-weight:800; color:#fff; display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:26px;">💬</span> Assistance Technique & Échange de Fichiers
+                    <span style="font-size:11px; background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; padding:3px 8px; border-radius:6px; font-weight:800;">100% Interne & Sécurisé</span>
+                </h2>
+                <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">Transmettez vos fichiers de calibration non reconnus ou vos demandes de retouche sur mesure directement à nos ingénieurs.</p>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(360px, 1fr)); gap:22px;">
+                <!-- New Ticket Form -->
+                <div style="background:var(--bg-card); border:1px solid #2a151c; border-radius:16px; padding:24px; box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                    <div style="font-size:16px; font-weight:800; color:#fb7185; margin-bottom:16px; display:flex; align-items:center; gap:8px;">
+                        <span>✍️</span> Ouvrir une Demande / Envoyer un Fichier
+                    </div>
+                    <form id="supportTicketForm" onsubmit="submitSupportTicket(event)" style="display:grid; gap:14px;">
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:6px;">Motif de la demande :</label>
+                            <select id="ticketSubject" required style="width:100%; padding:11px 14px; background:#08080c; border:1px solid #2a151c; border-radius:8px; color:#fff; font-size:13px; font-weight:600; outline:none;">
+                                <option value="Calculateur non supporté">Calculateur non supporté (Demande d'ajout)</option>
+                                <option value="Modification manuelle sur mesure">Modification manuelle sur mesure (Stage 1 / Custom OFF)</option>
+                                <option value="Erreur de traitement">Erreur de traitement automatique</option>
+                                <option value="Autre demande technique">Autre demande technique</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:6px;">Véhicule & Calculateur (ex: VW Golf 7 2.0 TDI - Bosch EDC17C64) :</label>
+                            <input type="text" id="ticketVehicleEcu" required placeholder="Marque, Modèle, Motorisation & Type ECU"
+                                   style="width:100%; padding:11px 14px; background:#08080c; border:1px solid #2a151c; border-radius:8px; color:#fff; font-size:13px; outline:none;">
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:6px;">Votre Message & Consignes :</label>
+                            <textarea id="ticketMessage" required rows="4" placeholder="Précisez votre demande (ex: Merci de faire DPF OFF et désactiver le DTC P2002)..."
+                                      style="width:100%; padding:11px 14px; background:#08080c; border:1px solid #2a151c; border-radius:8px; color:#fff; font-size:13px; outline:none; resize:vertical;"></textarea>
+                        </div>
+                        <div>
+                            <label style="display:block; font-size:12px; font-weight:700; color:#9ca3af; margin-bottom:6px;">Fichier Flash (.bin / .ori / .zip / .rar) ou Photo erreur :</label>
+                            <input type="file" id="ticketAttachment" accept=".bin,.ori,.mod,.zip,.rar,.7z,.jpg,.jpeg,.png,*"
+                                   style="width:100%; padding:10px; background:#08080c; border:1px dashed #e11d48; border-radius:8px; color:#9ca3af; font-size:12px; cursor:pointer;">
+                            <span style="font-size:11px; color:#6b7280; margin-top:4px; display:block;">Taille maximale: 16 Mo (Stocké en base de données sécurisée).</span>
+                        </div>
+                        <button type="submit" id="btnSubmitTicket" class="btn-action-main" style="padding:13px; font-size:14px; margin-top:6px;">
+                            🚀 Transmettre à l'Ingénieur SCORPION
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Client Tickets List & Live Chat Modal -->
+                <div style="background:var(--bg-card); border:1px solid #2a151c; border-radius:16px; padding:24px; box-shadow:0 8px 30px rgba(0,0,0,0.4);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <div style="font-size:16px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>📋</span> Mes Demandes en Cours (Tickets)
+                        </div>
+                        <button class="chip" onclick="loadUserTickets()" style="padding:4px 10px; font-size:11.5px;">🔄 Rafraîchir</button>
+                    </div>
+                    <div id="userTicketsList" style="display:grid; gap:12px; max-height:480px; overflow-y:auto; padding-right:4px;">
+                        <div style="text-align:center; padding:30px; color:var(--text-muted); font-size:13px;">Chargement de vos tickets...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Conversation Modal Box -->
+            <div id="ticketModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:9999; backdrop-filter:blur(6px); align-items:center; justify-content:center; padding:20px;">
+                <div style="background:#0c0c12; border:1.5px solid #e11d48; border-radius:18px; width:100%; max-width:820px; max-height:90vh; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 15px 50px rgba(225,29,72,0.3);">
+                    <!-- Modal Header -->
+                    <div style="padding:16px 20px; background:#12080d; border-bottom:1px solid #221319; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:15px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;" id="modalTicketTitle">
+                                Ticket #1001
+                            </div>
+                            <div style="font-size:12px; color:#fb7185; margin-top:2px;" id="modalTicketSubtitle">VW Golf 7 - Bosch EDC17</div>
+                        </div>
+                        <button onclick="closeTicketModal()" style="background:transparent; border:none; color:#9ca3af; font-size:22px; cursor:pointer; padding:4px 8px;">✕</button>
+                    </div>
+
+                    <!-- Messages Thread -->
+                    <div id="modalMessagesThread" style="flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:14px; background:#07070a;">
+                    </div>
+
+                    <!-- Reply Box -->
+                    <div style="padding:16px 20px; background:#0e0e14; border-top:1px solid #221319;">
+                        <form id="modalReplyForm" onsubmit="submitTicketReply(event)" style="display:flex; flex-direction:column; gap:10px;">
+                            <textarea id="replyMessageText" required rows="2" placeholder="Répondre à l'administrateur..." style="width:100%; padding:10px 14px; background:#07070a; border:1px solid #26141c; border-radius:8px; color:#fff; font-size:13px; outline:none; resize:none;"></textarea>
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <label style="font-size:12px; color:#9ca3af; cursor:pointer; display:flex; align-items:center; gap:6px; background:#180d13; border:1px solid #2c1620; padding:6px 12px; border-radius:6px;">
+                                        <span>📎</span> Joindre un fichier
+                                        <input type="file" id="replyAttachment" accept=".bin,.ori,.mod,.zip,.rar,.7z,.jpg,.jpeg,.png,*" style="display:none;" onchange="onReplyFileSelected(this)">
+                                    </label>
+                                    <span id="replySelectedFileName" style="font-size:11px; color:#fb7185; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                                </div>
+                                <button type="submit" id="btnSendReply" style="background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:8px 20px; border-radius:8px; font-weight:800; font-size:13px; cursor:pointer;">
+                                    Envoyer le message ✉️
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
         <section id="tabAdmin" class="tab-panel">
             <div style="margin-bottom:24px;">
                 <h2 style="font-size:20px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
@@ -1140,6 +1243,39 @@
                 <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px;">
                     <div style="font-size:12px; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Fichiers Modifiés Totaux</div>
                     <div style="font-size:32px; font-weight:800; color:#10b981; margin-top:6px;" id="adminStatFiles">--</div>
+                </div>
+            </div>
+
+            <!-- 1. Support & Client Files Inbox (Main Administration Section) -->
+            <div style="background:var(--bg-card); border:1.5px solid #e11d48; border-radius:16px; padding:22px; margin-bottom:24px; box-shadow:0 8px 30px rgba(225,29,72,0.25);">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                    <div>
+                        <h3 style="font-size:17px; font-weight:800; color:#fff; display:flex; align-items:center; gap:8px;">
+                            <span>📬</span> Boîte de Réception Support & Fichiers Clients
+                            <span id="adminTicketsCountBadge" style="background:#e11d48; color:#fff; font-size:11px; font-weight:800; padding:2px 8px; border-radius:12px;">0 Nouveau</span>
+                        </h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin-top:2px;">Fichiers binaires et demandes sur mesure déposés par les clients. Téléchargez le fichier original et renvoyez le fichier MOD directement.</p>
+                    </div>
+                    <button class="chip" onclick="loadAdminTickets()" style="background:#e11d48; border-color:#e11d48; color:#fff; font-weight:700;">🔄 Actualiser la boîte</button>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr style="background:#0e0c12;">
+                                <th>N° Ticket</th>
+                                <th>Client / Atelier</th>
+                                <th>Véhicule & Calculateur</th>
+                                <th>Sujet / Demande</th>
+                                <th>Dernier Message</th>
+                                <th>Statut</th>
+                                <th>Date</th>
+                                <th style="text-align:center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTicketsBody">
+                            <tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">Chargement des tickets clients...</td></tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -1236,7 +1372,8 @@
             btn.classList.add('active');
             if(tabId === 'tabCatalogue' && catalogueData.length === 0) loadCatalogue();
             if(tabId === 'tabHistory') loadUserHistory();
-            if(tabId === 'tabAdmin') loadAdminData();
+            if(tabId === 'tabSupport') loadUserTickets();
+            if(tabId === 'tabAdmin') { loadAdminData(); loadAdminTickets(); }
         }
 
         function getAuthHeaders(extra = {}) {
@@ -2392,8 +2529,358 @@
         }
 
         // =========================================================================
-        // Historique Utilisateur
+        // Système de Support & Messagerie Interne 100% (Client & Admin)
         // =========================================================================
+        let currentOpenTicketId = null;
+
+        function sendToSupportFromRemap() {
+            // التحويل الذكي من Studio Remap إلى تبويب الدعم
+            const tabBtn = Array.from(document.querySelectorAll('.nav-tab')).find(b => b.innerText.includes('Support'));
+            if(tabBtn) switchTab('tabSupport', tabBtn);
+
+            const subjSel = document.getElementById('ticketSubject');
+            if(subjSel) subjSel.value = 'Calculateur non supporté';
+
+            const ecuInput = document.getElementById('ticketVehicleEcu');
+            if(ecuInput) {
+                const brand = document.getElementById('brandVal') ? document.getElementById('brandVal').innerText : '';
+                const ecu = document.getElementById('ecuVal') ? document.getElementById('ecuVal').innerText : '';
+                if(brand && brand !== '--') {
+                    ecuInput.value = `${brand} - ${ecu}`;
+                } else if(currentFile) {
+                    ecuInput.value = currentFile.name.replace(/\.[^/.]+$/, "");
+                }
+            }
+
+            const msgBox = document.getElementById('ticketMessage');
+            if(msgBox && !msgBox.value) {
+                msgBox.value = "Bonjour, merci de traiter ce fichier ECU qui n'est pas reconnu automatiquement ou nécessite une retouche sur mesure.";
+            }
+
+            // إرفاق الملف المرفوع تلقائياً إن وُجد
+            if(currentFile) {
+                const dt = new DataTransfer();
+                dt.items.add(currentFile);
+                const fileInput = document.getElementById('ticketAttachment');
+                if(fileInput) fileInput.files = dt.files;
+            }
+        }
+
+        async function submitSupportTicket(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btnSubmitTicket');
+            btn.disabled = true;
+            btn.innerText = '⏳ Transmission du fichier et de la demande...';
+
+            const formData = new FormData();
+            formData.append('subject', document.getElementById('ticketSubject').value);
+            formData.append('vehicle_ecu', document.getElementById('ticketVehicleEcu').value);
+            formData.append('message', document.getElementById('ticketMessage').value);
+
+            const fileInput = document.getElementById('ticketAttachment');
+            if(fileInput && fileInput.files.length > 0) {
+                formData.append('attachment', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch('/api/v1/support/tickets', {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    alert('✅ ' + data.message);
+                    document.getElementById('supportTicketForm').reset();
+                    loadUserTickets();
+                } else {
+                    alert('Erreur: ' + (data.detail || 'Impossible d\'enregistrer le ticket'));
+                }
+            } catch(e) {
+                alert('Erreur de communication : ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = '🚀 Transmettre à l\'Ingénieur SCORPION';
+            }
+        }
+
+        async function loadUserTickets() {
+            const listEl = document.getElementById('userTicketsList');
+            if(!listEl) return;
+            try {
+                const res = await fetch('/api/v1/support/tickets', {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
+                });
+                if(!res.ok) return;
+                const data = await res.json();
+                const tickets = data.tickets || [];
+                
+                // تحديث شارة الردود الجديدة
+                const userBadge = document.getElementById('userSupportBadge');
+                const answeredCount = tickets.filter(t => t.status === 'answered').length;
+                if(userBadge) {
+                    if(answeredCount > 0) {
+                        userBadge.style.display = 'inline-block';
+                        userBadge.innerText = `${answeredCount} Répondu`;
+                    } else {
+                        userBadge.style.display = 'none';
+                    }
+                }
+
+                if(tickets.length === 0) {
+                    listEl.innerHTML = '<div style="text-align:center; padding:30px; color:var(--text-muted); font-size:13px;">Vous n\'avez aucune demande en cours.<br>Remplissez le formulaire ci-contre pour solliciter nos ingénieurs.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                tickets.forEach(t => {
+                    const isAnswered = t.status === 'answered';
+                    const statusBadge = isAnswered 
+                        ? '<span style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4); font-size:11px; font-weight:800; padding:2px 8px; border-radius:12px;">✅ Répondu par l\'Admin</span>'
+                        : '<span style="background:rgba(245,158,11,0.2); color:#fbbf24; border:1px solid rgba(245,158,11,0.4); font-size:11px; font-weight:800; padding:2px 8px; border-radius:12px;">⏳ En attente de traitement</span>';
+
+                    const item = document.createElement('div');
+                    item.style.cssText = 'background:#08080c; border:1px solid #22141a; border-radius:12px; padding:14px; cursor:pointer; transition:all 0.2s;';
+                    item.onmouseenter = () => { item.style.borderColor = '#e11d48'; item.style.transform = 'translateY(-1px)'; };
+                    item.onmouseleave = () => { item.style.borderColor = '#22141a'; item.style.transform = 'none'; };
+                    item.onclick = () => openTicketModal(t.id);
+
+                    item.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <strong style="color:#fff; font-size:13.5px;">Ticket #${t.id} - ${t.subject}</strong>
+                            ${statusBadge}
+                        </div>
+                        <div style="font-size:12px; color:#fb7185; font-weight:700; margin-bottom:4px;">🚗 ${t.vehicle_ecu}</div>
+                        <div style="font-size:12px; color:#9ca3af; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-bottom:6px;">
+                            ${t.last_sender === 'admin' ? '🛡️ <strong>Admin :</strong> ' : '👤 <strong>Moi :</strong> '} ${t.last_message || ''}
+                        </div>
+                        <div style="font-size:11px; color:#6b7280; display:flex; justify-content:space-between; align-items:center;">
+                            <span>🕒 Mis à jour : ${t.updated_at}</span>
+                            <span style="color:#e11d48; font-weight:800;">Ouvrir la discussion ➔</span>
+                        </div>
+                    `;
+                    listEl.appendChild(item);
+                });
+            } catch(e) {
+                console.error("Error loading user tickets:", e);
+            }
+        }
+
+        async function openTicketModal(ticketId) {
+            currentOpenTicketId = ticketId;
+            const modal = document.getElementById('ticketModal');
+            if(!modal) return;
+            modal.style.display = 'flex';
+
+            const thread = document.getElementById('modalMessagesThread');
+            thread.innerHTML = '<div style="text-align:center; padding:30px; color:#9ca3af;">Chargement de la conversation...</div>';
+
+            try {
+                const res = await fetch(`/api/v1/support/tickets/${ticketId}`, {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
+                });
+                if(!res.ok) {
+                    alert('Impossible de charger le ticket');
+                    closeTicketModal();
+                    return;
+                }
+                const data = await res.json();
+                const ticket = data.ticket;
+
+                document.getElementById('modalTicketTitle').innerHTML = `Demande #${ticket.id} - <span style="color:#e11d48;">${ticket.subject}</span>`;
+                document.getElementById('modalTicketSubtitle').innerText = `${ticket.vehicle_ecu} • Client : ${ticket.user_name} (${ticket.workshop_name}) • Solde : ${ticket.user_tokens} Crédits`;
+
+                thread.innerHTML = '';
+                ticket.messages.forEach(msg => {
+                    const isAdmin = msg.sender_role === 'admin';
+                    const msgBox = document.createElement('div');
+                    msgBox.style.cssText = `max-width:80%; padding:14px 18px; border-radius:14px; align-self:${isAdmin ? 'flex-start' : 'flex-end'}; ${isAdmin ? 'background:#1a0f14; border:1px solid #e11d48;' : 'background:#14141d; border:1px solid #2a2a38;'}`;
+
+                    let attHtml = '';
+                    if(msg.has_attachment && msg.attachment_name) {
+                        attHtml = `
+                            <div style="margin-top:10px; padding:10px 14px; background:#08080c; border:1px solid #2a151c; border-radius:8px; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+                                <div style="display:flex; align-items:center; gap:8px; overflow:hidden;">
+                                    <span style="font-size:18px;">💾</span>
+                                    <span style="font-size:12px; color:#fff; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${msg.attachment_name}</span>
+                                </div>
+                                <a href="/api/v1/support/messages/${msg.id}/download" style="background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; text-decoration:none; font-size:11.5px; font-weight:800; padding:5px 12px; border-radius:6px; white-space:nowrap; box-shadow:0 0 10px rgba(225,29,72,0.4);">
+                                    📥 Télécharger
+                                </a>
+                            </div>
+                        `;
+                    }
+
+                    msgBox.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:6px;">
+                            <strong style="font-size:12px; color:${isAdmin ? '#fb7185' : '#38bdf8'}; font-weight:800;">
+                                ${isAdmin ? '🛡️ Administrateur SCORPION HQ' : '👤 Vous (Client)'}
+                            </strong>
+                            <span style="font-size:10.5px; color:#6b7280;">${msg.created_at}</span>
+                        </div>
+                        <div style="font-size:13px; color:#e2e8f0; line-height:1.5; white-space:pre-wrap;">${msg.message_text}</div>
+                        ${attHtml}
+                    `;
+                    thread.appendChild(msgBox);
+                });
+
+                thread.scrollTop = thread.scrollHeight;
+            } catch(e) {
+                alert('Erreur : ' + e.message);
+                closeTicketModal();
+            }
+        }
+
+        function closeTicketModal() {
+            const modal = document.getElementById('ticketModal');
+            if(modal) modal.style.display = 'none';
+            currentOpenTicketId = null;
+            const replyFileEl = document.getElementById('replyAttachment');
+            if(replyFileEl) replyFileEl.value = '';
+            const fileNameEl = document.getElementById('replySelectedFileName');
+            if(fileNameEl) fileNameEl.innerText = '';
+        }
+
+        function onReplyFileSelected(input) {
+            const nameEl = document.getElementById('replySelectedFileName');
+            if(input.files && input.files.length > 0) {
+                nameEl.innerText = '📎 ' + input.files[0].name;
+            } else {
+                nameEl.innerText = '';
+            }
+        }
+
+        async function submitTicketReply(event) {
+            event.preventDefault();
+            if(!currentOpenTicketId) return;
+
+            const btn = document.getElementById('btnSendReply');
+            btn.disabled = true;
+            btn.innerText = 'Envoi en cours...';
+
+            const formData = new FormData();
+            formData.append('message', document.getElementById('replyMessageText').value);
+            const fileInput = document.getElementById('replyAttachment');
+            if(fileInput && fileInput.files.length > 0) {
+                formData.append('attachment', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`/api/v1/support/tickets/${currentOpenTicketId}/reply`, {
+                    method: 'POST',
+                    headers: getAuthHeaders(),
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await res.json();
+                if(res.ok && data.success) {
+                    document.getElementById('replyMessageText').value = '';
+                    fileInput.value = '';
+                    document.getElementById('replySelectedFileName').innerText = '';
+                    openTicketModal(currentOpenTicketId);
+                    loadUserTickets();
+                    if(document.getElementById('tabAdmin') && document.getElementById('tabAdmin').classList.contains('active')) {
+                        loadAdminTickets();
+                    }
+                } else {
+                    alert('Erreur : ' + (data.detail || 'Impossible d\'envoyer le message'));
+                }
+            } catch(e) {
+                alert('Erreur serveur : ' + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Envoyer le message ✉️';
+            }
+        }
+
+        // =========================================================================
+        // لوحة تحكم المدير: تذاكر الزبائن والملفات
+        // =========================================================================
+        async function loadAdminTickets() {
+            const tbody = document.getElementById('adminTicketsBody');
+            if(!tbody) return;
+            try {
+                const res = await fetch('/api/v1/admin/support/tickets', {
+                    headers: getAuthHeaders(),
+                    credentials: 'include'
+                });
+                if(!res.ok) return;
+                const data = await res.json();
+                const tickets = data.tickets || [];
+                const openCount = data.open_count || 0;
+
+                // تحديث شارة الإدارة الحمراء المضيئة
+                const adminBadge = document.getElementById('adminPendingBadge');
+                if(adminBadge) {
+                    if(openCount > 0) {
+                        adminBadge.style.display = 'inline-block';
+                        adminBadge.innerText = `${openCount} NOUVEAU`;
+                    } else {
+                        adminBadge.style.display = 'none';
+                    }
+                }
+                const inboxBadge = document.getElementById('adminTicketsCountBadge');
+                if(inboxBadge) inboxBadge.innerText = `${openCount} Nouveau(x) en attente`;
+
+                if(tickets.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:24px; color:var(--text-muted);">Aucun ticket de support client pour le moment.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = '';
+                tickets.forEach(t => {
+                    const isOpen = t.status === 'open';
+                    const statusBadge = isOpen
+                        ? '<span style="background:#e11d48; color:#fff; font-size:11px; font-weight:800; padding:3px 9px; border-radius:12px; box-shadow:0 0 10px rgba(225,29,72,0.5);">⏳ En attente (OPEN)</span>'
+                        : '<span style="background:rgba(16,185,129,0.2); color:#34d399; border:1px solid #10b981; font-size:11px; font-weight:800; padding:3px 9px; border-radius:12px;">✅ Traité / Répondu</span>';
+
+                    const tr = document.createElement('tr');
+                    tr.style.cssText = 'border-bottom:1px solid #1a1016; transition:0.15s;';
+                    tr.onmouseenter = () => { tr.style.background = 'rgba(225,29,72,0.06)'; };
+                    tr.onmouseleave = () => { tr.style.background = 'transparent'; };
+
+                    tr.innerHTML = `
+                        <td style="padding:12px;"><strong style="color:#fb7185; font-family:monospace; font-size:13px;">#${t.id}</strong></td>
+                        <td style="padding:12px;">
+                            <strong style="color:#fff;">${t.user_name}</strong>
+                            <div style="font-size:11px; color:#9ca3af;">${t.workshop_name || 'Atelier'} • 🪙 ${t.user_tokens} crédits</div>
+                        </td>
+                        <td style="padding:12px; color:#fb7185; font-weight:700;">${t.vehicle_ecu}</td>
+                        <td style="padding:12px; color:#e2e8f0; font-size:12px;">${t.subject}</td>
+                        <td style="padding:12px; color:#9ca3af; font-size:11.5px; max-width:240px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${t.last_message || ''}
+                        </td>
+                        <td style="padding:12px;">${statusBadge}</td>
+                        <td style="padding:12px; font-size:11px; color:#6b7280;">${t.updated_at}</td>
+                        <td style="padding:12px; text-align:center;">
+                            <button onclick="openAdminReplyModal(${t.id})" style="background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; box-shadow:0 0 10px rgba(225,29,72,0.3);">
+                                Traiter & Répondre ✉️
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } catch(e) {
+                console.error("Error loading admin tickets:", e);
+            }
+        }
+
+        function openAdminReplyModal(ticketId) {
+            openTicketModal(ticketId);
+        }
+
+        // تفقد التذاكر تلقائياً كل 15 ثانية للزبون والمدير
+        setInterval(() => {
+            loadUserTickets();
+            const tabAdmin = document.getElementById('tabAdmin');
+            if(tabAdmin && tabAdmin.classList.contains('active')) {
+                loadAdminTickets();
+            }
+        }, 15000);
+
         async function loadUserHistory() {
             try {
                 const res = await fetch('/api/v1/user/history');
