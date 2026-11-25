@@ -24,7 +24,7 @@ VAG_GROUP_REGISTRY: Dict[str, Dict[str, Any]] = {
         "brand": "VAG GROUP (VW / Audi / Seat / Skoda)",
         "fuel_type": "DIESEL",
         "standard_sizes": [2097152, 4194304], # 2MB (TC1766/TC1767/TC1796), 4MB (TC1797)
-        "signatures": [b"EDC17", b"CP14", b"CP20", b"C46", b"C64", b"C74"],
+        "signatures": [b"EDC17", b"CP04", b"17C04", b"CP14", b"CP20", b"C46", b"C64", b"C74"],
         "solutions": ["DTC OFF", "DPF OFF", "EGR OFF", "VSA OFF", "TVA OFF", "ADBLUE OFF", "IMMO OFF"],
         "dtc_table_type": "16bit_le_mask",
         "description": "Calculateur Bosch EDC17 TriCore TDI (Golf 6/7, Passat B7/B8, Audi A3/A4/A6, Tiguan)"

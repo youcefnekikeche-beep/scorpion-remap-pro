@@ -55,6 +55,19 @@ DAVINCI_VAG_REGISTRY: Dict[str, Dict[str, Any]] = {
         "source": "DaVinci v1.0.28 / v1.0.30",
         "description": "Bosch EDC16CP34 (Passat B6 2.0TDI, Audi A6 3.0TDI V6, Touareg 3.0TDI)"
     },
+    "vag_edc17cp04": {
+        "id": "vag_edc17cp04",
+        "name": "Bosch EDC17CP04 / EDC17CP14 (Audi A4 / A5 / A6 / Q5 2.0 / 2.7 / 3.0 TDI)",
+        "brand": "VAG GROUP (VW / Audi / Seat / Skoda)",
+        "fuel_type": "DIESEL",
+        "standard_sizes": [2097152, 4194304],
+        "signatures": [b"EDC17CP04", b"CP04", b"17C04", b"EDC17_CP04", b"CP14"],
+        "solutions": ["DTC OFF", "DPF OFF", "EGR OFF", "TVA OFF", "FLAPS OFF", "ADBLUE OFF", "VSA OFF", "HOT START OFF"],
+        "plug_notes": "DPF: débrancher sonde de température amont et capteur pression différentielle. EGR: laisser branchée.",
+        "dtc_table_type": "16bit_le_mask",
+        "source": "DaVinci v1.0.28 / v1.0.30",
+        "description": "Bosch EDC17CP04 TDI Common Rail (Audi A4 B8, A5, A6 C6, Q5 2.0/2.7/3.0 TDI)"
+    },
     "vag_edc17c46": {
         "id": "vag_edc17c46",
         "name": "Bosch EDC17C46 (VAG 1.6 TDI Bluemotion / CAYC / CLHA)",

@@ -124,22 +124,46 @@ def identify_ecu(binary_data: bytes, filename: str) -> dict:
     detected_ecu_id = None
     fn_lower = filename.lower()
 
-    # 2. Correspondance stricte par signatures et tailles dans les moteurs modulaires
-    for ecu_id, info in FLAT_ECU_REGISTRY.items():
-        matched_sig = False
-        for sig in info.get("signatures", []):
-            if sig in binary_data:
-                matched_sig = True
-                break
-        
-        # Vérification par nom de fichier si signature présente
-        if not matched_sig and any(p.lower() in fn_lower for p in [info["id"], ecu_id.replace("_", " "), info["name"].split()[0]]):
-            if file_size in info.get("standard_sizes", []):
-                matched_sig = True
+    # 1.5 Détection prioritaire précise basée sur le nom de fichier (Audi / VAG / BMW / Mercedes / etc.)
+    if any(k in fn_lower for k in ["cp04", "17c04", "edc17c04", "c04"]):
+        if "vag_edc17cp04" in FLAT_ECU_REGISTRY:
+            detected_ecu_id = "vag_edc17cp04"
+        elif "vag_edc17" in FLAT_ECU_REGISTRY:
+            detected_ecu_id = "vag_edc17"
+    elif any(k in fn_lower for k in ["cp14", "edc17cp14"]):
+        detected_ecu_id = "vag_edc17cp04" if "vag_edc17cp04" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "c46" in fn_lower or "edc17c46" in fn_lower:
+        detected_ecu_id = "vag_edc17c46" if "vag_edc17c46" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "c64" in fn_lower or "edc17c64" in fn_lower:
+        detected_ecu_id = "vag_edc17c64" if "vag_edc17c64" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "c74" in fn_lower or "edc17c74" in fn_lower:
+        detected_ecu_id = "vag_edc17c74" if "vag_edc17c74" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "cp44" in fn_lower or "edc17cp44" in fn_lower:
+        detected_ecu_id = "vag_edc17cp44" if "vag_edc17cp44" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "cp54" in fn_lower or "edc17cp54" in fn_lower:
+        detected_ecu_id = "vag_edc17cp54" if "vag_edc17cp54" in FLAT_ECU_REGISTRY else "vag_edc17"
+    elif "pcr2" in fn_lower or "pcr2.1" in fn_lower:
+        detected_ecu_id = "vag_pcr21" if "vag_pcr21" in FLAT_ECU_REGISTRY else "vag_edc17"
 
-        if matched_sig and (not info.get("standard_sizes") or file_size in info["standard_sizes"] or file_size % 65536 == 0):
-            detected_ecu_id = ecu_id
-            break
+    # 2. Correspondance stricte par signatures et tailles dans les moteurs modulaires
+    if not detected_ecu_id:
+        for ecu_id, info in FLAT_ECU_REGISTRY.items():
+            matched_sig = False
+            for sig in info.get("signatures", []):
+                if sig in binary_data:
+                    matched_sig = True
+                    break
+            
+            # Vérification par nom de fichier si signature présente (sauf termes génériques comme Bosch/Siemens)
+            generic_brands = ["bosch", "siemens", "delphi", "continental", "denso", "marelli"]
+            tokens_to_check = [p.lower() for p in [info["id"], ecu_id.replace("_", " ")] if p.lower() not in generic_brands]
+            if not matched_sig and any(p in fn_lower for p in tokens_to_check):
+                if file_size in info.get("standard_sizes", []):
+                    matched_sig = True
+
+            if matched_sig and (not info.get("standard_sizes") or file_size in info["standard_sizes"] or file_size % 65536 == 0):
+                detected_ecu_id = ecu_id
+                break
 
     # 3. Détection spécifique Bosch VAG / BMW / Mercedes si Bosch HW/SW présent
     if not detected_ecu_id and (sw_version or hw_version):

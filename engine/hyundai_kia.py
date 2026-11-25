@@ -58,7 +58,7 @@ HYUNDAI_KIA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "brand": "HYUNDAI / KIA",
         "fuel_type": "DIESEL",
         "standard_sizes": [2097152, 4194304], # 2MB TC1782, 4MB TC1793
-        "signatures": [b"EDC17C57", b"1037", b"1039", b"P1274"],
+        "signatures": [b"EDC17C57", b"P1274"],
         "solutions": ["DTC OFF", "DPF OFF", "EGR OFF", "ADBLUE OFF", "SL OFF"],
         "dtc_table_type": "16bit_le_mask",
         "description": "Calculateur Bosch EDC17C57 TriCore Diesel (Tucson, Sportage, Ceed, i30)"
@@ -201,7 +201,7 @@ HYUNDAI_KIA_REGISTRY: Dict[str, Dict[str, Any]] = {
         "brand": "HYUNDAI / KIA",
         "fuel_type": "DIESEL",
         "standard_sizes": [2097152], # 2MB MPC562
-        "signatures": [b"EDC16C39", b"10373", b"10375", b"CR39"],
+        "signatures": [b"EDC16C39", b"CR39"],
         "solutions": ["DTC OFF", "DPF OFF", "EGR OFF", "IMMO OFF"],
         "dtc_table_type": "16bit_be_direct",
         "description": "Calculateur Bosch EDC16C39 Diesel CRDi (H1, Porter, Santa Fe, Sorento, Tucson, i30)"

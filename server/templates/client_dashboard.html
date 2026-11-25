@@ -1453,16 +1453,24 @@
                     }
                 }
 
-                // 2. التحقق من دعم السيرفر الفعلي للحل
+                // 2. التحقق من دعم السيرفر الفعلي للحل مع مطابقة دقيقة لكافة الحلول
                 const isSupported = supportedSolutionsList.some(s => {
-                    const su = s.toUpperCase();
+                    const su = s.toUpperCase().trim();
                     if (su === ku || ku.includes(su) || su.includes(ku)) return true;
-                    if ((su.includes('VSA') || su.includes('SWIRL')) && (ku.includes('VSA') || ku.includes('SWIRL'))) return true;
-                    if ((su.includes('CAT') || su.includes('LAMBDA') || su.includes('DECAT')) && (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT'))) return true;
+                    if ((su.includes('DPF') || su.includes('FAP')) && (ku.includes('DPF') || ku.includes('FAP'))) return true;
+                    if (su.includes('EGR') && ku.includes('EGR')) return true;
+                    if ((su.includes('ADBLUE') || su.includes('SCR')) && (ku.includes('ADBLUE') || ku.includes('SCR'))) return true;
+                    if ((su.includes('CAT') || su.includes('LAMBDA') || su.includes('DECAT') || su.includes('O2')) && (ku.includes('CAT') || ku.includes('LAMBDA') || ku.includes('DECAT') || ku.includes('O2'))) return true;
+                    if ((su.includes('VSA') || su.includes('SWIRL') || su.includes('FLAP')) && (ku.includes('VSA') || ku.includes('SWIRL') || ku.includes('FLAP'))) return true;
                     if (su.includes('TVA') && ku.includes('TVA')) return true;
                     if (su.includes('IMMO') && ku.includes('IMMO')) return true;
                     if (su.includes('EVAP') && ku.includes('EVAP')) return true;
-                    if ((su.includes('ADBLUE') || su.includes('SCR')) && (ku.includes('ADBLUE') || ku.includes('SCR'))) return true;
+                    if ((su.includes('START') || su.includes('STOP')) && (ku.includes('START') || ku.includes('STOP'))) return true;
+                    if ((su.includes('SPEED') || su.includes('SL OFF') || su.includes('LIMIT')) && (ku.includes('SPEED') || ku.includes('LIMIT'))) return true;
+                    if (su.includes('MAF') && ku.includes('MAF')) return true;
+                    if ((su.includes('HOT') || su.includes('WARM')) && (ku.includes('HOT') || ku.includes('WARM'))) return true;
+                    if (su.includes('TORQUE') && ku.includes('TORQUE')) return true;
+                    if (su.includes('STAGE') && ku.includes('STAGE')) return true;
                     return false;
                 });
 
