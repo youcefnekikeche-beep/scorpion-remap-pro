@@ -516,9 +516,14 @@
                         <span>Calculateur Sélectionné</span>
                         <span id="detectedModeBadge" style="font-size:11px; padding:3px 8px; border-radius:6px; background:rgba(16,185,129,0.2); color:#34d399; border:1px solid rgba(16,185,129,0.4);">Automatique ✅</span>
                     </h3>
-                    <button type="button" onclick="toggleManualSelector(true)" style="background:rgba(225, 29, 72, 0.15); border:1px solid rgba(225, 29, 72, 0.4); color:#fb7185; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
-                        <span>✏️</span> Corriger / Choisir un autre calculateur manuellement
-                    </button>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button type="button" onclick="sendToSupportFromRemap()" style="background:linear-gradient(135deg, #e11d48, #9f1239); border:1px solid rgba(251,113,133,0.3); color:#fff; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:800; cursor:pointer; display:flex; align-items:center; gap:6px; box-shadow:0 0 12px rgba(225,29,72,0.35);">
+                            <span>📩</span> Envoyer au Support Admin
+                        </button>
+                        <button type="button" onclick="toggleManualSelector(true)" style="background:rgba(225, 29, 72, 0.15); border:1px solid rgba(225, 29, 72, 0.4); color:#fb7185; padding:6px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+                            <span>✏️</span> Corriger manuellement
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="specs-grid">
