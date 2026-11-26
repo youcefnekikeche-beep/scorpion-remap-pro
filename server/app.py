@@ -458,35 +458,9 @@ async def api_login(payload: dict, request: Request, response: Response):
     except PermissionError as pe:
         raise HTTPException(status_code=403, detail=str(pe))
     except ValueError as ve:
-        err_msg = str(ve)
-        if err_msg.startswith("EMAIL_UNVERIFIED:"):
-            parts = err_msg.split(":")
-            # parts: ["EMAIL_UNVERIFIED", user_id, email, email_code, full_name]
-            return JSONResponse(
-                status_code=403,
-                content={
-                    "detail": "Compte non activé. Veuillez saisir le code secret reçu par email.",
-                    "requires_email_verification": True,
-                    "user_id": int(parts[1]),
-                    "email": parts[2],
-                    "email_code": parts[3] if len(parts) > 3 else "",
-                    "full_name": parts[4] if len(parts) > 4 else "Client"
-                }
-            )
-        elif err_msg.startswith("WHATSAPP_UNVERIFIED:"):
-            parts = err_msg.split(":")
-            return JSONResponse(
-                status_code=403,
-                content={
-                    "detail": "Compte non activé. Veuillez confirmer votre adresse email.",
-                    "requires_email_verification": True,
-                    "user_id": int(parts[1]),
-                    "email": parts[2],
-                    "email_code": parts[3] if len(parts) > 3 else "",
-                    "full_name": parts[4] if len(parts) > 4 else "Client"
-                }
-            )
-        raise HTTPException(status_code=400, detail=err_msg)
+        raise HTTPException(status_code=400, detail=str(ve))
+    except PermissionError as pe:
+        raise HTTPException(status_code=403, detail=str(pe))
 
     if not user:
         raise HTTPException(
@@ -551,39 +525,23 @@ async def api_register(payload: dict, request: Request, response: Response):
     new_user["username"] = new_user.get("email", "")
     new_user["is_admin"] = (new_user.get("role") == "admin")
 
-    # If new user is an admin, auto-login
-    if new_user.get("role") == "admin":
-        token = str(uuid.uuid4())
-        SESSIONS[token] = new_user["id"]
-        save_session_db(token, new_user["id"])
-        response.set_cookie(key="access_token", value=token, max_age=86400*30, samesite="lax")
-        return {
-            "success": True,
-            "requires_email_verification": False,
-            "access_token": token,
-            "redirect": "/admin",
-            "user": new_user
-        }
+    # Auto-Activation: Direct 1-second login & 10 free credits for all clients & workshops
+    token = str(uuid.uuid4())
+    SESSIONS[token] = new_user["id"]
+    save_session_db(token, new_user["id"])
+    response.set_cookie(key="access_token", value=token, max_age=86400*30, samesite="lax")
+    response.set_cookie(key="ecu_token", value=token, httponly=True, max_age=86400*30, samesite="lax")
 
-    # Real Email Verification: Send OTP directly to user's Email address
-    smtp_cfg = get_smtp_config()
-    code = new_user.get("email_code", "")
-    sent_ok, send_msg = send_verification_email(
-        to_email=new_user["email"],
-        code=code,
-        client_name=new_user["full_name"],
-        config=smtp_cfg
-    )
+    redirect_url = "/admin" if new_user.get("role") == "admin" else "/portal"
 
     return {
         "success": True,
-        "requires_email_verification": True,
-        "user_id": new_user["id"],
-        "full_name": new_user["full_name"],
-        "workshop_name": new_user["workshop_name"],
-        "email": new_user["email"],
-        "email_sent": sent_ok,
-        "detail": f"Un code de confirmation a été envoyé à votre adresse email ({new_user['email']})." if sent_ok else "Veuillez saisir le code de confirmation envoyé à votre adresse email."
+        "requires_email_verification": False,
+        "requires_whatsapp_verification": False,
+        "access_token": token,
+        "redirect": redirect_url,
+        "detail": "🎉 Bienvenue ! Votre compte est activé avec succès avec 10 Crédits offerts.",
+        "user": new_user
     }
 
 @app.get("/api/v1/user/me")

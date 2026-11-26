@@ -269,9 +269,14 @@
             <div class="card-header">
                 <h2><span>👥</span> إدارة حسابات الزبائن وأصحاب الورشات</h2>
                 <div class="card-header-actions" style="display:flex; align-items:center; gap:8px;">
+                    <!-- مصيدة إكمال كروم التلقائي لمنع وضع إيميل الأدمن في مربع البحث -->
+                    <form style="display:none; position:absolute; left:-9999px;" autocomplete="off" aria-hidden="true">
+                        <input type="text" name="chrome_decoy_user" autocomplete="username">
+                        <input type="password" name="chrome_decoy_pass" autocomplete="current-password">
+                    </form>
                     <div style="position:relative; display:flex; align-items:center;">
-                        <input type="search" id="userSearchInput" class="search-box" readonly onfocus="this.removeAttribute('readonly')" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." oninput="filterUsersTable()" style="padding-left:32px;">
-                        <button type="button" onclick="clearUserSearch()" title="مسح البحث وعرض الكل" style="position:absolute; left:8px; background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:2px;">✕</button>
+                        <input type="text" id="userSearchInput" name="clients_search_filter_query" class="search-box" autocomplete="chrome-off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." oninput="filterUsersTable()" style="padding-left:32px;">
+                        <button type="button" onclick="clearUserSearch()" title="مسح البحث وعرض جميع الزبائن" style="position:absolute; left:8px; background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:2px;">✕</button>
                     </div>
                     <button class="btn-add" onclick="openAddUserModal()">+ إضافة حساب زبون جديد</button>
                 </div>
@@ -579,6 +584,21 @@
                 filterUsersTable();
             }
         }
+
+        // مسح أي إكمال تلقائي يحاول متصفح كروم حقنه في مربع البحث
+        window.addEventListener('load', () => {
+            const resetSearchBox = () => {
+                const s = document.getElementById('userSearchInput');
+                if (s && (s.value.includes('@') || s.value.includes('admin') || s.value.includes('scorpion'))) {
+                    s.value = '';
+                    filterUsersTable();
+                }
+            };
+            resetSearchBox();
+            setTimeout(resetSearchBox, 200);
+            setTimeout(resetSearchBox, 600);
+            setTimeout(resetSearchBox, 1200);
+        });
 
         function filterUsersTable() {
             const query = document.getElementById('userSearchInput').value.trim().toLowerCase();

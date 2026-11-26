@@ -610,10 +610,13 @@
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
             }
 
-            showAlert("Bienvenue ! Redirection en cours...", true);
+            const welcomeMsg = (currentLang === 'ar') 
+                ? "🎉 مبروك! تم تفعيل حسابك بنجاح وحصلت على 10 نقاط هدية. جاري الدخول..."
+                : "🎉 Félicitations ! Votre compte est activé avec 10 crédits offerts. Redirection en cours...";
+            showAlert(welcomeMsg, true);
             setTimeout(() => {
                 window.location.href = data.redirect || '/portal';
-            }, 1000);
+            }, 800);
         } catch (err) {
             showAlert("Erreur réseau : " + err.message);
         }

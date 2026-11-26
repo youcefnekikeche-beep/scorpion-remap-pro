@@ -66,8 +66,8 @@ def init_db():
             except Exception:
                 pass
 
-        # Super admin users and pre-existing accounts are automatically verified
-        cursor.execute("UPDATE users SET email_verified = 1, is_active = 1 WHERE role = 'admin' OR id <= 9")
+        # All registered users are automatically verified and active
+        cursor.execute("UPDATE users SET email_verified = 1, whatsapp_verified = 1, is_active = 1 WHERE is_active IS NULL OR is_active = 0")
 
         # جدول إعدادات النظام وربط بوابات WhatsApp
         cursor.execute("""
@@ -255,10 +255,11 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
         user_role = "admin" if user_is_super else "user"
         initial_tokens = 9999 if user_is_super else (10 if bonus_granted else 0)
 
-        # Generate 6-digit Email verification code
-        email_code = str(random.randint(100000, 999999)) if not user_is_super else "000000"
-        email_verified = 1 if user_is_super else 0
-        is_active_init = 1 if user_is_super else 0
+        # Auto-Activation: Direct access for workshops and clients
+        email_code = "000000"
+        email_verified = 1
+        whatsapp_verified = 1
+        is_active_init = 1
 
         cursor.execute("""
         INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code, email_verified, email_code)
@@ -274,9 +275,9 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             user_role,
             ip,
             is_active_init,
-            1, # whatsapp_verified default OK
+            1, # whatsapp_verified OK
             "000000",
-            email_verified,
+            1, # email_verified OK
             email_code
         ))
         new_user_id = cursor.lastrowid
@@ -333,8 +334,6 @@ def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str
 
         user_dict = dict(user)
         if user_dict.get("is_active") != 1:
-            if user_dict.get("email_verified") == 0:
-                raise ValueError(f"EMAIL_UNVERIFIED:{user_dict['id']}:{user_dict['email']}:{user_dict.get('email_code') or ''}:{user_dict['full_name']}")
             raise PermissionError("Ce compte est suspendu ou désactivé par l'administrateur.")
         # ترقية حساب المدير تلقائياً إذا كان من عناوين المدراء المعتمدة
         if is_super_admin(user_dict.get("email", "")):
