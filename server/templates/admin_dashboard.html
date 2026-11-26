@@ -270,7 +270,7 @@
                 <h2><span>👥</span> إدارة حسابات الزبائن وأصحاب الورشات</h2>
                 <div class="card-header-actions" style="display:flex; align-items:center; gap:8px;">
                     <div style="position:relative; display:flex; align-items:center;">
-                        <input type="text" id="userSearchInput" class="search-box" autocomplete="off" name="user_search_prevent_autofill" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." oninput="filterUsersTable()" style="padding-left:32px;">
+                        <input type="search" id="userSearchInput" class="search-box" readonly onfocus="this.removeAttribute('readonly')" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." oninput="filterUsersTable()" style="padding-left:32px;">
                         <button type="button" onclick="clearUserSearch()" title="مسح البحث وعرض الكل" style="position:absolute; left:8px; background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:2px;">✕</button>
                     </div>
                     <button class="btn-add" onclick="openAddUserModal()">+ إضافة حساب زبون جديد</button>
@@ -473,7 +473,15 @@
 
                 // رندرة المستخدمين
                 cachedUsers = data.users || [];
-                renderUsersTable(cachedUsers);
+                const searchInp = document.getElementById('userSearchInput');
+                if (searchInp && (searchInp.value.trim() === 'admin@scorpion-remap.pro' || searchInp.value.includes('admin@'))) {
+                    searchInp.value = '';
+                }
+                if (searchInp && searchInp.value.trim()) {
+                    filterUsersTable();
+                } else {
+                    renderUsersTable(cachedUsers);
+                }
 
                 // رندرة الملفات
                 const ftb = document.getElementById('filesTableBody');
@@ -736,6 +744,10 @@
         // بدء التشغيل والتحديث الدوري التلقائي كل 8 ثوانٍ
         fetchDashboardData();
         setInterval(fetchDashboardData, 8000);
+        window.addEventListener('load', () => {
+            const s = document.getElementById('userSearchInput');
+            if (s) { s.value = ''; filterUsersTable(); }
+        });
     
         // ================= SUPPORT TICKETS MANAGEMENT =================
         let cachedAdminTickets = [];
