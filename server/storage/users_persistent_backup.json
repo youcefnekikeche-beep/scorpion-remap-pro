@@ -180,26 +180,6 @@
     "email_verified_at": null
   },
   {
-    "id": 10,
-    "full_name": "Email Test Client",
-    "workshop_name": "Garage Blida",
-    "phone": "0550991122",
-    "email": "emailclient@test.dz",
-    "wilaya_country": "Blida",
-    "password_hash": "e4f40a26190793429b813b225e4ef8d643e05f1b2b5cde01a9a02b940c50e5b6",
-    "tokens": 10,
-    "role": "user",
-    "ip_address": "127.0.0.1",
-    "is_active": 1,
-    "created_at": "2026-11-26 01:20:05",
-    "whatsapp_verified": 1,
-    "whatsapp_code": "000000",
-    "whatsapp_verified_at": null,
-    "email_verified": 1,
-    "email_code": "315090",
-    "email_verified_at": "2026-11-26 01:20:05"
-  },
-  {
     "id": 11,
     "full_name": "Mustapha Auto Reprog",
     "workshop_name": "Garage El Bordj Remap",
