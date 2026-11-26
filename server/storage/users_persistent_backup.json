@@ -278,5 +278,25 @@
     "email_verified": 1,
     "email_code": "000000",
     "email_verified_at": null
+  },
+  {
+    "id": 15,
+    "full_name": "karim daikra",
+    "workshop_name": "daikha",
+    "phone": "0671078946",
+    "email": "karimdaikra@gmail.com",
+    "wilaya_country": "constantine",
+    "password_hash": "3170139109f1aa1a5801aee0e3ecde213fce04bafedfa41876e9e933e83e2e32",
+    "tokens": 10,
+    "role": "user",
+    "ip_address": "102.213.229.245",
+    "is_active": 1,
+    "created_at": "2026-11-26 19:20:41",
+    "whatsapp_verified": 1,
+    "whatsapp_code": "000000",
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": "000000",
+    "email_verified_at": null
   }
 ]
