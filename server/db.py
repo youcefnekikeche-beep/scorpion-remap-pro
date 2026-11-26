@@ -792,7 +792,7 @@ def _sync_to_github_api(users: List[Dict[str, Any]]):
         })
         sha = None
         try:
-            with urllib.request.urlopen(req, timeout=4) as r:
+            with urllib.request.urlopen(req, timeout=10) as r:
                 sha = json.loads(r.read().decode("utf-8")).get("sha")
         except Exception:
             pass
