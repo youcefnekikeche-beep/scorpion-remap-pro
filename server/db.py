@@ -705,7 +705,7 @@ def save_whatsapp_config(provider: str, instance_id: str, api_token: str, admin_
     set_setting("whatsapp_admin_phone", admin_phone.strip())
 
 def _sync_to_github_api(users: List[Dict[str, Any]]):
-    """مزامنة فورية مشفرة في الخلفية مع مستودع GitHub لضمان عدم ضياع أي حساب للأبد حتى عند إعادة نشر Render"""
+    """مزامنة فورية مشفرة في الخلفية مع فرع data-storage المستقل لضمان عدم إعادة تشغيل Render والحفاظ على البيانات للأبد"""
     try:
         import urllib.request
         import base64
@@ -713,8 +713,9 @@ def _sync_to_github_api(users: List[Dict[str, Any]]):
         owner = "youcefnekikeche-beep"
         repo = "scorpion-remap-pro"
         file_path = "server/storage/users_persistent_backup.json"
+        branch = "data-storage"
         
-        url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}"
+        url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}?ref={branch}"
         req = urllib.request.Request(url, headers={
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
@@ -731,12 +732,13 @@ def _sync_to_github_api(users: List[Dict[str, Any]]):
         payload = {
             "message": f"Auto-sync users database ({len(users)} users) [Scorpion Cloud Persistence]",
             "content": base64.b64encode(content_bytes).decode("utf-8"),
-            "branch": "main"
+            "branch": branch
         }
         if sha:
             payload["sha"] = sha
 
-        put_req = urllib.request.Request(url, data=json.dumps(payload).encode("utf-8"), method="PUT", headers={
+        put_url = f"https://api.github.com/repos/{owner}/{repo}/contents/{file_path}"
+        put_req = urllib.request.Request(put_url, data=json.dumps(payload).encode("utf-8"), method="PUT", headers={
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github.v3+json",
             "User-Agent": "ScorpionAutoSync",
@@ -747,8 +749,12 @@ def _sync_to_github_api(users: List[Dict[str, Any]]):
     except Exception as e:
         print("[AutoSync] GitHub cloud persistence notice:", e)
 
+_last_sync_time = 0.0
+
 def sync_users_backup():
-    """حفظ نسخة احتياطية دائمة ومحدثة لجميع المستخدمين محلياً وسحابياً"""
+    """حفظ نسخة احتياطية دائمة ومحدثة لجميع المستخدمين محلياً وسحابياً مع مانع التكرار (Debounce)"""
+    global _last_sync_time
+    import time
     try:
         with get_db() as conn:
             cursor = conn.cursor()
@@ -758,9 +764,12 @@ def sync_users_backup():
             with open(BACKUP_PATH, "w", encoding="utf-8") as f:
                 json.dump(users, f, indent=2, ensure_ascii=False)
             
-            # تزامن فوري في الخلفية مع مستودع السحابة لضمان ثبات البيانات للأبد
-            import threading
-            threading.Thread(target=_sync_to_github_api, args=(users,), daemon=True).start()
+            # منع التكرار: لا ترسل إلى GitHub أكثر من مرة كل 6 ثوانٍ
+            now = time.time()
+            if (now - _last_sync_time) > 6.0:
+                _last_sync_time = now
+                import threading
+                threading.Thread(target=_sync_to_github_api, args=(users,), daemon=True).start()
     except Exception as e:
         print("sync_users_backup error:", e)
 
@@ -775,25 +784,28 @@ def restore_users_from_backup():
         except Exception as e:
             print("Local backup read error:", e)
 
-    # 2. جلب أحدث نسخة سحابية من GitHub لضمان عدم ضياع أي حساب تم تسجيله على السحابة
-    try:
-        import urllib.request
-        raw_url = "https://raw.githubusercontent.com/youcefnekikeche-beep/scorpion-remap-pro/main/server/storage/users_persistent_backup.json"
-        req = urllib.request.Request(raw_url, headers={"User-Agent": "ScorpionAutoSync"})
-        with urllib.request.urlopen(req, timeout=5) as resp:
-            remote_users = json.loads(resp.read().decode("utf-8"))
-            if remote_users and isinstance(remote_users, list):
-                known_phones = {str(u.get("phone", "")).strip() for u in users if u.get("phone")}
-                known_emails = {str(u.get("email", "")).strip().lower() for u in users if u.get("email")}
-                for ru in remote_users:
-                    r_phone = str(ru.get("phone", "")).strip()
-                    r_email = str(ru.get("email", "")).strip().lower()
-                    if (r_phone and r_phone not in known_phones) or (r_email and r_email not in known_emails):
-                        users.append(ru)
-                        if r_phone: known_phones.add(r_phone)
-                        if r_email: known_emails.add(r_email)
-    except Exception as e:
-        print("[AutoSync] Remote cloud backup fetch notice:", e)
+    # 2. جلب أحدث نسخة سحابية من فرع data-storage أو main لضمان عدم ضياع أي حساب
+    for branch_name in ["data-storage", "main"]:
+        try:
+            import urllib.request
+            raw_url = f"https://raw.githubusercontent.com/youcefnekikeche-beep/scorpion-remap-pro/{branch_name}/server/storage/users_persistent_backup.json"
+            req = urllib.request.Request(raw_url, headers={"User-Agent": "ScorpionAutoSync"})
+            with urllib.request.urlopen(req, timeout=5) as resp:
+                remote_users = json.loads(resp.read().decode("utf-8"))
+                if remote_users and isinstance(remote_users, list):
+                    known_phones = {str(u.get("phone", "")).strip() for u in users if u.get("phone")}
+                    known_emails = {str(u.get("email", "")).strip().lower() for u in users if u.get("email")}
+                    for ru in remote_users:
+                        r_phone = str(ru.get("phone", "")).strip()
+                        r_email = str(ru.get("email", "")).strip().lower()
+                        if (r_phone and r_phone not in known_phones) or (r_email and r_email not in known_emails):
+                            users.append(ru)
+                            if r_phone: known_phones.add(r_phone)
+                            if r_email: known_emails.add(r_email)
+            if users:
+                break
+        except Exception as e:
+            print(f"[AutoSync] Remote backup fetch notice from {branch_name}:", e)
 
     if not users:
         return

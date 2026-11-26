@@ -155,6 +155,21 @@ def require_admin(request: Request) -> dict:
 async def health_check():
     return {"status": "ok"}
 
+@app.on_event("startup")
+async def app_startup_keepalive():
+    import threading, time, urllib.request
+    def _keepalive_loop():
+        time.sleep(180)
+        while True:
+            try:
+                req = urllib.request.Request("https://scorpion-remap-pro.onrender.com/healthz", headers={"User-Agent": "ScorpionKeepAlive/1.0"})
+                with urllib.request.urlopen(req, timeout=10) as r:
+                    pass
+            except Exception:
+                pass
+            time.sleep(600)
+    threading.Thread(target=_keepalive_loop, daemon=True).start()
+
 @app.get("/", response_class=HTMLResponse)
 @app.head("/")
 async def index_page(request: Request):
