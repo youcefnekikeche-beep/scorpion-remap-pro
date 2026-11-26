@@ -268,8 +268,11 @@
 <section class="main-card">
             <div class="card-header">
                 <h2><span>👥</span> إدارة حسابات الزبائن وأصحاب الورشات</h2>
-                <div class="card-header-actions">
-                    <input type="text" id="userSearchInput" class="search-box" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." onkeyup="filterUsersTable()">
+                <div class="card-header-actions" style="display:flex; align-items:center; gap:8px;">
+                    <div style="position:relative; display:flex; align-items:center;">
+                        <input type="text" id="userSearchInput" class="search-box" autocomplete="off" name="user_search_prevent_autofill" placeholder="🔍 بحث بالاسم، الورشة، الهاتف..." oninput="filterUsersTable()" style="padding-left:32px;">
+                        <button type="button" onclick="clearUserSearch()" title="مسح البحث وعرض الكل" style="position:absolute; left:8px; background:none; border:none; color:#94a3b8; font-size:14px; cursor:pointer; padding:2px;">✕</button>
+                    </div>
                     <button class="btn-add" onclick="openAddUserModal()">+ إضافة حساب زبون جديد</button>
                 </div>
             </div>
@@ -559,6 +562,14 @@
                     </tr>
                 `;
             });
+        }
+
+        function clearUserSearch() {
+            const input = document.getElementById('userSearchInput');
+            if (input) {
+                input.value = '';
+                filterUsersTable();
+            }
         }
 
         function filterUsersTable() {
