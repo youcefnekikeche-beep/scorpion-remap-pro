@@ -273,19 +273,19 @@
         <div class="form-grid">
             <div class="form-group">
                 <label id="lblRegFullName">Nom complet :</label>
-                <input type="text" id="regFullName" placeholder="ex: Karim Benali" required>
+                <input type="text" id="regFullName" placeholder="Nom et prénom" required>
             </div>
             <div class="form-group">
                 <label id="lblRegWorkshop">Nom de l'atelier / Garage :</label>
-                <input type="text" id="regWorkshop" placeholder="ex: Auto Remap Performance" required>
+                <input type="text" id="regWorkshop" placeholder="Nom de l'atelier / Garage" required>
             </div>
             <div class="form-group">
                 <label id="lblRegPhone">Téléphone / WhatsApp :</label>
-                <input type="text" id="regPhone" placeholder="ex: +213 555 123 456" required>
+                <input type="text" id="regPhone" placeholder="05 / 06 / 07..." required>
             </div>
             <div class="form-group">
                 <label id="lblRegWilaya">Wilaya / Ville / Pays :</label>
-                <input type="text" id="regWilaya" placeholder="ex: Alger, Algérie" required>
+                <input type="text" id="regWilaya" placeholder="Wilaya / Ville" required>
             </div>
             <div class="form-group full-width">
                 <label id="lblRegEmail">Adresse Email professionnelle :</label>
@@ -415,6 +415,15 @@
         document.getElementById('lblRegWilaya').textContent = t.lblWilaya;
         document.getElementById('lblRegEmail').textContent = t.lblEmail;
         document.getElementById('lblRegPassConfirm').textContent = t.lblPassConf;
+
+        const regFull = document.getElementById('regFullName');
+        if (regFull) regFull.placeholder = (lang === 'ar') ? "الاسم واللقب" : "Nom et prénom";
+        const regWork = document.getElementById('regWorkshop');
+        if (regWork) regWork.placeholder = (lang === 'ar') ? "اسم الورشة أو المحل" : "Nom de l'atelier / Garage";
+        const regPh = document.getElementById('regPhone');
+        if (regPh) regPh.placeholder = (lang === 'ar') ? "رقم الهاتف / واتساب" : "05 / 06 / 07...";
+        const regWil = document.getElementById('regWilaya');
+        if (regWil) regWil.placeholder = (lang === 'ar') ? "الولاية / المدينة" : "Wilaya / Ville";
 
         if (document.getElementById('txtVerifyTitle')) {
             document.getElementById('txtVerifyTitle').textContent = t.verifyTitle;
