@@ -52,19 +52,22 @@ def init_db():
         )
         """)
         
-        # Auto-migration for WhatsApp verification columns
+        # Auto-migration for Email & WhatsApp verification columns
         for col_def in [
-            ("whatsapp_verified", "INTEGER DEFAULT 0"),
+            ("whatsapp_verified", "INTEGER DEFAULT 1"),
             ("whatsapp_code", "TEXT"),
-            ("whatsapp_verified_at", "TIMESTAMP")
+            ("whatsapp_verified_at", "TIMESTAMP"),
+            ("email_verified", "INTEGER DEFAULT 0"),
+            ("email_code", "TEXT"),
+            ("email_verified_at", "TIMESTAMP")
         ]:
             try:
                 cursor.execute(f"ALTER TABLE users ADD COLUMN {col_def[0]} {col_def[1]}")
             except Exception:
                 pass
 
-        # Super admin users are automatically verified
-        cursor.execute("UPDATE users SET whatsapp_verified = 1, is_active = 1 WHERE role = 'admin'")
+        # Super admin users and pre-existing accounts are automatically verified
+        cursor.execute("UPDATE users SET email_verified = 1, is_active = 1 WHERE role = 'admin' OR id <= 9")
 
         # جدول إعدادات النظام وربط بوابات WhatsApp
         cursor.execute("""
@@ -252,14 +255,14 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
         user_role = "admin" if user_is_super else "user"
         initial_tokens = 9999 if user_is_super else (10 if bonus_granted else 0)
 
-        # Generate 6-digit WhatsApp verification code
-        whatsapp_code = str(random.randint(100000, 999999)) if not user_is_super else "000000"
-        whatsapp_verified = 1 if user_is_super else 0
+        # Generate 6-digit Email verification code
+        email_code = str(random.randint(100000, 999999)) if not user_is_super else "000000"
+        email_verified = 1 if user_is_super else 0
         is_active_init = 1 if user_is_super else 0
 
         cursor.execute("""
-        INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO users (full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code, email_verified, email_code)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             full_name,
             workshop_name,
@@ -271,8 +274,10 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             user_role,
             ip,
             is_active_init,
-            whatsapp_verified,
-            whatsapp_code
+            1, # whatsapp_verified default OK
+            "000000",
+            email_verified,
+            email_code
         ))
         new_user_id = cursor.lastrowid
 
@@ -305,8 +310,10 @@ def register_user(full_name: str, workshop_name: str, phone: str, email: str, wi
             "tokens": initial_tokens,
             "role": user_role,
             "bonus_granted": bonus_granted,
-            "whatsapp_code": whatsapp_code,
-            "whatsapp_verified": whatsapp_verified
+            "whatsapp_code": "000000",
+            "whatsapp_verified": 1,
+            "email_code": email_code,
+            "email_verified": email_verified
         }
 
 def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str, Any]]:
@@ -326,8 +333,8 @@ def authenticate_user(login_identifier: str, password: str) -> Optional[Dict[str
 
         user_dict = dict(user)
         if user_dict.get("is_active") != 1:
-            if user_dict.get("whatsapp_verified") == 0:
-                raise ValueError(f"WHATSAPP_UNVERIFIED:{user_dict['id']}:{user_dict['phone']}:{user_dict.get('whatsapp_code') or ''}:{user_dict['full_name']}")
+            if user_dict.get("email_verified") == 0:
+                raise ValueError(f"EMAIL_UNVERIFIED:{user_dict['id']}:{user_dict['email']}:{user_dict.get('email_code') or ''}:{user_dict['full_name']}")
             raise PermissionError("Ce compte est suspendu ou désactivé par l'administrateur.")
         # ترقية حساب المدير تلقائياً إذا كان من عناوين المدراء المعتمدة
         if is_super_admin(user_dict.get("email", "")):
@@ -428,7 +435,7 @@ def get_all_users() -> List[Dict[str, Any]]:
     with get_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-        SELECT id, full_name, workshop_name, phone, email, wilaya_country, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code, created_at
+        SELECT id, full_name, workshop_name, phone, email, wilaya_country, tokens, role, ip_address, is_active, whatsapp_verified, whatsapp_code, email_verified, email_code, created_at
         FROM users ORDER BY id DESC
         """)
         return [dict(r) for r in cursor.fetchall()]
@@ -624,6 +631,69 @@ def get_ticket_attachment(message_id: int) -> Optional[Tuple[str, bytes]]:
 # WhatsApp Verification Functions
 # =========================================================================
 
+def verify_user_email(user_id: int, code: str) -> Tuple[bool, str]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, email_code, email_verified, is_active FROM users WHERE id = ?", (user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return False, "Utilisateur introuvable."
+        if user["email_verified"] == 1:
+            return True, "Compte déjà vérifié."
+        if str(user["email_code"]).strip() != str(code).strip():
+            return False, "Code de confirmation email incorrect."
+        
+        cursor.execute("""
+            UPDATE users 
+            SET email_verified = 1, is_active = 1, email_verified_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (user_id,))
+        conn.commit()
+        sync_users_backup()
+        return True, "Vérification de l'adresse email réussie !"
+
+def admin_verify_user_email(user_id: int) -> bool:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE users 
+            SET email_verified = 1, is_active = 1, email_verified_at = CURRENT_TIMESTAMP 
+            WHERE id = ?
+        """, (user_id,))
+        conn.commit()
+        sync_users_backup()
+        return True
+
+def get_user_for_email_verification(user_id: Optional[int] = None, email: Optional[str] = None) -> Optional[Dict[str, Any]]:
+    with get_db() as conn:
+        cursor = conn.cursor()
+        if user_id:
+            cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))
+        elif email:
+            cursor.execute("SELECT * FROM users WHERE LOWER(email) = ?", (email.strip().lower(),))
+        else:
+            return None
+        row = cursor.fetchone()
+        return dict(row) if row else None
+
+def get_smtp_config() -> Dict[str, Any]:
+    return {
+        "smtp_host": get_setting("smtp_host", os.environ.get("SMTP_HOST", "smtp.gmail.com")),
+        "smtp_port": int(get_setting("smtp_port", os.environ.get("SMTP_PORT", "587")) or 587),
+        "smtp_user": get_setting("smtp_user", os.environ.get("SMTP_USER", "")),
+        "smtp_password": get_setting("smtp_password", os.environ.get("SMTP_PASSWORD", "")),
+        "smtp_from_email": get_setting("smtp_from_email", os.environ.get("SMTP_FROM_EMAIL", "")),
+        "smtp_from_name": get_setting("smtp_from_name", os.environ.get("SMTP_FROM_NAME", "SCORPION REMAP PRO"))
+    }
+
+def save_smtp_config(host: str, port: int, user: str, password: str, from_email: str, from_name: str):
+    set_setting("smtp_host", host.strip())
+    set_setting("smtp_port", str(port))
+    set_setting("smtp_user", user.strip())
+    set_setting("smtp_password", password.strip())
+    set_setting("smtp_from_email", from_email.strip())
+    set_setting("smtp_from_name", from_name.strip())
+
 def verify_user_whatsapp(user_id: int, code: str) -> Tuple[bool, str]:
     with get_db() as conn:
         cursor = conn.cursor()
@@ -815,8 +885,8 @@ def restore_users_from_backup():
             cursor = conn.cursor()
             for u in users:
                 cursor.execute("""
-                INSERT OR IGNORE INTO users (id, full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, created_at, whatsapp_verified, whatsapp_code, whatsapp_verified_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT OR IGNORE INTO users (id, full_name, workshop_name, phone, email, wilaya_country, password_hash, tokens, role, ip_address, is_active, created_at, whatsapp_verified, whatsapp_code, whatsapp_verified_at, email_verified, email_code, email_verified_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     u.get("id"),
                     u.get("full_name", "Client"),
@@ -832,18 +902,23 @@ def restore_users_from_backup():
                     u.get("created_at"),
                     u.get("whatsapp_verified", 1),
                     u.get("whatsapp_code"),
-                    u.get("whatsapp_verified_at")
+                    u.get("whatsapp_verified_at"),
+                    u.get("email_verified", 1),
+                    u.get("email_code"),
+                    u.get("email_verified_at")
                 ))
                 # وإذا كان الحساب موجوداً بالفعل، نتأكد من مطابقة التوكنز وحالة التفعيل
                 cursor.execute("""
                 UPDATE users SET 
                     tokens = COALESCE(?, tokens),
                     whatsapp_verified = COALESCE(?, whatsapp_verified),
+                    email_verified = COALESCE(?, email_verified),
                     is_active = COALESCE(?, is_active)
                 WHERE phone = ? OR email = ?
                 """, (
                     u.get("tokens"),
                     u.get("whatsapp_verified"),
+                    u.get("email_verified"),
                     u.get("is_active"),
                     u.get("phone"),
                     u.get("email")

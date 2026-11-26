@@ -304,36 +304,31 @@
         <button type="submit" id="btnSubmitRegister" class="btn-submit">Créer mon compte & Réclamer 10 Crédits ➔</button>
     </form>
 
-    <!-- View 3: WhatsApp Mandatory Verification Box -->
-    <div id="whatsappVerifyBox" style="display:none; text-align:center; padding:15px 0;">
-        <div style="width:72px; height:72px; margin:0 auto 16px; background:radial-gradient(circle, #22c55e 0%, #15803d 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(34,197,94,0.6); animation:pulse 2s infinite;">
-            <span style="font-size:38px;">💬</span>
+    <!-- View 3: Email Verification Box -->
+    <div id="emailVerifyBox" style="display:none; text-align:center; padding:15px 0;">
+        <div style="width:72px; height:72px; margin:0 auto 16px; background:radial-gradient(circle, #0284c7 0%, #0369a1 100%); border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 0 30px rgba(2,132,199,0.6); animation:pulse 2s infinite;">
+            <span style="font-size:36px;">✉️</span>
         </div>
 
         <h3 id="txtVerifyTitle" style="font-size:20px; font-weight:800; color:#fff; margin-bottom:8px;">
-            تم إرسال رمز التحقق إلى واتساب
+            تأكيد الحساب عبر البريد الإلكتروني
         </h3>
         <p id="txtVerifySubtitle" style="font-size:13px; color:#9ca3af; line-height:1.6; margin-bottom:18px;">
-            يرجى تفقد رسائل تطبيق <strong>WhatsApp</strong> على هاتفك، لقد أرسلنا لك رمز التأكيد المكون من 6 أرقام لتفعيل حسابك واستلام <strong>10 توكنز مجاناً</strong>.
+            يرجى تفقد صندوق البريد الإلكتروني (بما في ذلك مجلد <strong>Spam / Indésirables</strong>)، لقد أرسلنا لك رمز التأكيد السري المكون من 6 أرقام لتفعيل حسابك واستلام <strong>10 توكنز مجاناً</strong>.
         </p>
 
         <div style="background:#08080d; border:1px solid #1e293b; border-radius:14px; padding:18px; margin-bottom:20px;">
-            <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;" id="lblVerifyPhone">الرقم المستلم على واتساب :</div>
-            <div id="verifyUserPhone" style="font-size:18px; font-weight:800; color:#22c55e; font-family:monospace; letter-spacing:1px; margin-bottom:16px;">+213 ...</div>
-
-            <!-- زر فتح واتساب بنقرة واحدة -->
-            <a id="btnOpenWhatsApp" target="_blank" href="#" style="background:linear-gradient(135deg, #22c55e, #15803d); color:#fff; font-weight:800; font-size:13.5px; padding:12px 18px; border-radius:10px; display:flex; align-items:center; justify-content:center; gap:8px; text-decoration:none; box-shadow:0 4px 15px rgba(34,197,94,0.3); transition:all 0.2s; margin-bottom:16px;">
-                <span>💬 فتح واتساب لتأكيد الرقم فوراً ➔</span>
-            </a>
+            <div style="font-size:12px; color:#94a3b8; margin-bottom:4px;" id="lblVerifyEmail">البريد الإلكتروني المسجل :</div>
+            <div id="verifyUserEmail" style="font-size:17px; font-weight:800; color:#38bdf8; font-family:monospace; letter-spacing:0.5px; margin-bottom:16px;">...</div>
 
             <div style="border-top:1px dashed #223042; padding-top:14px; margin-top:12px;">
                 <label id="lblInputOtp" style="font-size:12.5px; color:#cbd5e1; font-weight:700; display:block; margin-bottom:8px;">
-                    أو أدخل رمز التأكيد (6 أرقام) :
+                    أدخل رمز التأكيد (6 أرقام) :
                 </label>
                 <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
-                    <input type="text" id="verifyInputCode" maxlength="6" placeholder="• • • • • •" style="width:220px; text-align:center; font-size:24px; font-weight:900; letter-spacing:8px; padding:10px 14px; background:#040407; border:2px solid #22c55e; border-radius:10px; color:#fff; outline:none; box-shadow:0 0 15px rgba(34,197,94,0.2);">
+                    <input type="text" id="verifyInputCode" maxlength="6" placeholder="• • • • • •" style="width:220px; text-align:center; font-size:24px; font-weight:900; letter-spacing:8px; padding:10px 14px; background:#040407; border:2px solid #0284c7; border-radius:10px; color:#fff; outline:none; box-shadow:0 0 15px rgba(2,132,199,0.3);">
                     
-                    <button type="button" id="btnSubmitVerifyOtp" onclick="submitWhatsAppCode()" style="width:100%; max-width:280px; background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(225,29,72,0.4); transition:all 0.2s;">
+                    <button type="button" id="btnSubmitVerifyOtp" onclick="submitEmailCode()" style="width:100%; max-width:280px; background:linear-gradient(135deg, #e11d48, #9f1239); color:#fff; border:none; padding:12px 20px; border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; box-shadow:0 4px 15px rgba(225,29,72,0.4); transition:all 0.2s;">
                         تأكيد الرمز وتفعيل الحساب ➔
                     </button>
                 </div>
@@ -341,11 +336,11 @@
         </div>
 
         <div style="display:flex; justify-content:center; gap:16px; flex-wrap:wrap; font-size:12px;">
-            <button type="button" id="btnResendWa" onclick="resendWhatsAppCode()" style="background:transparent; border:none; color:#38bdf8; cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:700;">
+            <button type="button" id="btnResendEmail" onclick="resendEmailCode()" style="background:transparent; border:none; color:#38bdf8; cursor:pointer; display:flex; align-items:center; gap:4px; font-weight:700;">
                 🔄 لم يصلك الرمز؟ إعادة الإرسال
             </button>
             <button type="button" id="btnBackToLogin" onclick="backToLoginFromVerify()" style="background:transparent; border:none; color:#9ca3af; cursor:pointer; text-decoration:underline;">
-                ↩️ العودة وتعديل الرقم
+                ↩️ العودة وتعديل البريد
             </button>
         </div>
     </div>
@@ -466,33 +461,42 @@
         document.getElementById('alertBox').style.display = 'none';
     }
 
-    async function resendWhatsAppCode() {
+    let currentVerifyUserId = null;
+    let currentVerifyEmail = null;
+    let currentVerifyCode = null;
+    let currentVerifyName = null;
+
+    async function resendEmailCode() {
         if(!currentVerifyUserId) return;
-        const btn = document.getElementById('btnResendWa');
-        btn.disabled = true;
-        btn.innerText = '⏳ جاري إرسال الرمز...';
+        const btn = document.getElementById('btnResendEmail');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerText = '⏳ جاري إرسال البريد...';
+        }
 
         try {
-            const res = await fetch('/api/v1/auth/resend-whatsapp-otp', {
+            const res = await fetch('/api/v1/auth/resend-email-otp', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: currentVerifyUserId })
             });
             const data = await res.json();
-            showAlert(data.detail || "Code ré-envoyé !", res.ok);
+            showAlert(data.detail || "Code ré-envoyé par email !", res.ok);
         } catch(e) {
             showAlert("Erreur : " + e.message, false);
         } finally {
             setTimeout(() => {
-                btn.disabled = false;
-                btn.innerText = '🔄 لم يصلك الرمز؟ إعادة الإرسال';
-            }, 3000);
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = '🔄 لم يصلك الرمز؟ إعادة الإرسال';
+                }
+            }, 4000);
         }
     }
 
-    function showWhatsAppVerification(userId, phone, code, fullName, adminWa) {
+    function showEmailVerification(userId, email, code, fullName) {
         currentVerifyUserId = userId;
-        currentVerifyPhone = phone;
+        currentVerifyEmail = email;
         currentVerifyCode = code;
         currentVerifyName = fullName || "Client";
 
@@ -500,22 +504,22 @@
         document.getElementById('registerForm').style.display = 'none';
         document.querySelector('.auth-tabs').style.display = 'none';
 
-        const verifyBox = document.getElementById('whatsappVerifyBox');
-        verifyBox.style.display = 'block';
+        const verifyBox = document.getElementById('emailVerifyBox');
+        if (verifyBox) verifyBox.style.display = 'block';
 
-        document.getElementById('verifyUserPhone').innerText = phone;
-        // Code is sent to phone via WhatsApp directly (not shown on screen)
+        const emailEl = document.getElementById('verifyUserEmail');
+        if (emailEl) emailEl.innerText = email || "";
 
-        const targetAdminWa = adminWa || "213799999002";
-        const messageText = `Bonjour SCORPION REMAP PRO, je souhaite activer mon compte.\nNom: ${currentVerifyName}\nTéléphone: ${phone}\nCode d'activation: ${code}`;
-        const btnWa = document.getElementById('btnOpenWhatsApp');
-        if (btnWa) {
-            btnWa.href = `https://wa.me/${targetAdminWa}?text=${encodeURIComponent(messageText)}`;
+        const codeInput = document.getElementById('verifyInputCode');
+        if (codeInput) {
+            codeInput.value = '';
+            codeInput.focus();
         }
     }
 
     function backToLoginFromVerify() {
-        document.getElementById('whatsappVerifyBox').style.display = 'none';
+        const verifyBox = document.getElementById('emailVerifyBox');
+        if (verifyBox) verifyBox.style.display = 'none';
         document.querySelector('.auth-tabs').style.display = 'flex';
         switchAuthTab('login');
     }
@@ -535,9 +539,9 @@
             const data = await res.json();
 
             if (!res.ok) {
-                if (data.requires_whatsapp_verification) {
-                    showAlert(data.detail || "Veuillez valider votre compte via WhatsApp.", false);
-                    showWhatsAppVerification(data.user_id, data.phone, data.whatsapp_code, data.full_name, data.admin_whatsapp);
+                if (data.requires_email_verification || data.requires_whatsapp_verification) {
+                    showAlert(data.detail || "Veuillez valider votre adresse email.", false);
+                    showEmailVerification(data.user_id, data.email || username, data.email_code, data.full_name);
                     return;
                 }
                 showAlert(data.detail || "Erreur de connexion.");
@@ -595,9 +599,9 @@
                 return;
             }
 
-            if (data.requires_whatsapp_verification) {
-                showAlert("🎉 Inscription réussie ! Veuillez confirmer votre compte sur WhatsApp.", true);
-                showWhatsAppVerification(data.user_id, data.phone, data.whatsapp_code, data.full_name, data.admin_whatsapp);
+            if (data.requires_email_verification || data.requires_whatsapp_verification) {
+                showAlert("🎉 Inscription réussie ! Veuillez confirmer votre adresse email.", true);
+                showEmailVerification(data.user_id, data.email || email, data.email_code, data.full_name);
                 return;
             }
 
@@ -615,7 +619,7 @@
         }
     }
 
-    async function submitWhatsAppCode() {
+    async function submitEmailCode() {
         const codeInput = document.getElementById('verifyInputCode');
         const code = codeInput.value.trim();
 
@@ -625,7 +629,7 @@
         }
 
         try {
-            const res = await fetch('/api/v1/auth/verify-whatsapp', {
+            const res = await fetch('/api/v1/auth/verify-email', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -636,7 +640,7 @@
             const data = await res.json();
 
             if (!res.ok) {
-                showAlert(data.detail || "Code WhatsApp invalide.");
+                showAlert(data.detail || "Code de vérification email invalide.");
                 return;
             }
 
@@ -645,7 +649,7 @@
                 document.cookie = `access_token=${data.access_token}; path=/; max-age=86400; SameSite=Lax`;
             }
 
-            showAlert("🎉 " + (data.detail || "Compte activé avec succès !"), true);
+            showAlert("🎉 " + (data.detail || "Compte email activé avec succès !"), true);
             setTimeout(() => {
                 window.location.href = data.redirect || '/portal';
             }, 800);

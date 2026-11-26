@@ -18,8 +18,11 @@ PROJECT_ROOT = os.path.dirname(BASE_DIR)
 sys.path.append(PROJECT_ROOT)
 
 from server.whatsapp_service import send_real_whatsapp_otp, clean_phone_number
+from server.email_service import send_verification_email
 from server.db import (
     get_whatsapp_config, save_whatsapp_config,
+    get_smtp_config, save_smtp_config,
+    verify_user_email, admin_verify_user_email, get_user_for_email_verification,
     get_db, init_db, hash_password, verify_password,
     register_user, authenticate_user, get_user_by_id,
     deduct_user_tokens, add_user_tokens, get_all_users,
@@ -456,19 +459,31 @@ async def api_login(payload: dict, request: Request, response: Response):
         raise HTTPException(status_code=403, detail=str(pe))
     except ValueError as ve:
         err_msg = str(ve)
-        if err_msg.startswith("WHATSAPP_UNVERIFIED:"):
+        if err_msg.startswith("EMAIL_UNVERIFIED:"):
             parts = err_msg.split(":")
-            # parts: ["WHATSAPP_UNVERIFIED", user_id, phone, whatsapp_code, full_name]
+            # parts: ["EMAIL_UNVERIFIED", user_id, email, email_code, full_name]
             return JSONResponse(
                 status_code=403,
                 content={
-                    "detail": "Compte non activé. Veuillez confirmer votre numéro WhatsApp.",
-                    "requires_whatsapp_verification": True,
+                    "detail": "Compte non activé. Veuillez saisir le code secret reçu par email.",
+                    "requires_email_verification": True,
                     "user_id": int(parts[1]),
-                    "phone": parts[2],
-                    "whatsapp_code": parts[3],
-                    "full_name": parts[4] if len(parts) > 4 else "Client",
-                    "admin_whatsapp": "213799999002"
+                    "email": parts[2],
+                    "email_code": parts[3] if len(parts) > 3 else "",
+                    "full_name": parts[4] if len(parts) > 4 else "Client"
+                }
+            )
+        elif err_msg.startswith("WHATSAPP_UNVERIFIED:"):
+            parts = err_msg.split(":")
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "detail": "Compte non activé. Veuillez confirmer votre adresse email.",
+                    "requires_email_verification": True,
+                    "user_id": int(parts[1]),
+                    "email": parts[2],
+                    "email_code": parts[3] if len(parts) > 3 else "",
+                    "full_name": parts[4] if len(parts) > 4 else "Client"
                 }
             )
         raise HTTPException(status_code=400, detail=err_msg)
@@ -544,32 +559,31 @@ async def api_register(payload: dict, request: Request, response: Response):
         response.set_cookie(key="access_token", value=token, max_age=86400*30, samesite="lax")
         return {
             "success": True,
-            "requires_whatsapp_verification": False,
+            "requires_email_verification": False,
             "access_token": token,
             "redirect": "/admin",
             "user": new_user
         }
 
-    # Real WhatsApp Verification: Send OTP directly to user's WhatsApp
-    wa_config = get_whatsapp_config()
-    code = new_user.get("whatsapp_code", "")
-    sent_ok, send_msg = send_real_whatsapp_otp(
-        phone=new_user["phone"],
+    # Real Email Verification: Send OTP directly to user's Email address
+    smtp_cfg = get_smtp_config()
+    code = new_user.get("email_code", "")
+    sent_ok, send_msg = send_verification_email(
+        to_email=new_user["email"],
         code=code,
         client_name=new_user["full_name"],
-        config=wa_config
+        config=smtp_cfg
     )
 
     return {
         "success": True,
-        "requires_whatsapp_verification": True,
+        "requires_email_verification": True,
         "user_id": new_user["id"],
         "full_name": new_user["full_name"],
         "workshop_name": new_user["workshop_name"],
-        "phone": new_user["phone"],
-        "whatsapp_sent": sent_ok,
-        "admin_whatsapp": wa_config.get("admin_phone", "213799999002"),
-        "detail": f"Un code de confirmation a été envoyé à votre WhatsApp ({new_user['phone']})." if sent_ok else "Veuillez saisir le code reçu sur WhatsApp ou contacter le support."
+        "email": new_user["email"],
+        "email_sent": sent_ok,
+        "detail": f"Un code de confirmation a été envoyé à votre adresse email ({new_user['email']})." if sent_ok else "Veuillez saisir le code de confirmation envoyé à votre adresse email."
     }
 
 @app.get("/api/v1/user/me")
@@ -1299,17 +1313,21 @@ if __name__ == "__main__":
     uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
 
 
+@app.post("/api/v1/auth/verify-email")
 @app.post("/api/v1/auth/verify-whatsapp")
-async def api_verify_whatsapp(payload: dict, response: Response):
+async def api_verify_email(payload: dict, response: Response):
     user_id = payload.get("user_id")
     code = str(payload.get("code", "")).strip()
 
     if not user_id or not code:
         raise HTTPException(status_code=400, detail="Veuillez renseigner le code d'activation.")
 
-    success, msg = verify_user_whatsapp(int(user_id), code)
+    success, msg = verify_user_email(int(user_id), code)
     if not success:
-        raise HTTPException(status_code=400, detail=msg)
+        # Fallback to whatsapp verification check if email check failed
+        success, msg = verify_user_whatsapp(int(user_id), code)
+        if not success:
+            raise HTTPException(status_code=400, detail=msg)
 
     user = get_user_by_id(int(user_id))
     if not user:
@@ -1325,20 +1343,24 @@ async def api_verify_whatsapp(payload: dict, response: Response):
         "success": True,
         "access_token": token,
         "redirect": "/portal",
-        "detail": "Compte WhatsApp validé avec succès ! 10 Crédits offerts débloqués."
+        "detail": "Adresse email confirmée avec succès ! 10 Crédits offerts débloqués."
     }
 
 
+@app.post("/api/v1/admin/users/{user_id}/verify-email")
 @app.post("/api/v1/admin/users/{user_id}/verify-whatsapp")
-async def api_admin_verify_user_whatsapp(user_id: int, admin: dict = Depends(require_admin)):
-    ok = admin_verify_user_whatsapp(user_id)
+async def api_admin_verify_user_email(user_id: int, admin: dict = Depends(require_admin)):
+    ok = admin_verify_user_email(user_id)
+    if not ok:
+        ok = admin_verify_user_whatsapp(user_id)
     if not ok:
         raise HTTPException(status_code=400, detail="Impossible de valider cet utilisateur.")
-    return {"success": True, "detail": "Utilisateur validé et activé via WhatsApp avec succès !"}
+    return {"success": True, "detail": "Utilisateur validé et activé avec succès !"}
 
 
+@app.post("/api/v1/auth/resend-email-otp")
 @app.post("/api/v1/auth/resend-whatsapp-otp")
-async def api_resend_whatsapp_otp(payload: dict):
+async def api_resend_email_otp(payload: dict):
     user_id = payload.get("user_id")
     if not user_id:
         raise HTTPException(status_code=400, detail="ID utilisateur manquant.")
@@ -1347,26 +1369,73 @@ async def api_resend_whatsapp_otp(payload: dict):
     if not user:
         raise HTTPException(status_code=404, detail="Utilisateur introuvable.")
 
-    if user.get("whatsapp_verified"):
+    if user.get("email_verified"):
         return {"success": True, "detail": "Compte déjà vérifié."}
 
-    wa_config = get_whatsapp_config()
-    sent_ok, send_msg = send_real_whatsapp_otp(
-        phone=user["phone"],
-        code=user.get("whatsapp_code", ""),
+    smtp_cfg = get_smtp_config()
+    code = user.get("email_code") or user.get("whatsapp_code", "000000")
+    sent_ok, send_msg = send_verification_email(
+        to_email=user["email"],
+        code=code,
         client_name=user["full_name"],
-        config=wa_config
+        config=smtp_cfg
     )
     return {
         "success": sent_ok,
-        "detail": send_msg if sent_ok else "Impossible d'envoyer le message. Vérifiez la passerelle WhatsApp."
+        "detail": send_msg if sent_ok else f"Code renvoyé : {code} (Consultez vos emails ou contactez l'admin)."
     }
+
+
+@app.get("/api/v1/admin/settings/smtp")
+async def api_admin_get_smtp_config(admin: dict = Depends(require_admin)):
+    config = get_smtp_config()
+    pwd = config.get("smtp_password", "")
+    masked_pwd = pwd[:2] + "••••••••" + pwd[-2:] if len(pwd) > 4 else pwd
+    return {
+        "smtp_host": config.get("smtp_host", "smtp.gmail.com"),
+        "smtp_port": config.get("smtp_port", 587),
+        "smtp_user": config.get("smtp_user", ""),
+        "smtp_password": config.get("smtp_password", ""),
+        "masked_password": masked_pwd,
+        "smtp_from_email": config.get("smtp_from_email", ""),
+        "smtp_from_name": config.get("smtp_from_name", "SCORPION REMAP PRO")
+    }
+
+
+@app.post("/api/v1/admin/settings/smtp")
+async def api_admin_save_smtp_config(payload: dict, admin: dict = Depends(require_admin)):
+    host = payload.get("smtp_host", "smtp.gmail.com").strip()
+    port = int(payload.get("smtp_port", 587) or 587)
+    user = payload.get("smtp_user", "").strip()
+    password = payload.get("smtp_password", "").strip()
+    from_email = payload.get("smtp_from_email", "").strip()
+    from_name = payload.get("smtp_from_name", "SCORPION REMAP PRO").strip()
+
+    save_smtp_config(host, port, user, password, from_email, from_name)
+    return {"success": True, "detail": "Configuration du serveur SMTP enregistrée avec succès !"}
+
+
+@app.post("/api/v1/admin/settings/smtp/test")
+async def api_admin_test_smtp(payload: dict, admin: dict = Depends(require_admin)):
+    target_email = payload.get("test_email", "").strip() or admin.get("email", "")
+    if not target_email or "@" not in target_email:
+        raise HTTPException(status_code=400, detail="Veuillez indiquer une adresse email valide pour le test.")
+
+    config = get_smtp_config()
+    sent_ok, msg = send_verification_email(
+        to_email=target_email,
+        code="TEST-88",
+        client_name=admin.get("full_name", "Administrateur"),
+        config=config
+    )
+    if not sent_ok:
+        raise HTTPException(status_code=400, detail=msg)
+    return {"success": True, "detail": f"Email de test envoyé avec succès à {target_email} !"}
 
 
 @app.get("/api/v1/admin/settings/whatsapp")
 async def api_admin_get_whatsapp_config(admin: dict = Depends(require_admin)):
     config = get_whatsapp_config()
-    # Mask API token slightly for security
     token = config.get("api_token", "")
     masked_token = token[:4] + "••••••••" + token[-4:] if len(token) > 8 else token
     return {
@@ -1404,4 +1473,5 @@ async def api_admin_test_whatsapp(payload: dict, admin: dict = Depends(require_a
     )
     if not sent_ok:
         raise HTTPException(status_code=400, detail=msg)
+    return {"success": True, "detail": f"Message de test envoyé avec succès sur le WhatsApp de {target_phone} !"}
     return {"success": True, "detail": f"Message de test envoyé avec succès sur le WhatsApp de {target_phone} !"}

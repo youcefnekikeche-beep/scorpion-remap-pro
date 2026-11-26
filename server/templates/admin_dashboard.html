@@ -550,15 +550,15 @@
                         <td><span class="badge badge-credits">${tokens} نقطة 🪙</span></td>
                         <td><code style="color:#94a3b8; font-size:12px;">${ip}</code></td>
                         <td>
-    ${u.whatsapp_verified ? 
-        `<span class="badge ${is_active ? 'badge-active' : 'badge-disabled'}">${is_active ? '✅ نشط (واتساب مفعل)' : 'مجمد / معطل'}</span>` : 
-        `<span class="badge" style="background:rgba(234,179,8,0.2); color:#facc15; border:1px solid #eab308;">⏳ بانتظار واتساب<br><small style="font-family:monospace; color:#fff;">كود: ${u.whatsapp_code || '--'}</small></span>`
+    ${(u.email_verified || u.whatsapp_verified) ? 
+        `<span class="badge ${is_active ? 'badge-active' : 'badge-disabled'}">${is_active ? '✅ نشط (البريد مؤكد)' : 'مجمد / معطل'}</span>` : 
+        `<span class="badge" style="background:rgba(234,179,8,0.2); color:#facc15; border:1px solid #eab308;">⏳ بانتظار تأكيد البريد<br><small style="font-family:monospace; color:#fff;">كود: ${u.email_code || u.whatsapp_code || '--'}</small></span>`
     }
 </td>
                         <td style="font-size:12.5px; color:#94a3b8;">${u.created_at}</td>
                         <td>
                             <div class="action-btns">
-                                ${!u.whatsapp_verified ? `<button class="btn-sm" style="background:#15803d; color:#fff; font-weight:800; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="adminVerifyUserWhatsApp(${u.id}, '${displayName}')">📲 تفعيل واتساب</button>` : ''}
+                                ${!(u.email_verified || u.whatsapp_verified) ? `<button class="btn-sm" style="background:#0284c7; color:#fff; font-weight:800; border:none; padding:4px 8px; border-radius:6px; cursor:pointer;" onclick="adminVerifyUserEmail(${u.id}, '${displayName}')">✉️ تفعيل البريد</button>` : ''}
                                 <button class="btn-sm btn-charge" onclick="rechargeUser(${u.id}, '${displayName}')">+ شحن نقاط</button>
                                 ${!u.is_admin ? `
                                     <button class="btn-sm ${is_active ? 'btn-toggle-freeze' : 'btn-toggle-activate'}" onclick="toggleUser(${u.id})">
@@ -698,10 +698,10 @@
             }
         }
 
-                async function adminVerifyUserWhatsApp(userId, name) {
-            if(!confirm(`هل تريد تأكيد وتفعيل حساب الواتساب للزبون "${name}" يدوياً؟`)) return;
+        async function adminVerifyUserEmail(userId, name) {
+            if(!confirm(`هل تريد تأكيد وتفعيل البريد الإلكتروني لحساب "${name}" يدوياً؟`)) return;
             try {
-                const res = await authFetch(`/api/v1/admin/users/${userId}/verify-whatsapp`, { method: 'POST' });
+                const res = await authFetch(`/api/v1/admin/users/${userId}/verify-email`, { method: 'POST' });
                 const data = await res.json();
                 if(res.ok) {
                     alert('✅ ' + (data.detail || 'تم تفعيل الحساب بنجاح'));
@@ -713,6 +713,7 @@
                 alert('خطأ: ' + e.message);
             }
         }
+        const adminVerifyUserWhatsApp = adminVerifyUserEmail;
 
         async function rechargeUser(userId, name) {
             const amount = prompt(`كم عدد النقاط التي ترغب في إضافتها لحساب: ${name}؟`, '10');

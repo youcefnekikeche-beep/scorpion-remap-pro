@@ -14,7 +14,10 @@
     "created_at": "2026-11-24 15:51:28",
     "whatsapp_verified": 1,
     "whatsapp_code": null,
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 2,
@@ -31,7 +34,10 @@
     "created_at": "2026-11-24 15:59:27",
     "whatsapp_verified": 0,
     "whatsapp_code": null,
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 3,
@@ -48,7 +54,10 @@
     "created_at": "2026-11-24 16:03:27",
     "whatsapp_verified": 1,
     "whatsapp_code": null,
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 4,
@@ -65,7 +74,10 @@
     "created_at": "2026-11-24 20:48:07",
     "whatsapp_verified": 0,
     "whatsapp_code": null,
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 5,
@@ -82,7 +94,10 @@
     "created_at": "2026-11-24 21:42:20",
     "whatsapp_verified": 1,
     "whatsapp_code": null,
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 6,
@@ -99,7 +114,10 @@
     "created_at": "2026-11-25 23:05:52",
     "whatsapp_verified": 1,
     "whatsapp_code": "441517",
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 7,
@@ -116,7 +134,10 @@
     "created_at": "2026-11-25 23:05:52",
     "whatsapp_verified": 1,
     "whatsapp_code": "312340",
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
   },
   {
     "id": 8,
@@ -133,6 +154,49 @@
     "created_at": "2026-11-25 23:07:30",
     "whatsapp_verified": 1,
     "whatsapp_code": "000000",
-    "whatsapp_verified_at": null
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
+  },
+  {
+    "id": 9,
+    "full_name": "Test Real Register",
+    "workshop_name": "Test Garage 2026",
+    "phone": "0550123456",
+    "email": "testreal@remap.dz",
+    "wilaya_country": "Algiers",
+    "password_hash": "e4f40a26190793429b813b225e4ef8d643e05f1b2b5cde01a9a02b940c50e5b6",
+    "tokens": 10,
+    "role": "user",
+    "ip_address": "154.251.185.76",
+    "is_active": 0,
+    "created_at": "2026-11-26 00:59:19",
+    "whatsapp_verified": 0,
+    "whatsapp_code": "265938",
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": null,
+    "email_verified_at": null
+  },
+  {
+    "id": 10,
+    "full_name": "Email Test Client",
+    "workshop_name": "Garage Blida",
+    "phone": "0550991122",
+    "email": "emailclient@test.dz",
+    "wilaya_country": "Blida",
+    "password_hash": "e4f40a26190793429b813b225e4ef8d643e05f1b2b5cde01a9a02b940c50e5b6",
+    "tokens": 10,
+    "role": "user",
+    "ip_address": "127.0.0.1",
+    "is_active": 1,
+    "created_at": "2026-11-26 01:20:05",
+    "whatsapp_verified": 1,
+    "whatsapp_code": "000000",
+    "whatsapp_verified_at": null,
+    "email_verified": 1,
+    "email_code": "315090",
+    "email_verified_at": "2026-11-26 01:20:05"
   }
 ]
